@@ -66,6 +66,9 @@ models/
 *.key
 secrets/
 
+# Volúmenes de datos de Docker (persistencia local del stack)
+data-volumes/
+
 # Logs
 logs/
 *.log
