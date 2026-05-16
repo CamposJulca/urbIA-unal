@@ -147,6 +147,26 @@ services:
     networks:
       - urbia
 
+  frontend:
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile
+    image: urbia/frontend:0.1.0
+    container_name: urbia-frontend
+    restart: unless-stopped
+    environment:
+      # DNS interno del bridge: el frontend habla con el backend por
+      # nombre de servicio, no por la IP del host.
+      BACKEND_URL: "http://backend:8000"
+      LOG_LEVEL: "INFO"
+    ports:
+      - "8501:8501"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - urbia
+
 networks:
   urbia:
     name: urbia-network

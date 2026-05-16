@@ -378,6 +378,18 @@ Ver `PLAN_IMPLEMENTACION_SEMANA_1.md` (si existe) o el plan equivalente. Resumen
   autenticación con `passwd_file` + ACLs por topic. No urgente.
   Ver bloque MQTT de `.env.example` para más contexto.
 
+- **Backend sin endpoint de estadísticas agregadas (`/stats`)**. El
+  endpoint `/telemetry/recent` está acotado a `limit ≤ 1000` (≈ 100 s
+  de datos a 10 msg/s en el cluster actual), lo que impide responder
+  preguntas tipo "¿cuántos mensajes recibimos en la última hora?" desde
+  el frontend. Hoy la página Overview muestra el count en una ventana
+  de ~100 s con un `st.caption` explicando la limitación. **A
+  resolver:** agregar al backend `GET /stats/recent?since=<duration>`
+  que devuelva conteos agregados directamente de PostgreSQL
+  (`SELECT count(*) FROM ami_telemetry WHERE received_at > now() -
+  $1`). Trivial de implementar; pendiente solo por scope de la
+  semana 1. No urgente.
+
 ---
 
 ## 12. Definición de "hecho"
