@@ -293,6 +293,15 @@ Aún no obligatorios (autor único). Cuando llegue colaboración:
 
 Si Claude Code propone agregar alguno de estos al repo, rechazar.
 
+### 9.5 Autoría de commits
+
+Los commits hechos en este repositorio NO deben incluir la línea
+`Co-Authored-By: Claude` ni atribuciones similares a agentes de IA.
+La autoría intelectual y la responsabilidad del código son del autor
+humano del proyecto. La asistencia de herramientas de IA se declara
+en el `README.md` raíz y en la sección de metodología de la tesis,
+pero no en el historial de git.
+
 ---
 
 ## 10. Reglas operativas del cluster
