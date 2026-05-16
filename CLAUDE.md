@@ -361,6 +361,14 @@ Ver `PLAN_IMPLEMENTACION_SEMANA_1.md` (si existe) o el plan equivalente. Resumen
 - Documento del anteproyecto en LaTeX — en paralelo al desarrollo.
 - Experimentos comparativos — semana 4+.
 
+### 11.4 Deuda técnica conocida
+
+- **MQTT broker .101 en modo anónimo** (`allow_anonymous=true`). Aceptable
+  mientras la red sea el cluster cerrado Neusi; **no es aceptable para
+  producción**. A resolver antes de la defensa doctoral: habilitar
+  autenticación con `passwd_file` + ACLs por topic. No urgente.
+  Ver bloque MQTT de `.env.example` para más contexto.
+
 ---
 
 ## 12. Definición de "hecho"
