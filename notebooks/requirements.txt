@@ -1,0 +1,11 @@
+# Dependencias del entorno de notebooks (aislado del backend).
+# Target: Python 3.12. Para E6 nos quedamos en numpy + networkx puros
+# para entender el aparato; pygsp se introduce en E7 cuando refactoricemos
+# a módulo bajo services/monitor-gsp/.
+
+jupyterlab>=4.0
+networkx>=3.2
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8
+pandas>=2.2

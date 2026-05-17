@@ -1,0 +1,31 @@
+{
+  "version": "v1",
+  "description": "Topología sintética inicial para prototipado del monitor GSP (E6). 10 medidores AMI organizados en 5 zonas de 2 medidores cada una. Las zonas se conectan entre sí formando un anillo usando el primer medidor de cada zona como representante. NO modela una red eléctrica real: es un grafo de juguete para validar el aparato GSP.",
+  "meters": [
+    {"id": "AMI-MNZ-00001", "zone": "CENTRO"},
+    {"id": "AMI-MNZ-00002", "zone": "CENTRO"},
+    {"id": "AMI-MNZ-00003", "zone": "NORTE"},
+    {"id": "AMI-MNZ-00004", "zone": "NORTE"},
+    {"id": "AMI-MNZ-00005", "zone": "SUR"},
+    {"id": "AMI-MNZ-00006", "zone": "SUR"},
+    {"id": "AMI-MNZ-00007", "zone": "ESTE"},
+    {"id": "AMI-MNZ-00008", "zone": "ESTE"},
+    {"id": "AMI-MNZ-00009", "zone": "OESTE"},
+    {"id": "AMI-MNZ-00010", "zone": "OESTE"}
+  ],
+  "zones": ["CENTRO", "NORTE", "SUR", "ESTE", "OESTE"],
+  "edges_intra_zone": [
+    ["AMI-MNZ-00001", "AMI-MNZ-00002"],
+    ["AMI-MNZ-00003", "AMI-MNZ-00004"],
+    ["AMI-MNZ-00005", "AMI-MNZ-00006"],
+    ["AMI-MNZ-00007", "AMI-MNZ-00008"],
+    ["AMI-MNZ-00009", "AMI-MNZ-00010"]
+  ],
+  "edges_inter_zone_ring": [
+    ["AMI-MNZ-00001", "AMI-MNZ-00003"],
+    ["AMI-MNZ-00003", "AMI-MNZ-00005"],
+    ["AMI-MNZ-00005", "AMI-MNZ-00007"],
+    ["AMI-MNZ-00007", "AMI-MNZ-00009"],
+    ["AMI-MNZ-00009", "AMI-MNZ-00001"]
+  ]
+}
