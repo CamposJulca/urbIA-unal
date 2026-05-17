@@ -157,10 +157,14 @@ urbia/
 │   ├── urbia-graph/                     # utilidades de grafos
 │   └── urbia-rl/                        # agente RL del Afinador
 │
-├── notebooks/                           # exploración Jupyter
-│   ├── 01_grafo_ami_basico.ipynb
-│   ├── 02_gft_caracterizacion.ipynb
-│   └── 03_anomalias_espectrales.ipynb
+├── notebooks/                           # exploración Jupyter (venv aislado del backend)
+│   ├── 01_gsp_hello_world.ipynb        # E6: Hello World GSP con grafo de juguete
+│   ├── requirements.txt
+│   ├── README.md
+│   ├── .env                            # gitignored — token de JupyterLab
+│   ├── .env.example
+│   └── data/
+│       └── synthetic_meters_v1.json    # topología sintética inicial (10 medidores)
 │
 ├── experiments/                         # experimentos reproducibles
 │   ├── baseline-giraldo/
