@@ -584,6 +584,8 @@ git clone --mirror /tmp/restore.bundle <dir>
 - **gzip sobre `git bundle` no comprime** (~456 KB pre/post). Los packfiles de git ya vienen con zlib. Para el repo actual (<1 MB) es irrelevante; revisar si crece a varios GB.
 - **MongoDB `urbia_telemetry`** aún no existe físicamente porque el backend escribe sólo a PostgreSQL en este momento. El backup de Mongo hoy sólo respalda `admin.system.users` y `admin.system.version` (~860 B). Crecerá automáticamente cuando el backend conecte a Mongo.
 - **scp throughput ~5 MB/s** entre .102 y .104 — limitado por CPU/NIC de .104. Suficiente para los tamaños actuales; si los daily crecen a varios GB, evaluar `aes128-gcm` o reemplazar scp por rsync.
+- **Scripts con paths hardcodeados** (IP `192.168.0.104`, mount `/mnt/storage/Neusi/urbia-backups/`, usuario `camposjulca`). Limita la portabilidad cross-machine y el reuso del flujo en otro nodo destino. A resolver: parametrizar vía env vars en un único `.env` consumido por los tres scripts de `scripts/ops/backups/`. No urgente; ningún bloqueador.
+- **Alertas por correo desactivadas pre-`trap ERR`**. Con `MAILTO=""` en el crontab, los fallos que ocurren antes de que el trap esté armado pasan en silencio y sólo quedan en `/var/log/syslog`. Considerar restaurar `MAILTO` apuntando al autor o disparar una notificación temprana desde el preámbulo de cada script.
 
 ---
 
