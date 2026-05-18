@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # Bundle visualizer output
 stats.html
+
+# Vitest coverage reports
+coverage
