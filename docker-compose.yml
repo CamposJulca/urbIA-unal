@@ -167,6 +167,37 @@ services:
     networks:
       - urbia
 
+  # Nuevo frontend React + Vite + nginx (F1). Convive con el
+  # Streamlit anterior (puerto 8501) durante la migracion. Sirve
+  # el bundle estatico y hace proxy_pass /api -> backend:8000.
+  frontend-v2:
+    build:
+      context: ./frontend-v2
+      dockerfile: Dockerfile
+    image: urbia/frontend-v2:0.2.0
+    container_name: urbia-frontend-v2
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - urbia
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      # busybox wget en alpine resuelve 'localhost' a ::1 y nginx escucha
+      # solo IPv4 — usar 127.0.0.1 para evitar 'Connection refused'.
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
 networks:
   urbia:
     name: urbia-network

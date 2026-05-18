@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" role="img" aria-label="UNAL Manizales">
+  <rect x="0" y="2" width="3" height="36" rx="1.5" fill="#FFC107"/>
+  <text x="10" y="18" font-family="Inter, sans-serif" font-weight="700" font-size="13" fill="#1A3A6E">UNAL</text>
+  <text x="10" y="32" font-family="Inter, sans-serif" font-weight="500" font-size="10" fill="#64748B">Manizales</text>
+</svg>

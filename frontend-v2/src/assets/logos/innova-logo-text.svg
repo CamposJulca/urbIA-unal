@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40" role="img" aria-label="Innova">
+  <circle cx="12" cy="20" r="6" fill="none" stroke="#334155" stroke-width="2"/>
+  <circle cx="12" cy="20" r="2" fill="#334155"/>
+  <text x="24" y="25" font-family="Inter, sans-serif" font-weight="600" font-size="14" fill="#334155">Innova</text>
+</svg>
