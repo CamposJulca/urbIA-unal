@@ -1,0 +1,27 @@
+services:
+  simulator-python:
+    build:
+      context: /opt/urbia
+      dockerfile: capa1/simuladores/python/Dockerfile
+    container_name: urbia-sim-python
+    restart: unless-stopped
+    environment:
+      - BROKER_HOST=192.168.0.101
+      - BROKER_PORT=1883
+      - NODE_ID=192.168.0.103
+      - INTERVALO_SEG=5
+      - LOG_LEVEL=INFO
+      - SEED_BASE=42
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - urbia-sim
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import paho.mqtt.client; print('ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  urbia-sim:
+    external: true

@@ -1,0 +1,1608 @@
+{
+  "version": "1.0",
+  "fecha_generacion": "2026-04-20",
+  "seed_utilizada": 42,
+  "total_medidores": 150,
+  "distribucion": {
+    "centro": {
+      "cantidad": 25,
+      "tipo": "mono",
+      "nodo": "192.168.0.103",
+      "lenguaje": "python"
+    },
+    "chipre": {
+      "cantidad": 25,
+      "tipo": "mono",
+      "nodo": "192.168.0.103",
+      "lenguaje": "python"
+    },
+    "la_enea": {
+      "cantidad": 25,
+      "tipo": "trifasico",
+      "nodo": "192.168.0.104",
+      "lenguaje": "cpp"
+    },
+    "palermo": {
+      "cantidad": 25,
+      "tipo": "trifasico",
+      "nodo": "192.168.0.104",
+      "lenguaje": "cpp"
+    },
+    "palogrande": {
+      "cantidad": 30,
+      "tipo": "mono",
+      "nodo": "192.168.0.105",
+      "lenguaje": "java"
+    },
+    "universitario": {
+      "cantidad": 20,
+      "tipo": "trifasico",
+      "nodo": "192.168.0.105",
+      "lenguaje": "java"
+    }
+  },
+  "zonas": {
+    "centro": {
+      "codigo": "cen",
+      "descripcion": "Centro histórico de Manizales",
+      "bbox": {
+        "lat_min": 5.063,
+        "lat_max": 5.072,
+        "lon_min": -75.5174,
+        "lon_max": -75.508
+      }
+    },
+    "chipre": {
+      "codigo": "chi",
+      "descripcion": "Barrio Chipre, sector occidental",
+      "bbox": {
+        "lat_min": 5.07,
+        "lat_max": 5.078,
+        "lon_min": -75.525,
+        "lon_max": -75.516
+      }
+    },
+    "la_enea": {
+      "codigo": "ena",
+      "descripcion": "Barrio La Enea, sector oriental",
+      "bbox": {
+        "lat_min": 5.052,
+        "lat_max": 5.062,
+        "lon_min": -75.482,
+        "lon_max": -75.47
+      }
+    },
+    "palermo": {
+      "codigo": "pal",
+      "descripcion": "Barrio Palermo, sector central",
+      "bbox": {
+        "lat_min": 5.058,
+        "lat_max": 5.066,
+        "lon_min": -75.505,
+        "lon_max": -75.495
+      }
+    },
+    "palogrande": {
+      "codigo": "pgr",
+      "descripcion": "Barrio Palogrande, sector sur",
+      "bbox": {
+        "lat_min": 5.049,
+        "lat_max": 5.057,
+        "lon_min": -75.513,
+        "lon_max": -75.504
+      }
+    },
+    "universitario": {
+      "codigo": "uni",
+      "descripcion": "Sector Universitario — Campus UNAL Manizales",
+      "bbox": {
+        "lat_min": 5.054,
+        "lat_max": 5.063,
+        "lon_min": -75.497,
+        "lon_max": -75.488
+      }
+    }
+  },
+  "medidores": [
+    {
+      "device_id": "urbia-cen-mon-0001",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.068755,
+      "lon": -75.517165,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0002",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.065475,
+      "lon": -75.515302,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0003",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.069628,
+      "lon": -75.511039,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0004",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.07103,
+      "lon": -75.516583,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0005",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.066797,
+      "lon": -75.51712,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0006",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.064968,
+      "lon": -75.51265,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0007",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.063239,
+      "lon": -75.515531,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0008",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.068849,
+      "lon": -75.512278,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0009",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.064984,
+      "lon": -75.511861,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0010",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.070285,
+      "lon": -75.517339,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0011",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.070252,
+      "lon": -75.510837,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0012",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.066062,
+      "lon": -75.515938,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0013",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.071615,
+      "lon": -75.514236,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0014",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.063835,
+      "lon": -75.516491,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0015",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.070627,
+      "lon": -75.511725,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0016",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.070264,
+      "lon": -75.510541,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0017",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.067826,
+      "lon": -75.508253,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0018",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.066407,
+      "lon": -75.512211,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0019",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.070465,
+      "lon": -75.511586,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0020",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.070755,
+      "lon": -75.511973,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0021",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.069341,
+      "lon": -75.516969,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0022",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.065051,
+      "lon": -75.51468,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0023",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.063718,
+      "lon": -75.515212,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0024",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.063909,
+      "lon": -75.514787,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-cen-mon-0025",
+      "device_type": "mono",
+      "zona": "centro",
+      "lat": 5.068721,
+      "lon": -75.513971,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0001",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.072961,
+      "lon": -75.523114,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0002",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.072136,
+      "lon": -75.51657,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0003",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.075184,
+      "lon": -75.519518,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0004",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.071369,
+      "lon": -75.518438,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0005",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.071307,
+      "lon": -75.521585,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0006",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.077916,
+      "lon": -75.51924,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0007",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.074456,
+      "lon": -75.518838,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0008",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.076743,
+      "lon": -75.518016,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0009",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.071832,
+      "lon": -75.524711,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0010",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.072524,
+      "lon": -75.52259,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0011",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.071688,
+      "lon": -75.516514,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0012",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.077011,
+      "lon": -75.522168,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0013",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.075244,
+      "lon": -75.521439,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0014",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.077316,
+      "lon": -75.52087,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0015",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.072119,
+      "lon": -75.52278,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0016",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.074491,
+      "lon": -75.522635,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0017",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.074677,
+      "lon": -75.51692,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0018",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.073195,
+      "lon": -75.523026,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0019",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.07798,
+      "lon": -75.520414,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0020",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.070727,
+      "lon": -75.524576,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0021",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.070877,
+      "lon": -75.519353,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0022",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.076337,
+      "lon": -75.521201,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0023",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.070508,
+      "lon": -75.521565,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0024",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.077969,
+      "lon": -75.520238,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-chi-mon-0025",
+      "device_type": "mono",
+      "zona": "chipre",
+      "lat": 5.077769,
+      "lon": -75.517253,
+      "nodo_origen": "192.168.0.103",
+      "lenguaje": "python",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0001",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.052115,
+      "lon": -75.473351,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0002",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.058817,
+      "lon": -75.475556,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0003",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.054668,
+      "lon": -75.474308,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0004",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.053116,
+      "lon": -75.476783,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0005",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.056537,
+      "lon": -75.470554,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0006",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.060759,
+      "lon": -75.478839,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0007",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.057006,
+      "lon": -75.479856,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0008",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.061126,
+      "lon": -75.471554,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0009",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.054984,
+      "lon": -75.474333,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0010",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.05809,
+      "lon": -75.480166,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0011",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.059625,
+      "lon": -75.475527,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0012",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.059786,
+      "lon": -75.475636,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0013",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.052006,
+      "lon": -75.47811,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0014",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.052195,
+      "lon": -75.470851,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0015",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.060787,
+      "lon": -75.47202,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0016",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.055075,
+      "lon": -75.481305,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0017",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.06078,
+      "lon": -75.470637,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0018",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.052857,
+      "lon": -75.476168,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0019",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.052692,
+      "lon": -75.472873,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0020",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.059658,
+      "lon": -75.480459,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0021",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.056753,
+      "lon": -75.475402,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0022",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.054651,
+      "lon": -75.471531,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0023",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.056231,
+      "lon": -75.479458,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0024",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.057393,
+      "lon": -75.473241,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-ena-tri-0025",
+      "device_type": "trifasico",
+      "zona": "la_enea",
+      "lat": 5.054012,
+      "lon": -75.478259,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0001",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.065961,
+      "lon": -75.498501,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0002",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.061505,
+      "lon": -75.499824,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0003",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.058968,
+      "lon": -75.502753,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0004",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.060705,
+      "lon": -75.499117,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0005",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.059841,
+      "lon": -75.502798,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0006",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.058568,
+      "lon": -75.498689,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0007",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.059832,
+      "lon": -75.495946,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0008",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.064877,
+      "lon": -75.504291,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0009",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.059904,
+      "lon": -75.49831,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0010",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.059714,
+      "lon": -75.503677,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0011",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.065484,
+      "lon": -75.49929,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0012",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.061781,
+      "lon": -75.497154,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0013",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.06446,
+      "lon": -75.503096,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0014",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.058775,
+      "lon": -75.500689,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0015",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.061389,
+      "lon": -75.50033,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0016",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.063833,
+      "lon": -75.498266,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0017",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.065873,
+      "lon": -75.504016,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0018",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.061221,
+      "lon": -75.501607,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0019",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.064893,
+      "lon": -75.502513,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0020",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.059522,
+      "lon": -75.500514,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0021",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.061375,
+      "lon": -75.502215,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0022",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.059998,
+      "lon": -75.495767,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0023",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.061545,
+      "lon": -75.496387,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0024",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.062403,
+      "lon": -75.504494,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pal-tri-0025",
+      "device_type": "trifasico",
+      "zona": "palermo",
+      "lat": 5.065994,
+      "lon": -75.49664,
+      "nodo_origen": "192.168.0.104",
+      "lenguaje": "cpp",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0001",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.056752,
+      "lon": -75.504663,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0002",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.05579,
+      "lon": -75.511503,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0003",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.052885,
+      "lon": -75.511076,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0004",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.052208,
+      "lon": -75.512472,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0005",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.052032,
+      "lon": -75.504132,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0006",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.051122,
+      "lon": -75.505943,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0007",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.05264,
+      "lon": -75.509193,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0008",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.056659,
+      "lon": -75.504041,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0009",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.053446,
+      "lon": -75.506534,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0010",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.050238,
+      "lon": -75.51033,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0011",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.05675,
+      "lon": -75.507787,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0012",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.053338,
+      "lon": -75.506268,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0013",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.049457,
+      "lon": -75.507742,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0014",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.053023,
+      "lon": -75.505326,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0015",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.050259,
+      "lon": -75.504353,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0016",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.049641,
+      "lon": -75.511328,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0017",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.05376,
+      "lon": -75.506923,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0018",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.050882,
+      "lon": -75.511921,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0019",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.056122,
+      "lon": -75.510784,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0020",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.053756,
+      "lon": -75.507426,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0021",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.052354,
+      "lon": -75.507747,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0022",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.053182,
+      "lon": -75.504588,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0023",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.050634,
+      "lon": -75.506554,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0024",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.050909,
+      "lon": -75.509438,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0025",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.054374,
+      "lon": -75.5103,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0026",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.051529,
+      "lon": -75.506233,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0027",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.04958,
+      "lon": -75.508875,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0028",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.056988,
+      "lon": -75.504035,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0029",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.049586,
+      "lon": -75.511082,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-pgr-mon-0030",
+      "device_type": "mono",
+      "zona": "palogrande",
+      "lat": 5.051122,
+      "lon": -75.504601,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0001",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.061928,
+      "lon": -75.489087,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0002",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.057326,
+      "lon": -75.49558,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0003",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.061504,
+      "lon": -75.490668,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0004",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.059505,
+      "lon": -75.488115,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0005",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.059886,
+      "lon": -75.49693,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0006",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.061354,
+      "lon": -75.494306,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0007",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.05997,
+      "lon": -75.48855,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0008",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.055209,
+      "lon": -75.495961,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0009",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.054963,
+      "lon": -75.492021,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0010",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.056451,
+      "lon": -75.491557,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0011",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.060459,
+      "lon": -75.495168,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0012",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.059708,
+      "lon": -75.494624,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0013",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.058397,
+      "lon": -75.488852,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0014",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.061615,
+      "lon": -75.496169,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0015",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.057812,
+      "lon": -75.49451,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0016",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.054032,
+      "lon": -75.49006,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0017",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.059734,
+      "lon": -75.494642,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0018",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.060671,
+      "lon": -75.492035,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0019",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.057849,
+      "lon": -75.496913,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    },
+    {
+      "device_id": "urbia-uni-tri-0020",
+      "device_type": "trifasico",
+      "zona": "universitario",
+      "lat": 5.054677,
+      "lon": -75.489052,
+      "nodo_origen": "192.168.0.105",
+      "lenguaje": "java",
+      "estado": "activo"
+    }
+  ]
+}
