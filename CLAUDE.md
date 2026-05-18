@@ -352,6 +352,7 @@ pero no en el historial de git.
 - Repositorio `urbIA-unal` creado en GitHub y clonado en .102.
 - SSH key de .102 → GitHub configurada.
 - Plan de implementación de la semana 1 escrito (E1-E5).
+- Sistema de backups automatizados desde .102 a NAS de .104 (PostgreSQL, MongoDB, repo git) con cron, política de retención 7d/4w/3m y verificación md5 end-to-end. Configurado 2026-05-18. Ver §17.
 
 ### 11.2 Lo siguiente (semana 1)
 
@@ -468,5 +469,123 @@ NO se actualiza por cada commit ni por cambios menores.
 
 ---
 
-*Última actualización: mayo 2026 — versión 1.0*
+## 17. Infraestructura de backups
+
+### 17.1 Visión general
+
+Los datos críticos del proyecto (PostgreSQL, MongoDB y el repositorio git) se respaldan diariamente desde **.102** (`innova-pruebas`) al **NAS WD 10 TB** conectado a **.104** (`camposjulca`), vía cron + scp con verificación md5 en origen y destino. El push lo origina .102; .104 sólo recibe.
+
+### 17.2 Mount persistente del NAS en .104
+
+- Punto de montaje: `/mnt/storage` (NTFS via ntfs-3g, FUSE userspace).
+- Disco: WD Elements 10 TB, UUID `F0602A5F602A2CB2`.
+- Entrada en `/etc/fstab` (persistente tras reinicio):
+  ```
+  UUID=F0602A5F602A2CB2 /mnt/storage ntfs defaults,nofail,uid=1000,gid=1000,umask=0022 0 0
+  ```
+- Propietario visible de los archivos: `camposjulca:neusi-data` (uid/gid 1000), sintetizado por las opciones de mount.
+- Validado con `findmnt --verify` limpio y `mount --fake -a` exit 0.
+
+### 17.3 Estructura en el NAS
+
+```
+/mnt/storage/Neusi/urbia-backups/
+├── README.md
+├── postgres/{daily,weekly,monthly}/
+├── mongo/{daily,weekly,monthly}/
+└── repo/{daily,weekly,monthly}/
+```
+
+Cada backup va acompañado de un `.md5` hermano con la suma de control verificable.
+
+### 17.4 Scripts (versionados en `scripts/ops/backups/`)
+
+| Script | Componente | Mecanismo |
+|---|---|---|
+| `backup_postgres.sh` | PostgreSQL `urbia-postgres` | `docker exec pg_dump` → gzip → scp |
+| `backup_mongo.sh` | MongoDB `urbia-mongo` (auth) | `docker exec mongodump --archive --gzip` → scp |
+| `backup_repo.sh` | repo `urbIA-unal` | `git bundle --all` → gzip → scp |
+
+Uso común: `./backup_<componente>.sh [daily|weekly|monthly]` (default: `daily`).
+
+Características compartidas:
+- Extraen credenciales del contenedor docker dinámicamente con `docker inspect` (no hardcodean passwords).
+- Verifican md5 en origen y destino; abortan si difiere y borran el archivo corrupto remoto.
+- Aplican política de retención remota con `find -mtime`.
+- Logean con timestamp a `/home/pruebas/urbia-backups/logs/`.
+- `set -euo pipefail` + `trap ERR` con número de línea.
+
+### 17.5 Política de retención
+
+| Frecuencia | Mantener | Disparo |
+|---|---|---|
+| daily | 7 archivos | todos los días |
+| weekly | 4 archivos | domingos |
+| monthly | 3 archivos | día 1 de cada mes |
+
+### 17.6 Horarios cron (crontab del usuario `pruebas` en .102)
+
+| Hora | Job |
+|---|---|
+| 03:15 | `backup_postgres.sh daily` |
+| 03:25 | `backup_mongo.sh daily` |
+| 03:35 | `backup_repo.sh daily` |
+| 03:45 dom | `backup_postgres.sh weekly` |
+| 03:55 dom | `backup_mongo.sh weekly` |
+| 04:05 dom | `backup_repo.sh weekly` |
+| 04:15 día 1 | `backup_postgres.sh monthly` |
+| 04:25 día 1 | `backup_mongo.sh monthly` |
+| 04:35 día 1 | `backup_repo.sh monthly` |
+| 05:00 día 1 | `find /home/pruebas/urbia-backups/logs/ -mtime +60 -delete` |
+
+`MAILTO=""` en el crontab desactiva el correo de cron; el seguimiento se hace por logs y `/var/log/syslog`.
+
+### 17.7 Restauración
+
+**PostgreSQL:**
+```
+gunzip -c urbia_postgres_<freq>_<TS>.sql.gz \
+  | docker exec -i urbia-postgres psql -U urbia -d urbia
+```
+
+**MongoDB (auth requerida):**
+```
+gunzip -c urbia_mongo_<freq>_<TS>.archive.gz \
+  | docker exec -i urbia-mongo mongorestore --archive --gzip \
+      --username=urbia --password=<pwd> --authenticationDatabase=admin
+```
+
+**Repo git:**
+```
+# Restauración simple (sólo rama actual)
+gunzip -c urbia_repo_<freq>_<TS>_<sha>.bundle.gz > /tmp/restore.bundle
+git clone /tmp/restore.bundle <dir>
+
+# Restauración completa (preserva refs/original/ y backup-pre-rebase)
+git clone --mirror /tmp/restore.bundle <dir>
+```
+
+### 17.8 Verificación operativa
+
+- **Logs por ejecución:** `/home/pruebas/urbia-backups/logs/<servicio>_<freq>_<TS>.log`
+- **Historial cron:** `grep -E "CRON.*urbIA-unal" /var/log/syslog`
+- **Validación md5 manual:**
+  ```
+  md5sum <local>                    # en .102
+  ssh camposjulca@192.168.0.104 'md5sum <remoto>'   # en .104
+  ```
+- **Listado remoto:**
+  ```
+  ssh camposjulca@192.168.0.104 'ls -lh /mnt/storage/Neusi/urbia-backups/<servicio>/<freq>/'
+  ```
+
+### 17.9 Deuda técnica conocida en backups
+
+- **gzip sobre `git bundle` no comprime** (~456 KB pre/post). Los packfiles de git ya vienen con zlib. Para el repo actual (<1 MB) es irrelevante; revisar si crece a varios GB.
+- **MongoDB `urbia_telemetry`** aún no existe físicamente porque el backend escribe sólo a PostgreSQL en este momento. El backup de Mongo hoy sólo respalda `admin.system.users` y `admin.system.version` (~860 B). Crecerá automáticamente cuando el backend conecte a Mongo.
+- **scp throughput ~5 MB/s** entre .102 y .104 — limitado por CPU/NIC de .104. Suficiente para los tamaños actuales; si los daily crecen a varios GB, evaluar `aes128-gcm` o reemplazar scp por rsync.
+
+---
+
+*Última actualización: mayo 2026 — versión 1.1 (infraestructura de backups)*
 *Autor: Cristhiam Daniel Campos Julca*
