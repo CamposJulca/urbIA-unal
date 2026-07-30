@@ -179,6 +179,9 @@ services:
     restart: unless-stopped
     ports:
       - "3001:80"
+      # 8082 es el upstream del tunel ngrok 'urbia-unal'. Se publica en
+      # paralelo a 3001 para no invalidar accesos locales existentes.
+      - "8082:80"
     depends_on:
       backend:
         condition: service_healthy
