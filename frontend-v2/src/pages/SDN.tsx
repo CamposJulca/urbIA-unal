@@ -26,11 +26,11 @@ export default function SDN(): JSX.Element {
         </div>
       </header>
 
-      <ConceptualBanner title="Visualizacion conceptual · Datos sinteticos · Ryu controller pendiente (E10)">
+      <ConceptualBanner title="Visualizacion conceptual · Datos sinteticos · Controlador SDN sin desplegar">
         Esta vista muestra la arquitectura SDN disenada para UrbIA. Los flujos
         visualizados y las metricas superiores son sinteticos generados en el
-        navegador. La integracion con un controlador Ryu real esta planificada
-        en el Entregable 10 del cronograma doctoral.
+        navegador. La integracion con un controlador real esta planificada para una
+        fase posterior del proyecto y todavia no existe.
       </ConceptualBanner>
 
       <div className="mt-6">
@@ -43,8 +43,9 @@ export default function SDN(): JSX.Element {
             <CardTitle>Topologia de red del cluster</CardTitle>
             <p className="text-xs text-ink-muted">
               Plano de control (lineas finas hacia el controlador) y plano de datos
-              (lineas gruesas animadas entre switches). Arrastra los nodos para
-              reorganizar; usa la rueda para zoom.
+              (lineas gruesas entre nodos). El diagrama representa enlaces de la
+              arquitectura, no trafico medido. Los nodos se pueden reorganizar
+              arrastrandolos.
             </p>
           </CardHeader>
           <CardContent className="pt-0">
@@ -65,15 +66,15 @@ export default function SDN(): JSX.Element {
           <p className="text-sm leading-relaxed text-ink-muted">
             UrbIA planea desplegar un controlador <strong className="text-ink">Ryu</strong> sobre el cluster
             Neusi, separando el plano de control del plano de datos segun el modelo OpenFlow.
-            Cada maquina del cluster expondra un switch logico OpenFlow administrado por el
-            controlador desde el nodo <code className="font-mono">.102</code>. El proposito es
+            Cada nodo del cluster expondra un switch logico OpenFlow administrado por el
+            controlador desde el nodo de integracion. El proposito es
             aplicar <strong className="text-ink">politicas adaptativas de calidad de servicio</strong>
             que prioricen el trafico MQTT de telemetria AMI cuando el monitor distribuido GSP
             detecte anomalias espectrales en el grafo de medidores. Esta capa de coordinacion
             implementa la linea "Adaptador" del aparato de Aristizabal, integrada con el
-            "Afinador" basado en Reinforcement Learning que ajusta los parametros τ del
-            difuminador en tiempo real. La integracion concreta con Ryu y Mininet esta
-            programada en el Entregable 10; hoy esta pagina demuestra la topologia objetivo.
+            "Afinador" basado en Reinforcement Learning que ajustara los parametros τ del
+            difuminador. La integracion concreta con Ryu y Mininet esta prevista para una
+            fase posterior; hoy esta pagina solo describe la topologia objetivo.
           </p>
         </CardContent>
       </Card>

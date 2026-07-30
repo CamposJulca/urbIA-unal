@@ -1,5 +1,10 @@
 import { memo } from 'react';
-import { formatClock } from '@/lib/format';
+import {
+  ageSeconds,
+  formatClock,
+  formatStampWithDate,
+  STALE_THRESHOLD_S,
+} from '@/lib/format';
 import { colorForZone, labelForZone } from '@/lib/zones';
 import type { TelemetryRecord } from '@/api/types';
 
@@ -7,6 +12,10 @@ import type { TelemetryRecord } from '@/api/types';
  * Tabla compacta con los ultimos 20 mensajes globales. Cabecera
  * sticky, scroll horizontal en pantallas estrechas, color sutil por
  * zona en el borde izquierdo de cada fila.
+ *
+ * Si el lote mostrado es historico (mas viejo que STALE_THRESHOLD_S), la
+ * columna de tiempo incluye la fecha: una hora suelta sobre datos de
+ * semanas atras se lee como si fuera de hoy.
  */
 function RecentReadingsTableImpl({
   records,
@@ -16,19 +25,22 @@ function RecentReadingsTableImpl({
   const rows = records.slice(0, 20);
 
   if (rows.length === 0) {
-    return (
-      <div className="p-6 text-sm text-ink-muted">
-        Esperando lecturas del simulador AMI...
-      </div>
-    );
+    return <div className="p-6 text-sm text-ink-muted">No hay lecturas para mostrar.</div>;
   }
+
+  // PRECONDICION: `records` llega ordenado por timestamp descendente (lo
+  // ordena Telemetry.tsx antes de pasarlo), asi que rows[0] es la lectura
+  // mas reciente. Si alguien invierte ese orden, tomar el maximo aqui en
+  // vez de rows[0]: con orden ascendente este indicador daria "historico"
+  // permanentemente y volveriamos a mostrar horas sin fecha en vivo.
+  const isStale = (ageSeconds(rows[0]!.timestamp) ?? 0) > STALE_THRESHOLD_S;
 
   return (
     <div className="max-h-[420px] overflow-auto">
       <table className="w-full min-w-[820px] text-sm">
         <thead className="sticky top-0 z-10 bg-neutral-50 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
           <tr>
-            <th className="px-4 py-2">Hora</th>
+            <th className="px-4 py-2">{isStale ? 'Fecha y hora' : 'Hora'}</th>
             <th className="px-4 py-2">Medidor</th>
             <th className="px-4 py-2">Zona</th>
             <th className="px-4 py-2 text-right">V</th>
@@ -50,7 +62,7 @@ function RecentReadingsTableImpl({
                 style={{ boxShadow: `inset 3px 0 0 ${zc}` }}
               >
                 <td className="whitespace-nowrap px-4 py-2 font-mono text-xs text-ink-muted">
-                  {formatClock(r.timestamp)}
+                  {isStale ? formatStampWithDate(r.timestamp) : formatClock(r.timestamp)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-2 font-mono text-xs">{r.meter_id}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-xs">{labelForZone(r.zone)}</td>

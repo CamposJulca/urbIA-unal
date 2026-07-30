@@ -10,11 +10,20 @@ import { cn } from '@/lib/utils';
 
 type Protocol = { name: string; port: number; color: string };
 
-const HOSTS = ['.100', '.101', '.102', '.103', '.104', '.105'] as const;
+// Etiquetas de rol, no direcciones: la lista lateral es una maqueta y no
+// debe publicar el inventario de maquinas.
+const HOSTS = [
+  'Observabilidad',
+  'Servicios',
+  'Integracion',
+  'Borde x86',
+  'Datos',
+  'Consola',
+] as const;
+
 const PROTOCOLS: readonly Protocol[] = [
   { name: 'MQTT',       port: 1883, color: 'success' },
   { name: 'HTTP',       port: 8000, color: 'primary' },
-  { name: 'HTTP',       port: 8501, color: 'primary' },
   { name: 'PostgreSQL', port: 5432, color: 'warning' },
   { name: 'NFS',        port: 2049, color: 'warning' },
   { name: 'SCP',        port:   22, color: 'neutral' },
@@ -101,10 +110,10 @@ function FlowsPanelImpl(): JSX.Element {
             className="grid animate-fade-in grid-cols-[1fr,auto] items-center gap-2 px-4 py-2.5"
           >
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5 font-mono text-xs text-ink">
-                <span className="font-semibold">{f.src}</span>
-                <ArrowRight className="h-3 w-3 text-ink-muted" aria-hidden="true" />
-                <span className="font-semibold">{f.dst}</span>
+              <div className="flex min-w-0 items-center gap-1.5 text-xs text-ink">
+                <span className="truncate font-semibold">{f.src}</span>
+                <ArrowRight className="h-3 w-3 shrink-0 text-ink-muted" aria-hidden="true" />
+                <span className="truncate font-semibold">{f.dst}</span>
                 <Badge variant={badgeVariant(f.protocol)} className="ml-1 px-1.5 py-0 text-[10px]">
                   {f.protocol.name}:{f.protocol.port}
                 </Badge>

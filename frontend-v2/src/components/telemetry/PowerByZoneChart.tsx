@@ -58,8 +58,12 @@ function PowerByZoneChartImpl({
 
   if (data.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center text-sm text-ink-muted">
-        Esperando datos suficientes para graficar la ventana de 60 s...
+      <div className="flex h-64 flex-col items-center justify-center gap-1 px-6 text-center text-sm text-ink-muted">
+        <p className="font-medium text-ink">Sin lecturas en los ultimos 60 segundos.</p>
+        <p>
+          Este grafico solo cubre la ventana en vivo. La telemetria historica disponible
+          se lista en la tabla inferior.
+        </p>
       </div>
     );
   }

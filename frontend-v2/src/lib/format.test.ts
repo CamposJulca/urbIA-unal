@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import { formatNumber, formatRelative, formatClock, ageSeconds } from './format';
+import {
+  formatNumber,
+  formatRelative,
+  formatClock,
+  formatStampWithDate,
+  ageSeconds,
+} from './format';
 
 describe('formatNumber', () => {
   it('devuelve guion para null', () => {
@@ -53,6 +59,18 @@ describe('formatClock', () => {
     // parseISO retorna Invalid Date y toLocaleTimeString lo serializa
     // como 'Invalid Date' sin lanzar. Documentamos el comportamiento.
     expect(formatClock('basura')).toBe('Invalid Date');
+  });
+});
+
+describe('formatStampWithDate', () => {
+  it('incluye dia y mes en español ademas de la hora', () => {
+    const out = formatStampWithDate('2026-05-22T21:59:46Z');
+    expect(out).toMatch(/^\d{1,2} \p{L}{3,} \d{2}:\d{2}:\d{2}$/u);
+    expect(out).toContain('may');
+  });
+
+  it('devuelve la entrada tal cual si la fecha no es valida (no lanza)', () => {
+    expect(formatStampWithDate('basura')).toBe('basura');
   });
 });
 

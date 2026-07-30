@@ -36,7 +36,7 @@ const PILLARS: readonly Pillar[] = [
     icon: <Activity className="h-6 w-6" aria-hidden="true" />,
     title: 'Telemetria AMI',
     description:
-      'Diez medidores sinteticos en cinco zonas. Publican metricas DLMS-JSON al broker MQTT del cluster; el backend las persiste y las expone por REST.',
+      'Diez medidores sinteticos en cinco zonas publicaron metricas DLMS-JSON al broker MQTT del cluster. La ingesta esta detenida: el backend conserva el ultimo periodo capturado y lo expone por REST.',
     link: '/telemetria',
     status: 'datos historicos',
   },

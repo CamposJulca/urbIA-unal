@@ -154,15 +154,15 @@ export default function Edge(): JSX.Element {
 
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <EdgeNodeCard
-          hostname="stage.urbia"
-          ipAddress="192.168.40.11"
+          name="Nodo de borde x86"
+          descriptor="Agregacion central del monitor GSP"
           role="central"
-          status="simulated"
+          status="not-deployed"
           metrics={state.central}
         />
         <EdgeNodeCard
-          hostname="rpi5-edge-01"
-          ipAddress="por asignar (planificado)"
+          name="Nodo de borde ARM (pendiente)"
+          descriptor="Deteccion zonal sobre el subgrafo local"
           role="edge"
           status="pending"
           metrics={state.edge}
@@ -186,8 +186,8 @@ export default function Edge(): JSX.Element {
           <CardHeader>
             <CardTitle>Detecciones del monitor GSP</CardTitle>
             <p className="text-xs text-ink-muted">
-              Sintetico. Cuando .106 este desplegado, alimentara este panel via el endpoint
-              <code className="ml-1 font-mono">/anomalies</code>.
+              Sintetico. Cuando el monitor GSP exista, sus detecciones alimentaran este
+              panel; hoy no hay ninguna medicion detras de estas cifras.
             </p>
           </CardHeader>
           <CardContent className="pt-0">
@@ -214,18 +214,19 @@ export default function Edge(): JSX.Element {
               Afinador de τ.
             </p>
             <p>
-              <strong className="text-ink">Conexion con E6.</strong> El detector espectral{' '}
-              <code className="font-mono">H(λ) = λ</code> identificado en el notebook E6
-              detecta anomalias estructurales en nodos hoja del grafo AMI. Esta propiedad
+              <strong className="text-ink">Base experimental.</strong> El detector espectral{' '}
+              <code className="font-mono">H(λ) = λ</code>, evaluado en los experimentos
+              preliminares de la tesis, detecta anomalias estructurales en nodos hoja del
+              grafo AMI. Esta propiedad
               motiva la distribucion del procesamiento: cada nodo edge ejecuta el filtro
               pasaaltos sobre su subgrafo zonal local, y el nodo central agrega
               resultados para deteccion de anomalias emergentes a escala de cluster.
             </p>
             <p>
-              <strong className="text-ink">Plan de integracion.</strong> Cuando llegue la
-              RPi5 (.106), el agente edge se desplegara via contenedor; mientras tanto se
-              emulara con un contenedor adicional en .102 para validar la coordinacion.
-              Integracion concreta prevista en los Entregables E10-E11.
+              <strong className="text-ink">Plan de integracion.</strong> Cuando se disponga
+              del nodo de borde ARM, el agente edge se desplegara en contenedor; mientras
+              tanto se emulara sobre el nodo x86 para validar la coordinacion. La
+              integracion concreta esta prevista para fases posteriores del proyecto.
             </p>
           </CardContent>
         </Card>

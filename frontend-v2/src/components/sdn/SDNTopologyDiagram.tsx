@@ -17,8 +17,11 @@ import { cn } from '@/lib/utils';
 import '@xyflow/react/dist/style.css';
 
 /**
- * Diagrama conceptual de la topologia SDN planificada del cluster
- * Neusi. NO conecta a un Ryu real. Layout manual para previsibilidad.
+ * Diagrama conceptual de la topologia SDN planificada. Sin conexion a un
+ * controlador real. Layout manual para previsibilidad.
+ *
+ * Los nodos se identifican por rol, no por direccion ni hostname: el
+ * inventario de maquinas no se publica.
  */
 
 type ControllerData = {
@@ -26,22 +29,28 @@ type ControllerData = {
   sublabel: string;
 };
 
-type SwitchRole = 'cerebro' | 'broker' | 'produccion' | 'simulador' | 'datos' | 'auditoria';
+type SwitchRole =
+  | 'integracion'
+  | 'servicios'
+  | 'observabilidad'
+  | 'borde'
+  | 'datos'
+  | 'consola';
 
 type SwitchData = {
-  ip: string;
-  hostname: string;
+  label: string;
   role: SwitchRole;
-  description: string;
 };
 
+// El chip describe la funcion del nodo; el label describe su rol en la
+// arquitectura. Ninguno expone direcciones ni hostnames.
 const ROLE_STYLE: Record<SwitchRole, { ring: string; chip: string; label: string }> = {
-  cerebro:    { ring: 'border-primary',  chip: 'bg-primary text-primary-foreground',  label: 'Cerebro UrbIA' },
-  broker:     { ring: 'border-success',  chip: 'bg-success text-success-foreground',  label: 'Broker MQTT' },
-  produccion: { ring: 'border-warning',  chip: 'bg-warning text-accent-foreground',   label: 'Observabilidad' },
-  simulador:  { ring: 'border-neutral-300', chip: 'bg-neutral-200 text-neutral-700',  label: 'Gateway IoT' },
-  datos:      { ring: 'border-neutral-300', chip: 'bg-neutral-200 text-neutral-700',  label: 'Datos / NAS' },
-  auditoria:  { ring: 'border-neutral-300', chip: 'bg-neutral-200 text-neutral-700',  label: 'Auditoria' },
+  integracion:    { ring: 'border-primary',     chip: 'bg-primary text-primary-foreground', label: 'Backend y persistencia' },
+  servicios:      { ring: 'border-success',     chip: 'bg-success text-success-foreground', label: 'Broker MQTT' },
+  observabilidad: { ring: 'border-warning',     chip: 'bg-warning text-accent-foreground',  label: 'Metricas y tableros' },
+  borde:          { ring: 'border-neutral-300', chip: 'bg-neutral-200 text-neutral-700',    label: 'Gateway IoT' },
+  datos:          { ring: 'border-neutral-300', chip: 'bg-neutral-200 text-neutral-700',    label: 'Respaldos' },
+  consola:        { ring: 'border-neutral-300', chip: 'bg-neutral-200 text-neutral-700',    label: 'Auditoria y capturas' },
 };
 
 function ControllerNode({ data }: NodeProps<Node<ControllerData, 'controller'>>): JSX.Element {
@@ -71,14 +80,13 @@ function SwitchNode({ data }: NodeProps<Node<SwitchData, 'switch'>>): JSX.Elemen
       <Handle type="source" position={Position.Left} id="left" style={{ background: '#94A3B8' }} />
       <Handle type="source" position={Position.Right} id="right" style={{ background: '#94A3B8' }} />
       <div className="flex items-center gap-1.5">
-        {data.role === 'cerebro' ? (
+        {data.role === 'integracion' ? (
           <Cpu className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
         ) : (
           <Server className="h-3.5 w-3.5 text-ink-muted" aria-hidden="true" />
         )}
-        <span className="font-mono text-[11px] font-semibold text-ink">{data.ip}</span>
+        <span className="text-[11px] font-semibold text-ink">{data.label}</span>
       </div>
-      <span className="text-[10px] font-medium text-ink">{data.hostname}</span>
       <span className={cn('rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase', r.chip)}>
         {r.label}
       </span>
@@ -99,55 +107,55 @@ const NODES: Node[] = [
     id: 'ctrl',
     type: 'controller',
     position: { x: X0 + 2 * DX + 75, y: Y_CTRL },
-    data: { label: 'Ryu Controller', sublabel: '.102 (planificado · E10)' } as ControllerData,
+    data: { label: 'Controlador SDN', sublabel: 'planificado — sin desplegar' } as ControllerData,
     draggable: true,
   },
   {
-    id: 'sw-100',
+    id: 'sw-obs',
     type: 'switch',
     position: { x: X0 + 0 * DX, y: Y_SW },
-    data: { ip: '.100', hostname: 'innova-produccion', role: 'produccion', description: '' } as SwitchData,
+    data: { label: 'Nodo de observabilidad', role: 'observabilidad' } as SwitchData,
     draggable: true,
   },
   {
-    id: 'sw-101',
+    id: 'sw-svc',
     type: 'switch',
     position: { x: X0 + 1 * DX, y: Y_SW },
-    data: { ip: '.101', hostname: 'innova-desarrollo', role: 'broker', description: '' } as SwitchData,
+    data: { label: 'Nodo de servicios', role: 'servicios' } as SwitchData,
     draggable: true,
   },
   {
-    id: 'sw-102',
+    id: 'sw-int',
     type: 'switch',
     position: { x: X0 + 2 * DX, y: Y_SW },
-    data: { ip: '.102', hostname: 'innova-pruebas', role: 'cerebro', description: '' } as SwitchData,
+    data: { label: 'Nodo de integracion', role: 'integracion' } as SwitchData,
     draggable: true,
   },
   {
-    id: 'sw-103',
+    id: 'sw-edge',
     type: 'switch',
     position: { x: X0 + 3 * DX, y: Y_SW },
-    data: { ip: '.103', hostname: 'simulador1', role: 'simulador', description: '' } as SwitchData,
+    data: { label: 'Nodo de borde x86', role: 'borde' } as SwitchData,
     draggable: true,
   },
   {
-    id: 'sw-104',
+    id: 'sw-data',
     type: 'switch',
     position: { x: X0 + 4 * DX, y: Y_SW },
-    data: { ip: '.104', hostname: 'camposjulca', role: 'datos', description: '' } as SwitchData,
+    data: { label: 'Nodo de datos', role: 'datos' } as SwitchData,
     draggable: true,
   },
   {
-    id: 'sw-105',
+    id: 'sw-console',
     type: 'switch',
     position: { x: X0 + 5 * DX, y: Y_SW },
-    data: { ip: '.105', hostname: 'manjaro-daniel', role: 'auditoria', description: '' } as SwitchData,
+    data: { label: 'Consola de operacion', role: 'consola' } as SwitchData,
     draggable: true,
   },
 ];
 
 // Plano de control (controlador → switches), sin animacion.
-const CONTROL_EDGES: Edge[] = ['sw-100', 'sw-101', 'sw-102', 'sw-103', 'sw-104', 'sw-105'].map((id) => ({
+const CONTROL_EDGES: Edge[] = ['sw-obs', 'sw-svc', 'sw-int', 'sw-edge', 'sw-data', 'sw-console'].map((id) => ({
   id: `ctrl-${id}`,
   source: 'ctrl',
   target: id,
@@ -155,52 +163,49 @@ const CONTROL_EDGES: Edge[] = ['sw-100', 'sw-101', 'sw-102', 'sw-103', 'sw-104',
   style: { stroke: 'rgba(46, 90, 158, 0.55)', strokeWidth: 1.5, strokeDasharray: '4 3' },
 }));
 
-// Plano de datos (switch ↔ switch), animado con dash animation propio de react-flow.
+// Plano de datos (nodo ↔ nodo). Sin animacion a proposito: el diagrama
+// describe enlaces de la arquitectura, no trafico medido.
 const DATA_EDGES: Edge[] = [
   {
-    id: 'mqtt-101-102',
-    source: 'sw-101',
+    id: 'mqtt-svc-int',
+    source: 'sw-svc',
     sourceHandle: 'right',
-    target: 'sw-102',
+    target: 'sw-int',
     type: 'smoothstep',
     label: 'MQTT 1883',
-    animated: true,
     style: { stroke: '#10B981', strokeWidth: 2 },
     labelBgStyle: { fill: '#ECFDF5' },
     labelStyle: { fill: '#065F46', fontSize: 11, fontWeight: 600 },
   },
   {
-    id: 'sim-103-102',
-    source: 'sw-103',
+    id: 'sim-edge-int',
+    source: 'sw-edge',
     sourceHandle: 'left',
-    target: 'sw-102',
+    target: 'sw-int',
     type: 'smoothstep',
-    label: 'AMI sim',
-    animated: true,
+    label: 'Telemetria AMI',
     style: { stroke: '#2E5A9E', strokeWidth: 2 },
     labelBgStyle: { fill: '#EFF6FF' },
     labelStyle: { fill: '#1A3A6E', fontSize: 11, fontWeight: 600 },
   },
   {
-    id: 'bkp-102-104',
-    source: 'sw-102',
+    id: 'bkp-int-data',
+    source: 'sw-int',
     sourceHandle: 'right',
-    target: 'sw-104',
+    target: 'sw-data',
     type: 'smoothstep',
-    label: 'NFS backup',
-    animated: true,
+    label: 'Respaldo NFS',
     style: { stroke: '#F59E0B', strokeWidth: 2, strokeDasharray: '6 4' },
     labelBgStyle: { fill: '#FFFBEB' },
     labelStyle: { fill: '#92400E', fontSize: 11, fontWeight: 600 },
   },
   {
-    id: 'obs-100-102',
-    source: 'sw-100',
+    id: 'obs-obs-int',
+    source: 'sw-obs',
     sourceHandle: 'right',
-    target: 'sw-102',
+    target: 'sw-int',
     type: 'smoothstep',
     label: 'Metricas',
-    animated: true,
     style: { stroke: '#A855F7', strokeWidth: 2 },
     labelBgStyle: { fill: '#FAF5FF' },
     labelStyle: { fill: '#6B21A8', fontSize: 11, fontWeight: 600 },
@@ -232,11 +237,11 @@ function SDNTopologyDiagramImpl(): JSX.Element {
           nodeColor={(n) =>
             n.type === 'controller'
               ? '#1A3A6E'
-              : (n.data as SwitchData).role === 'cerebro'
+              : (n.data as SwitchData).role === 'integracion'
                 ? '#1A3A6E'
-                : (n.data as SwitchData).role === 'broker'
+                : (n.data as SwitchData).role === 'servicios'
                   ? '#10B981'
-                  : (n.data as SwitchData).role === 'produccion'
+                  : (n.data as SwitchData).role === 'observabilidad'
                     ? '#F59E0B'
                     : '#CBD5E1'
           }

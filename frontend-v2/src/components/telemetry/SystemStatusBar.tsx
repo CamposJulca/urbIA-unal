@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 import { formatRelative } from '@/lib/format';
-import { ageSeconds } from '@/lib/format';
+import { ageSeconds, STALE_THRESHOLD_S } from '@/lib/format';
 import type { MeterInfo, SystemHealthState, TelemetryRecord } from '@/api/types';
 
 /**
@@ -14,14 +14,14 @@ import type { MeterInfo, SystemHealthState, TelemetryRecord } from '@/api/types'
  * por segundo, frescura del dato y boton de refresco manual.
  */
 
-// Umbral por encima del cual la telemetria deja de considerarse en
-// vivo. Con el simulador publicando a 1 Hz, 60 s es holgado.
-const STALE_THRESHOLD_S = 60;
+// El umbral de frescura vive en lib/format para que esta barra y la tabla
+// de lecturas apliquen el mismo criterio. Con el simulador publicando a
+// 10 msg/s (10 medidores a 1 Hz), 60 s es holgado.
 
-// 'empty' es el caso posterior a truncar ami_telemetry: sin este estado
-// la barra muestra solo guiones, que se leen como "cargando" y no como
-// "sin ingesta". 'unreachable' existe para NO afirmar "sin datos" cuando
-// en realidad no pudimos preguntar; de eso ya avisa Telemetry.tsx.
+// 'empty' es el caso sin registros almacenados: sin este estado la barra
+// muestra solo guiones, que se leen como "cargando" y no como "sin
+// ingesta". 'unreachable' existe para NO afirmar "sin datos" cuando en
+// realidad no pudimos preguntar; de eso ya avisa Telemetry.tsx.
 type DataFreshness = 'loading' | 'unreachable' | 'empty' | 'stale' | 'live';
 
 export function SystemStatusBar({
@@ -122,10 +122,9 @@ export function SystemStatusBar({
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden="true" />
           <p>
-            <strong>Sin datos de telemetria — ingesta no iniciada.</strong> La tabla{' '}
-            <code className="font-mono">ami_telemetry</code> no tiene registros. Las lecturas
-            apareceran aqui en cuanto el simulador AMI publique al broker y el backend
-            consuma el topic.
+            <strong>Sin datos de telemetria — ingesta no iniciada.</strong> No hay lecturas
+            almacenadas todavia. Apareceran aqui en cuanto el simulador AMI vuelva a
+            publicar y el backend las persista.
           </p>
         </div>
       )}

@@ -9,7 +9,10 @@ import { cn } from '@/lib/utils';
  * dependencia de recharts: las barras de progreso son divs.
  */
 
-export type EdgeStatus = 'active' | 'pending' | 'simulated';
+// 'not-deployed' es el estado real de todos los nodos hoy: el monitor GSP
+// no existe como software. 'pending' anade que tampoco existe el hardware.
+// Ninguno de los dos puede pintarse en verde.
+export type EdgeStatus = 'active' | 'pending' | 'not-deployed';
 export type EdgeRole = 'central' | 'edge';
 
 export type EdgeMetrics = {
@@ -20,8 +23,8 @@ export type EdgeMetrics = {
 };
 
 type Props = {
-  hostname: string;
-  ipAddress: string;
+  name: string;
+  descriptor: string;
   role: EdgeRole;
   status: EdgeStatus;
   metrics: EdgeMetrics;
@@ -32,10 +35,13 @@ const ROLE_BADGE: Record<EdgeRole, { variant: 'primary' | 'warning'; label: stri
   edge: { variant: 'warning', label: 'Edge' },
 };
 
-const STATUS_BADGE: Record<EdgeStatus, { variant: 'success' | 'warning' | 'primary'; label: string }> = {
-  active:    { variant: 'success', label: 'Operativo' },
-  simulated: { variant: 'primary', label: 'Emulado' },
-  pending:   { variant: 'warning', label: 'Pendiente fisico' },
+const STATUS_BADGE: Record<
+  EdgeStatus,
+  { variant: 'success' | 'warning' | 'neutral'; label: string }
+> = {
+  active:         { variant: 'success', label: 'Operativo' },
+  'not-deployed': { variant: 'neutral', label: 'Sin desplegar' },
+  pending:        { variant: 'warning', label: 'Hardware pendiente' },
 };
 
 function ProgressBar({
@@ -56,7 +62,7 @@ function ProgressBar({
   );
 }
 
-function EdgeNodeCardImpl({ hostname, ipAddress, role, status, metrics }: Props): JSX.Element {
+function EdgeNodeCardImpl({ name, descriptor, role, status, metrics }: Props): JSX.Element {
   const isPending = status === 'pending';
   const roleBadge = ROLE_BADGE[role];
   const statusBadge = STATUS_BADGE[status];
@@ -84,8 +90,8 @@ function EdgeNodeCardImpl({ hostname, ipAddress, role, status, metrics }: Props)
       <CardHeader className="gap-2 pb-3">
         <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <p className="font-mono text-sm font-semibold text-ink">{hostname}</p>
-            <p className="font-mono text-[11px] text-ink-muted">{ipAddress}</p>
+            <p className="text-sm font-semibold text-ink">{name}</p>
+            <p className="text-[11px] text-ink-muted">{descriptor}</p>
           </div>
           <div className="flex flex-col items-end gap-1">
             <Badge variant={roleBadge.variant}>{roleBadge.label}</Badge>
@@ -155,17 +161,20 @@ function EdgeNodeCardImpl({ hostname, ipAddress, role, status, metrics }: Props)
       <div className="flex items-center justify-between border-t border-border px-6 py-3 text-xs text-ink-muted">
         <span>Monitor GSP</span>
         <span className="flex items-center gap-1.5">
-          {isPending ? (
+          {status === 'active' ? (
             <>
-              <Hourglass className="h-3.5 w-3.5 text-warning" aria-hidden="true" />
-              <span className="text-warning">a la espera del hardware</span>
+              <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden="true" />
+              <span className="text-success">activo</span>
+            </>
+          ) : isPending ? (
+            <>
+              <Hourglass className="h-3.5 w-3.5 text-ink-muted" aria-hidden="true" />
+              <span>sin hardware asignado</span>
             </>
           ) : (
             <>
-              <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden="true" />
-              <span className="text-success">
-                {status === 'simulated' ? 'emulado en .102' : 'activo'}
-              </span>
+              <Hourglass className="h-3.5 w-3.5 text-ink-muted" aria-hidden="true" />
+              <span>sin implementar</span>
             </>
           )}
         </span>

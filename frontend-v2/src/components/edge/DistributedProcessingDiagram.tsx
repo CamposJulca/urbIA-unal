@@ -3,9 +3,9 @@ import { memo } from 'react';
 /**
  * Diagrama SVG inline del flujo de procesamiento distribuido:
  *
- *   [Simulador AMI] ─MQTT raw──> [Edge GSP .106] ─Anomalias─┐
- *                  └─MQTT raw (fallback)─> [Central GSP .102] ─Anomalias agregadas─┐
- *                                                                                  ├─> [Backend FastAPI] ─API /anomalies─> [Frontend]
+ *   [Simulador AMI] ─MQTT raw──> [Borde ARM] ─Anomalias─┐
+ *                  └─MQTT raw (fallback)─> [Borde x86] ─Anomalias agregadas─┐
+ *                                                            ├─> [Backend FastAPI] ─API futura─> [Consola]
  *
  * Se usa SVG inline (sin xyflow) para minimizar peso del bundle.
  * Flechas animadas con strokeDashoffset.
@@ -36,40 +36,40 @@ const BOXES: readonly Box[] = [
     title: 'Simulador AMI',
     subtitle: '10 medidores · MQTT',
     fill: '#EFF6FF', stroke: '#2E5A9E', textColor: '#1A3A6E',
-    tooltip: 'Simulador local en .102. Publica telemetria DLMS-JSON a 10 msg/s sobre el broker MQTT en .101.',
+    tooltip: 'Simulador de 10 medidores. Publicaba telemetria DLMS-JSON a 10 msg/s sobre el broker MQTT del cluster; la ingesta esta detenida.',
   },
   {
     id: 'edge',
     x: 320, y: 40, w: 200, h: 80,
-    title: 'Edge GSP · .106',
-    subtitle: 'RPi5 (pendiente fisico)',
+    title: 'Nodo de borde ARM',
+    subtitle: 'hardware pendiente',
     fill: '#FFFBEB', stroke: '#F59E0B', textColor: '#92400E',
     dashed: true,
-    tooltip: 'Nodo edge planificado. Ejecutara el filtro pasaaltos H(λ)=λ sobre el subgrafo zonal local para deteccion en hojas.',
+    tooltip: 'Nodo de borde planificado. Ejecutara el filtro pasaaltos H(λ)=λ sobre el subgrafo zonal local para deteccion en hojas.',
   },
   {
     id: 'central',
     x: 320, y: 200, w: 200, h: 80,
-    title: 'Central GSP · .102',
-    subtitle: 'innova-pruebas',
+    title: 'Nodo de borde x86',
+    subtitle: 'agregacion central',
     fill: '#EFF6FF', stroke: '#1A3A6E', textColor: '#1A3A6E',
-    tooltip: 'Monitor GSP centralizado en .102. Hoy ejecuta todo; cuando llegue .106, agregara resultados de los nodos edge.',
+    tooltip: 'Agregacion central prevista del monitor GSP. Sin implementar: ningun nodo ejecuta el monitor hoy.',
   },
   {
     id: 'api',
     x: 660, y: 130, w: 180, h: 60,
     title: 'Backend FastAPI',
-    subtitle: 'urbia-backend :8000',
+    subtitle: 'nodo de integracion',
     fill: '#ECFDF5', stroke: '#10B981', textColor: '#065F46',
-    tooltip: 'Backend que persiste anomalias en PostgreSQL y las expone por REST.',
+    tooltip: 'Backend de UrbIA. Hoy persiste y expone telemetria AMI; la persistencia de anomalias y su endpoint REST estan sin implementar.',
   },
   {
     id: 'front',
     x: 900, y: 130, w: 160, h: 60,
     title: 'Frontend',
-    subtitle: 'urbia/frontend-v2',
+    subtitle: 'consola de operacion',
     fill: '#F5F3FF', stroke: '#A855F7', textColor: '#6B21A8',
-    tooltip: 'Este mismo dashboard, consumiendo el endpoint /anomalies cuando exista.',
+    tooltip: 'Este mismo dashboard, consumiendo el endpoint de anomalias cuando exista.',
   },
 ];
 
@@ -87,7 +87,7 @@ const ARROWS: readonly Arrow[] = [
   { id: 'sim-central',  from: 'sim',     to: 'central', label: 'MQTT raw (fallback)',     variant: 'dashed', color: '#1A3A6E' },
   { id: 'edge-api',     from: 'edge',    to: 'api',     label: 'Anomalias detectadas',    variant: 'solid',  color: '#F59E0B' },
   { id: 'central-api',  from: 'central', to: 'api',     label: 'Anomalias agregadas',     variant: 'solid',  color: '#1A3A6E' },
-  { id: 'api-front',    from: 'api',     to: 'front',   label: 'API /anomalies',          variant: 'solid',  color: '#10B981' },
+  { id: 'api-front',    from: 'api',     to: 'front',   label: 'API de anomalias (futura)', variant: 'dashed', color: '#10B981' },
 ];
 
 function boxById(id: string): Box {

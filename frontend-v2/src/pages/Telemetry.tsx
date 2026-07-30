@@ -73,10 +73,10 @@ export default function Telemetry(): JSX.Element {
         <div className="mb-4 flex items-start gap-3 rounded-md border border-danger/30 bg-danger/5 p-4 text-danger">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
           <div className="text-sm">
-            <p className="font-semibold">No se puede conectar al backend de UrbIA</p>
+            <p className="font-semibold">El servicio de datos no responde</p>
             <p className="text-danger/90">
-              Verifica que el contenedor <code className="font-mono">urbia-backend</code> este
-              activo en el puerto 8000. Reintentando automaticamente.
+              No fue posible consultar la telemetria en este momento. La pagina reintenta
+              automaticamente cada pocos segundos.
             </p>
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function Telemetry(): JSX.Element {
 
       {/* Tabla */}
       <h2 className="mt-10 mb-3 text-sm font-semibold uppercase tracking-wider text-ink-muted">
-        Ultimas lecturas recibidas
+        Ultimas lecturas almacenadas
       </h2>
       <Card className="overflow-hidden">
         <RecentReadingsTable records={records} />
