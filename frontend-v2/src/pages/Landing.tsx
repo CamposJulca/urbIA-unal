@@ -17,7 +17,18 @@ type Pillar = {
   title: string;
   description: string;
   link: string;
-  status: 'datos reales' | 'visualizacion conceptual';
+  status: 'datos reales' | 'datos historicos' | 'visualizacion conceptual';
+};
+
+// La telemetria AMI esta implementada de punta a punta, pero su badge
+// no puede decir "datos reales" mientras la ingesta MQTT este detenida:
+// lo que se sirve es el ultimo periodo capturado. 'datos historicos'
+// cubre ese estado intermedio sin degradarlo a "conceptual", que seria
+// injusto con el modulo que si funciona.
+const STATUS_VARIANT: Record<Pillar['status'], 'success' | 'warning' | 'accent'> = {
+  'datos reales': 'success',
+  'datos historicos': 'warning',
+  'visualizacion conceptual': 'accent',
 };
 
 const PILLARS: readonly Pillar[] = [
@@ -25,15 +36,15 @@ const PILLARS: readonly Pillar[] = [
     icon: <Activity className="h-6 w-6" aria-hidden="true" />,
     title: 'Telemetria AMI',
     description:
-      'Diez medidores sinteticos distribuidos en cinco zonas, publicando metricas DLMS-JSON al broker MQTT del cluster.',
+      'Diez medidores sinteticos en cinco zonas. Publican metricas DLMS-JSON al broker MQTT del cluster; el backend las persiste y las expone por REST.',
     link: '/telemetria',
-    status: 'datos reales',
+    status: 'datos historicos',
   },
   {
     icon: <Network className="h-6 w-6" aria-hidden="true" />,
     title: 'Red Definida por Software',
     description:
-      'Topologia de control con Ryu sobre Mininet para gestion adaptativa del trafico entre los nodos del cluster Neusi.',
+      'Diseno de la topologia de control con Ryu sobre Mininet para gestion adaptativa del trafico entre los nodos del cluster. Sin implementar.',
     link: '/sdn',
     status: 'visualizacion conceptual',
   },
@@ -41,7 +52,7 @@ const PILLARS: readonly Pillar[] = [
     icon: <Cpu className="h-6 w-6" aria-hidden="true" />,
     title: 'Computacion Edge',
     description:
-      'Monitor GSP distribuido en nodos edge (Raspberry Pi 5) con deteccion espectral de anomalias sobre el grafo AMI.',
+      'Monitor GSP en nodos edge (Raspberry Pi 5) con deteccion espectral de anomalias sobre el grafo AMI. Nucleo doctoral, sin implementar.',
     link: '/edge',
     status: 'visualizacion conceptual',
   },
@@ -59,13 +70,15 @@ export default function Landing(): JSX.Element {
             Sistema modular IoT-SDN-Edge para gestion energetica urbana
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-white/80 md:text-xl">
-            Monitoreo distribuido de redes AMI con deteccion espectral de anomalias mediante
-            procesamiento de senales sobre grafos.
+            Arquitectura para el monitoreo distribuido de redes AMI con deteccion espectral
+            de anomalias mediante procesamiento de senales sobre grafos. Investigacion
+            doctoral en curso: la capa de telemetria esta implementada; las capas SDN y edge
+            estan en diseno.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Button asChild size="lg" variant="accent">
               <Link to="/telemetria">
-                Ver telemetria en vivo
+                Ver telemetria
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
@@ -87,8 +100,8 @@ export default function Landing(): JSX.Element {
               Tres pilares arquitectonicos
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-ink-muted">
-              UrbIA integra una capa de telemetria operativa con dos capas de coordinacion
-              definidas en el nucleo doctoral.
+              UrbIA integra una capa de telemetria ya implementada con dos capas de
+              coordinacion todavia en diseno, definidas en el nucleo doctoral.
             </p>
           </div>
 
@@ -100,7 +113,7 @@ export default function Landing(): JSX.Element {
                     <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                       {p.icon}
                     </div>
-                    <Badge variant={p.status === 'datos reales' ? 'success' : 'accent'}>
+                    <Badge variant={STATUS_VARIANT[p.status]}>
                       {p.status}
                     </Badge>
                   </div>

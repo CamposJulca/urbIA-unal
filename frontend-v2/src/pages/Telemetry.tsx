@@ -63,8 +63,8 @@ export default function Telemetry(): JSX.Element {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink">Telemetria AMI</h1>
           <p className="text-sm text-ink-muted">
-            10 medidores en 5 zonas — datos en tiempo real desde el simulador AMI
-            via MQTT y backend FastAPI.
+            10 medidores en 5 zonas — telemetria capturada por el simulador AMI via
+            MQTT y persistida por el backend FastAPI.
           </p>
         </div>
       </header>
@@ -87,6 +87,8 @@ export default function Telemetry(): JSX.Element {
         meters={meters.data ?? []}
         records={records}
         lastUpdate={lastUpdate}
+        isLoading={telemetry.isLoading}
+        hasError={telemetry.isError}
       />
 
       {/* Grid de medidores */}

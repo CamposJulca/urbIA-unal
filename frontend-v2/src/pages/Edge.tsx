@@ -143,25 +143,26 @@ export default function Edge(): JSX.Element {
         </div>
       </header>
 
-      <ConceptualBanner title="Visualizacion conceptual · RPi5 .106 pendiente · Metricas sinteticas">
-        El monitor GSP corre hoy de forma centralizada en{' '}
-        <code className="font-mono">.102</code> sobre grafo sintetico. La
-        distribucion a un nodo edge fisico (Raspberry Pi 5 en .106) esta
-        planificada. Las metricas mostradas aqui son sinteticas hasta la
-        integracion final.
+      <ConceptualBanner title="Maqueta de interfaz · Monitor GSP no implementado · Metricas sinteticas">
+        El monitor GSP <strong>todavia no esta implementado</strong>: esta pagina es
+        una maqueta de la interfaz prevista. Todas las cifras que se muestran
+        (latencia, CPU, memoria, anomalias) se generan en el navegador y{' '}
+        <strong>no corresponden a ninguna medicion</strong>. Tanto la implementacion
+        centralizada como su distribucion a un nodo edge fisico (Raspberry Pi 5) son
+        trabajo pendiente.
       </ConceptualBanner>
 
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <EdgeNodeCard
-          hostname="innova-pruebas"
-          ipAddress="192.168.0.102"
+          hostname="stage.urbia"
+          ipAddress="192.168.40.11"
           role="central"
-          status="active"
+          status="simulated"
           metrics={state.central}
         />
         <EdgeNodeCard
           hostname="rpi5-edge-01"
-          ipAddress="192.168.0.106 (planificado)"
+          ipAddress="por asignar (planificado)"
           role="edge"
           status="pending"
           metrics={state.edge}
