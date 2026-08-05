@@ -34,31 +34,46 @@ class FakeDatabase:
         return self.ping_result
 
     async def insert_telemetry(self, payload: TelemetryPayload) -> None:
+        """Réplica in-memory del alias español → inglés que hace `db.py`."""
+
         now = datetime.now(timezone.utc)
         record = TelemetryRecord(
             id=self._next_id,
-            meter_id=payload.meter_id,
-            timestamp=payload.timestamp,
-            voltage_v=payload.voltage_v,
-            current_a=payload.current_a,
-            power_kw=payload.power_kw,
-            energy_kwh=payload.energy_kwh,
-            frequency_hz=payload.frequency_hz,
-            power_factor=payload.power_factor,
-            zone=payload.zone,
-            status=payload.status,
+            meter_id=payload.device_id,
+            device_type=payload.device_type,
+            zone=payload.zona,
+            timestamp=payload.timestamp_utc,
+            voltage_v=payload.voltaje_v,
+            current_a=payload.corriente_a,
+            power_kw=payload.potencia_kw,
+            energy_kwh=payload.energia_kwh,
+            frequency_hz=payload.frecuencia_hz,
+            power_factor=payload.factor_potencia,
+            status=payload.estado,
+            nodo_origen=payload.nodo_origen,
+            lenguaje=payload.lenguaje,
+            seed=payload.seed,
             received_at=now,
         )
         self._next_id += 1
         self._records.append(record)
-        previous = self._meters.get(payload.meter_id)
+        previous = self._meters.get(payload.device_id)
         installed_at = previous.installed_at if previous is not None else now
-        zone = payload.zone or (previous.zone if previous is not None else None)
-        self._meters[payload.meter_id] = MeterInfo(
-            meter_id=payload.meter_id,
-            zone=zone,
+        # Mismo COALESCE del UPSERT real: lo que ya se sabía no se pierde.
+        def keep(new: object, attr: str) -> object:
+            return new if new is not None else (
+                getattr(previous, attr) if previous is not None else None
+            )
+
+        self._meters[payload.device_id] = MeterInfo(
+            meter_id=payload.device_id,
+            device_type=keep(payload.device_type, "device_type"),
+            zone=keep(payload.zona, "zone"),
+            lat=keep(payload.lat, "lat"),
+            lon=keep(payload.lon, "lon"),
+            nodo_origen=keep(payload.nodo_origen, "nodo_origen"),
             installed_at=installed_at,
-            last_seen=payload.timestamp,
+            last_seen=payload.timestamp_utc,
             is_active=True,
         )
 
@@ -102,28 +117,39 @@ class FakeMqttConsumer:
 
 
 def make_payload(
-    meter_id: str = "AMI-MNZ-00001",
+    device_id: str = "urbia-cen-mon-0001",
     *,
-    zone: str = "MNZ-CENTRO",
-    timestamp: Optional[datetime] = None,
-    voltage_v: float = 120.0,
-    current_a: float = 8.0,
-    power_kw: float = 0.95,
-    energy_kwh: float = 100.0,
+    zona: str = "centro",
+    device_type: str = "mon",
+    timestamp_utc: Optional[datetime] = None,
+    voltaje_v: float = 120.0,
+    corriente_a: float = 8.0,
+    potencia_kw: float = 0.95,
+    energia_kwh: Optional[float] = None,
 ) -> TelemetryPayload:
-    """Helper para construir payloads válidos en tests."""
+    """Helper para construir payloads válidos en tests (esquema v2).
+
+    Los defaults son valores reales del productor, no inventados:
+    `estado="activo"`, `lenguaje="python"`, `nodo_origen="192.168.0.103"`
+    (el nodo .103 del cluster) y `energia_kwh=None` — el productor no
+    reporta energía acumulada en todos los mensajes.
+    """
 
     return TelemetryPayload(
-        meter_id=meter_id,
-        timestamp=timestamp or datetime.now(timezone.utc),
-        voltage_v=voltage_v,
-        current_a=current_a,
-        power_kw=power_kw,
-        energy_kwh=energy_kwh,
-        frequency_hz=60.0,
-        power_factor=0.95,
-        zone=zone,
-        status="NORMAL",
+        device_id=device_id,
+        device_type=device_type,
+        zona=zona,
+        timestamp_utc=timestamp_utc or datetime.now(timezone.utc),
+        voltaje_v=voltaje_v,
+        corriente_a=corriente_a,
+        potencia_kw=potencia_kw,
+        energia_kwh=energia_kwh,
+        frecuencia_hz=60.0,
+        factor_potencia=0.95,
+        estado="activo",
+        nodo_origen="192.168.0.103",
+        lenguaje="python",
+        seed=42,
     )
 
 

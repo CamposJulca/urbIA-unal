@@ -2,6 +2,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { ageSeconds, formatNumber, formatRelative } from '@/lib/format';
+import { statusLabel, statusTone } from '@/lib/status';
 import { colorForZone, labelForZone } from '@/lib/zones';
 import type { MeterInfo, TelemetryRecord } from '@/api/types';
 
@@ -15,10 +16,10 @@ import type { MeterInfo, TelemetryRecord } from '@/api/types';
  *  - Retraso  : 10 s <= antiguedad < 30 s
  *  - Sin senal: antiguedad >= 30 s o sin lectura
  *
- * Estado del campo `status` del backend:
- *  - "NORMAL"      : badge verde (mismo lenguaje del simulador)
- *  - otro string   : badge rojo destacado (anomalia futura GSP)
- *  - null          : badge gris "Sin clasificar"
+ * Estado del campo `status` del backend (columna `estado` del esquema
+ * v2): los tres tramos los define `lib/status.ts`, compartidos con
+ * RecentReadingsTable — verde `activo`, ambar `mantenimiento`, rojo los
+ * cinco estados de falla, gris cuando el backend no lo reporta.
  */
 function MeterCardImpl({
   meter,
@@ -50,12 +51,11 @@ function MeterCardImpl({
           ? { variant: 'warning' as const, label: 'Retraso' }
           : { variant: 'danger' as const, label: 'Sin senal' };
 
-  const statusBadge = (() => {
-    const s = latest?.status ?? null;
-    if (s === null) return { variant: 'neutral' as const, label: 'Sin clasificar' };
-    if (s === 'NORMAL') return { variant: 'success' as const, label: 'NORMAL' };
-    return { variant: 'danger' as const, label: s };
-  })();
+  const status = latest?.status ?? null;
+  const statusBadge = {
+    variant: statusTone(status),
+    label: statusLabel(status),
+  };
 
   const zoneColor = colorForZone(meter.zone);
 

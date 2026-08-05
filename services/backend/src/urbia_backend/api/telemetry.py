@@ -10,11 +10,18 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
 
 from ..db import Database
-from ..models import HealthResponse, MeterInfo, TelemetryRecord
+from ..models import (
+    DEVICE_ID_MAX_LENGTH,
+    DEVICE_ID_PATTERN,
+    HealthResponse,
+    MeterInfo,
+    TelemetryRecord,
+)
 from ..mqtt_consumer import MqttConsumer
 
 
-_METER_ID_PATTERN = r"^AMI-MNZ-\d{5}$"
+# El path param sigue llamándose `meter_id` (contrato REST estable),
+# pero valida contra el formato de device_id del esquema v2.
 _DEFAULT_LIMIT = 100
 _MAX_LIMIT = 1000
 
@@ -76,7 +83,9 @@ async def list_meters(
     tags=["telemetry"],
 )
 async def meter_latest_telemetry(
-    meter_id: str = Path(pattern=_METER_ID_PATTERN, max_length=20),
+    meter_id: str = Path(
+        pattern=DEVICE_ID_PATTERN, max_length=DEVICE_ID_MAX_LENGTH
+    ),
     database: Database = Depends(get_database),
 ) -> TelemetryRecord:
     record = await database.latest_for_meter(meter_id)
@@ -95,7 +104,9 @@ async def meter_latest_telemetry(
     tags=["telemetry"],
 )
 async def meter_telemetry_history(
-    meter_id: str = Path(pattern=_METER_ID_PATTERN, max_length=20),
+    meter_id: str = Path(
+        pattern=DEVICE_ID_PATTERN, max_length=DEVICE_ID_MAX_LENGTH
+    ),
     limit: int = Query(default=_DEFAULT_LIMIT, ge=1, le=_MAX_LIMIT),
     database: Database = Depends(get_database),
 ) -> list[TelemetryRecord]:

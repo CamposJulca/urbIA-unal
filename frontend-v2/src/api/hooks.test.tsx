@@ -65,12 +65,23 @@ describe('useMeters', () => {
   it('devuelve la lista del backend', async () => {
     stubFetch(async () =>
       jsonRes([
-        { meter_id: 'AMI-MNZ-00001', zone: 'MNZ-CENTRO', installed_at: null, last_seen: null, is_active: true },
+        {
+          meter_id: 'urbia-cen-mon-0001',
+          device_type: 'mon',
+          zone: 'centro',
+          lat: 5.0689,
+          lon: -75.5174,
+          nodo_origen: '192.168.0.103',
+          installed_at: null,
+          last_seen: null,
+          is_active: true,
+        },
       ]),
     );
     const { result } = renderHook(() => useMeters(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.data).toHaveLength(1));
-    expect(result.current.data![0]!.meter_id).toBe('AMI-MNZ-00001');
+    expect(result.current.data![0]!.meter_id).toBe('urbia-cen-mon-0001');
+    expect(result.current.data![0]!.zone).toBe('centro');
   });
 });
 

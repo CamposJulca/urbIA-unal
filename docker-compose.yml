@@ -100,7 +100,7 @@ services:
     container_name: urbia-simulator-ami
     restart: unless-stopped
     environment:
-      # Broker MQTT externo en .101 (modo anónimo, ver .env.example).
+      # Broker MQTT externo en 192.168.40.12 (modo anónimo, ver .env.example).
       MQTT_HOST: ${MQTT_HOST}
       MQTT_PORT: ${MQTT_PORT}
       MQTT_USERNAME: ${MQTT_USERNAME}
@@ -128,7 +128,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      # Broker MQTT externo en .101 (modo anónimo, ver .env.example).
+      # Broker MQTT externo en 192.168.40.12 (modo anónimo, ver .env.example).
       MQTT_HOST: ${MQTT_HOST}
       MQTT_PORT: ${MQTT_PORT}
       MQTT_USERNAME: ${MQTT_USERNAME}
@@ -174,7 +174,9 @@ services:
     build:
       context: ./frontend-v2
       dockerfile: Dockerfile
-    image: urbia/frontend-v2:0.2.2
+    # 0.2.3: bundle alineado al esquema AMI v2 (zonas en slug, estados
+    # del enum de 7 valores, energy_kwh nullable).
+    image: urbia/frontend-v2:0.2.3
     container_name: urbia-frontend-v2
     restart: unless-stopped
     ports:

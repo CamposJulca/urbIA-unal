@@ -13,10 +13,39 @@ from .models import MeterInfo, TelemetryPayload, TelemetryRecord
 logger = logging.getLogger(__name__)
 
 
+# Las columnas viven en español (ver migrations/002_esquema_ami_v2.sql)
+# pero la API REST mantiene los nombres en inglés que el frontend ya
+# consume. El puente es este alias, no un renombre de columnas ni un
+# adaptador en el modelo Pydantic.
 _SELECT_TELEMETRY_COLUMNS = """
-    id, meter_id, timestamp, voltage_v, current_a,
-    power_kw, energy_kwh, frequency_hz, power_factor,
-    zone, status, received_at
+    id,
+    device_id       AS meter_id,
+    device_type,
+    zona            AS zone,
+    timestamp_utc   AS timestamp,
+    voltaje_v       AS voltage_v,
+    corriente_a     AS current_a,
+    potencia_kw     AS power_kw,
+    energia_kwh     AS energy_kwh,
+    frecuencia_hz   AS frequency_hz,
+    factor_potencia AS power_factor,
+    estado          AS status,
+    nodo_origen,
+    lenguaje,
+    seed,
+    recibido_en     AS received_at
+"""
+
+_SELECT_METER_COLUMNS = """
+    device_id            AS meter_id,
+    device_type,
+    zona                 AS zone,
+    lat,
+    lon,
+    nodo_origen,
+    instalado_en         AS installed_at,
+    visto_por_ultima_vez AS last_seen,
+    activo               AS is_active
 """
 
 
@@ -91,44 +120,69 @@ class Database:
                 await conn.execute(
                     """
                     INSERT INTO ami_telemetry (
-                        meter_id, timestamp, voltage_v, current_a,
-                        power_kw, energy_kwh, frequency_hz, power_factor,
-                        zone, status
-                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                        device_id, device_type, zona, timestamp_utc,
+                        voltaje_v, corriente_a, potencia_kw, energia_kwh,
+                        frecuencia_hz, factor_potencia, estado,
+                        nodo_origen, lenguaje, seed
+                    ) VALUES (
+                        $1, $2, $3, $4, $5, $6, $7,
+                        $8, $9, $10, $11, $12, $13, $14
+                    )
                     """,
-                    payload.meter_id,
-                    payload.timestamp,
-                    payload.voltage_v,
-                    payload.current_a,
-                    payload.power_kw,
-                    payload.energy_kwh,
-                    payload.frequency_hz,
-                    payload.power_factor,
-                    payload.zone,
-                    payload.status,
+                    payload.device_id,
+                    payload.device_type,
+                    payload.zona,
+                    payload.timestamp_utc,
+                    payload.voltaje_v,
+                    payload.corriente_a,
+                    payload.potencia_kw,
+                    payload.energia_kwh,
+                    payload.frecuencia_hz,
+                    payload.factor_potencia,
+                    payload.estado,
+                    payload.nodo_origen,
+                    payload.lenguaje,
+                    payload.seed,
                 )
+                # COALESCE en cada metadato: un mensaje que omita zona,
+                # lat/lon o nodo_origen no debe borrar lo que ya se
+                # conocía del medidor.
                 await conn.execute(
                     """
-                    INSERT INTO ami_meters (meter_id, zone, last_seen, is_active)
-                    VALUES ($1, $2, $3, TRUE)
-                    ON CONFLICT (meter_id) DO UPDATE
-                    SET zone = COALESCE(EXCLUDED.zone, ami_meters.zone),
-                        last_seen = EXCLUDED.last_seen,
-                        is_active = TRUE
+                    INSERT INTO ami_meters (
+                        device_id, device_type, zona, lat, lon,
+                        nodo_origen, visto_por_ultima_vez, activo
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
+                    ON CONFLICT (device_id) DO UPDATE
+                    SET device_type = COALESCE(
+                            EXCLUDED.device_type, ami_meters.device_type
+                        ),
+                        zona = COALESCE(EXCLUDED.zona, ami_meters.zona),
+                        lat = COALESCE(EXCLUDED.lat, ami_meters.lat),
+                        lon = COALESCE(EXCLUDED.lon, ami_meters.lon),
+                        nodo_origen = COALESCE(
+                            EXCLUDED.nodo_origen, ami_meters.nodo_origen
+                        ),
+                        visto_por_ultima_vez = EXCLUDED.visto_por_ultima_vez,
+                        activo = TRUE
                     """,
-                    payload.meter_id,
-                    payload.zone,
-                    payload.timestamp,
+                    payload.device_id,
+                    payload.device_type,
+                    payload.zona,
+                    payload.lat,
+                    payload.lon,
+                    payload.nodo_origen,
+                    payload.timestamp_utc,
                 )
 
     async def list_meters(self) -> list[MeterInfo]:
         async with self.pool.acquire() as conn:
             rows = await conn.fetch(
-                """
-                SELECT meter_id, zone, installed_at, last_seen, is_active
+                f"""
+                SELECT {_SELECT_METER_COLUMNS}
                 FROM ami_meters
-                WHERE is_active = TRUE
-                ORDER BY meter_id
+                WHERE activo = TRUE
+                ORDER BY device_id
                 """
             )
             return [MeterInfo(**dict(r)) for r in rows]
@@ -141,8 +195,8 @@ class Database:
                 f"""
                 SELECT {_SELECT_TELEMETRY_COLUMNS}
                 FROM ami_telemetry
-                WHERE meter_id = $1
-                ORDER BY received_at DESC
+                WHERE device_id = $1
+                ORDER BY recibido_en DESC
                 LIMIT 1
                 """,
                 meter_id,
@@ -157,8 +211,8 @@ class Database:
                 f"""
                 SELECT {_SELECT_TELEMETRY_COLUMNS}
                 FROM ami_telemetry
-                WHERE meter_id = $1
-                ORDER BY received_at DESC
+                WHERE device_id = $1
+                ORDER BY recibido_en DESC
                 LIMIT $2
                 """,
                 meter_id,
@@ -172,7 +226,7 @@ class Database:
                 f"""
                 SELECT {_SELECT_TELEMETRY_COLUMNS}
                 FROM ami_telemetry
-                ORDER BY received_at DESC
+                ORDER BY recibido_en DESC
                 LIMIT $1
                 """,
                 limit,

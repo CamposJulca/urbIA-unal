@@ -33,11 +33,12 @@ type EdgeState = {
 
 function initialZoneMap(): Record<KnownZone, number> {
   return {
-    'MNZ-CENTRO': 3,
-    'MNZ-NORTE': 1,
-    'MNZ-SUR': 0,
-    'MNZ-ESTE': 2,
-    'MNZ-OESTE': 0,
+    centro: 3,
+    chipre: 1,
+    la_enea: 0,
+    palermo: 2,
+    palogrande: 0,
+    universitario: 0,
   };
 }
 

@@ -2,11 +2,20 @@ import { memo } from 'react';
 import {
   ageSeconds,
   formatClock,
+  formatNumber,
   formatStampWithDate,
   STALE_THRESHOLD_S,
 } from '@/lib/format';
+import { statusLabel, statusTone, type StatusTone } from '@/lib/status';
 import { colorForZone, labelForZone } from '@/lib/zones';
 import type { TelemetryRecord } from '@/api/types';
+
+const STATUS_CLASS: Record<StatusTone, string> = {
+  success: 'text-success',
+  warning: 'text-warning font-medium',
+  danger: 'text-danger font-semibold',
+  neutral: 'text-ink-muted',
+};
 
 /**
  * Tabla compacta con los ultimos 20 mensajes globales. Cabecera
@@ -75,8 +84,10 @@ function RecentReadingsTableImpl({
                 <td className="whitespace-nowrap px-4 py-2 text-right font-mono">
                   {r.power_kw.toFixed(2)}
                 </td>
+                {/* energy_kwh es nullable en el esquema v2: formatNumber
+                    devuelve "—" en vez de reventar con .toFixed(). */}
                 <td className="whitespace-nowrap px-4 py-2 text-right font-mono">
-                  {r.energy_kwh.toFixed(2)}
+                  {formatNumber(r.energy_kwh, 2)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-2 text-right font-mono">
                   {r.frequency_hz.toFixed(2)}
@@ -84,17 +95,10 @@ function RecentReadingsTableImpl({
                 <td className="whitespace-nowrap px-4 py-2 text-right font-mono">
                   {r.power_factor.toFixed(3)}
                 </td>
+                {/* Mismos tramos que MeterCard: lib/status.ts. */}
                 <td className="whitespace-nowrap px-4 py-2">
-                  <span
-                    className={
-                      r.status === 'NORMAL'
-                        ? 'text-success'
-                        : r.status === null
-                          ? 'text-ink-muted'
-                          : 'text-danger font-semibold'
-                    }
-                  >
-                    {r.status ?? '—'}
+                  <span className={STATUS_CLASS[statusTone(r.status)]}>
+                    {r.status === null ? '—' : statusLabel(r.status)}
                   </span>
                 </td>
               </tr>

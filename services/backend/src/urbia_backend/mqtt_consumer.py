@@ -1,8 +1,20 @@
 """Consumidor MQTT del backend UrbIA.
 
-Suscribe al topic de telemetría AMI publicado por el simulator-ami,
-valida cada mensaje contra `TelemetryPayload` y persiste en PostgreSQL
-vía `Database`.
+Suscribe al árbol de telemetría AMI v2 (`urbia/manizales/#` por
+defecto, configurable con `MQTT_TOPIC_TELEMETRY`), valida cada mensaje
+contra `TelemetryPayload` (esquema v2, campos en español — ver
+`services/backend/SCHEMA.md`) y lo persiste en PostgreSQL vía
+`Database.insert_telemetry`, que en una sola transacción inserta la
+fila de `ami_telemetry` y hace UPSERT del medidor en `ami_meters`
+(incluidas `lat`/`lon` cuando el mensaje las trae).
+
+El topic no se parsea: el medidor se identifica por el `device_id` del
+payload, así que un cambio en la jerarquía del productor no rompe la
+ingesta. La contrapartida del comodín `#` es que también entregan los
+topics hermanos bajo `urbia/manizales/` que no sean telemetría AMI;
+esos fallan la validación Pydantic, suben `invalid_count` y quedan como
+WARNING. Si el productor empieza a publicar otra cosa en ese árbol con
+volumen, acotar el patrón en vez de filtrar aquí.
 
 paho-mqtt corre su network loop en un thread propio (`loop_start`), así
 que el callback `_on_message` se ejecuta FUERA del event loop asyncio

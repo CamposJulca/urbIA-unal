@@ -18,6 +18,12 @@ from urbia_backend.config import Settings
 from urbia_backend.mqtt_consumer import MqttConsumer
 
 
+# El consumidor no parsea el topic (enruta por el device_id del
+# payload), así que aquí sólo hace falta un topic plausible bajo el
+# árbol suscrito.
+TOPIC_EJEMPLO = "urbia/manizales/centro/urbia-cen-mon-0001"
+
+
 def _fake_message(topic: str, payload: bytes) -> SimpleNamespace:
     return SimpleNamespace(topic=topic, payload=payload)
 
@@ -31,13 +37,13 @@ def _build_consumer(loop: asyncio.AbstractEventLoop) -> tuple[MqttConsumer, Fake
 async def test_on_message_valid_payload_persists_to_db() -> None:
     loop = asyncio.get_running_loop()
     consumer, fake_db = _build_consumer(loop)
-    payload = make_payload("AMI-MNZ-00001")
+    payload = make_payload("urbia-cen-mon-0001")
     raw = payload.model_dump_json().encode("utf-8")
 
     consumer._on_message(
         None,
         None,
-        _fake_message("urbia/ami/AMI-MNZ-00001/telemetry", raw),
+        _fake_message(TOPIC_EJEMPLO, raw),
     )
     # run_coroutine_threadsafe usa call_soon_threadsafe → callback que
     # crea el Task → Task corre. Necesitamos múltiples vueltas del loop
@@ -49,7 +55,7 @@ async def test_on_message_valid_payload_persists_to_db() -> None:
     assert consumer.persist_failures == 0
     records = await fake_db.recent_telemetry(10)
     assert len(records) == 1
-    assert records[0].meter_id == "AMI-MNZ-00001"
+    assert records[0].meter_id == "urbia-cen-mon-0001"
 
 
 async def test_on_message_invalid_json_counts_as_invalid() -> None:
@@ -59,7 +65,7 @@ async def test_on_message_invalid_json_counts_as_invalid() -> None:
     consumer._on_message(
         None,
         None,
-        _fake_message("urbia/ami/AMI-MNZ-00001/telemetry", b"{no es json"),
+        _fake_message(TOPIC_EJEMPLO, b"{no es json"),
     )
     await asyncio.sleep(0)
 
@@ -72,11 +78,13 @@ async def test_on_message_invalid_schema_counts_as_invalid() -> None:
     loop = asyncio.get_running_loop()
     consumer, fake_db = _build_consumer(loop)
 
-    bad_payload = json.dumps({"meter_id": "NO_MATCH", "timestamp": "x"}).encode()
+    bad_payload = json.dumps(
+        {"device_id": "NO_MATCH", "timestamp_utc": "x"}
+    ).encode()
     consumer._on_message(
         None,
         None,
-        _fake_message("urbia/ami/INVALID/telemetry", bad_payload),
+        _fake_message("urbia/manizales/otra-cosa", bad_payload),
     )
     await asyncio.sleep(0)
 
@@ -100,7 +108,7 @@ async def test_on_connect_with_success_subscribes() -> None:
         subscribe=lambda topic, qos: subscribed.append((topic, qos))
     )
     consumer._on_connect(fake_client, None, None, 0)
-    assert subscribed == [("urbia/ami/+/telemetry", 0)]
+    assert subscribed == [("urbia/manizales/#", 0)]
 
 
 async def test_on_connect_with_failure_logs_and_does_not_subscribe(caplog) -> None:

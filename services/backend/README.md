@@ -38,10 +38,10 @@ Variables relevantes en `.env`:
 | `POSTGRES_DB` | `urbia` | Base de datos |
 | `POSTGRES_USER` | `urbia` | Usuario |
 | `POSTGRES_PASSWORD` | `...` | Contraseña (desde `.env`, no commiteada) |
-| `MQTT_HOST` | `192.168.0.101` | Broker MQTT del cluster |
+| `MQTT_HOST` | `192.168.40.12` | Broker MQTT del cluster |
 | `MQTT_PORT` | `1883` | Puerto del broker |
 | `MQTT_USERNAME` / `MQTT_PASSWORD` | vacío | Modo anónimo |
-| `MQTT_TOPIC_TELEMETRY` | `urbia/ami/+/telemetry` | Topic suscrito |
+| `MQTT_TOPIC_TELEMETRY` | `urbia/manizales/#` | Árbol de topics suscrito (esquema v2) |
 | `BACKEND_HOST` | `0.0.0.0` | Bind del servidor HTTP |
 | `BACKEND_PORT` | `8000` | Puerto del servidor HTTP |
 | `LOG_LEVEL` | `INFO` | Nivel de logging |

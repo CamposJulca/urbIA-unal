@@ -59,9 +59,9 @@ async def test_meters_endpoint_empty_returns_empty_array(client) -> None:
 async def test_meters_endpoint_returns_meters_after_seed(
     client, fake_db: FakeDatabase
 ) -> None:
-    await fake_db.insert_telemetry(make_payload("AMI-MNZ-00001", zone="MNZ-CENTRO"))
-    await fake_db.insert_telemetry(make_payload("AMI-MNZ-00002", zone="MNZ-CENTRO"))
-    await fake_db.insert_telemetry(make_payload("AMI-MNZ-00003", zone="MNZ-NORTE"))
+    await fake_db.insert_telemetry(make_payload("urbia-cen-mon-0001", zona="centro"))
+    await fake_db.insert_telemetry(make_payload("urbia-cen-tri-0002", zona="centro"))
+    await fake_db.insert_telemetry(make_payload("urbia-chi-mon-0003", zona="chipre"))
 
     response = await client.get("/meters")
     assert response.status_code == 200
@@ -77,7 +77,7 @@ async def test_meters_endpoint_returns_meters_after_seed(
 
 async def test_telemetry_recent_format(client, fake_db: FakeDatabase) -> None:
     await fake_db.insert_telemetry(
-        make_payload("AMI-MNZ-00001", voltage_v=121.5, current_a=8.2)
+        make_payload("urbia-cen-mon-0001", voltaje_v=121.5, corriente_a=8.2)
     )
     response = await client.get("/telemetry/recent?limit=1")
     assert response.status_code == 200
@@ -96,10 +96,14 @@ async def test_telemetry_recent_format(client, fake_db: FakeDatabase) -> None:
         "power_factor",
         "zone",
         "status",
+        "device_type",
+        "nodo_origen",
+        "lenguaje",
+        "seed",
         "received_at",
     }
     assert expected_fields <= set(record.keys())
-    assert record["meter_id"] == "AMI-MNZ-00001"
+    assert record["meter_id"] == "urbia-cen-mon-0001"
     assert record["voltage_v"] == pytest.approx(121.5)
 
 
@@ -107,7 +111,7 @@ async def test_telemetry_recent_respects_limit(
     client, fake_db: FakeDatabase
 ) -> None:
     for i in range(10):
-        await fake_db.insert_telemetry(make_payload(f"AMI-MNZ-{i:05d}"))
+        await fake_db.insert_telemetry(make_payload(f"urbia-cen-mon-{i:04d}"))
 
     assert len((await client.get("/telemetry/recent?limit=3")).json()) == 3
     assert len((await client.get("/telemetry/recent")).json()) == 10
@@ -125,20 +129,20 @@ async def test_meter_telemetry_latest(
     for i in range(3):
         await fake_db.insert_telemetry(
             make_payload(
-                "AMI-MNZ-00001",
-                timestamp=base + timedelta(seconds=i),
-                voltage_v=120.0 + i,
+                "urbia-cen-mon-0001",
+                timestamp_utc=base + timedelta(seconds=i),
+                voltaje_v=120.0 + i,
             )
         )
 
-    response = await client.get("/meters/AMI-MNZ-00001/telemetry/latest")
+    response = await client.get("/meters/urbia-cen-mon-0001/telemetry/latest")
     assert response.status_code == 200
     body = response.json()
-    assert body["meter_id"] == "AMI-MNZ-00001"
+    assert body["meter_id"] == "urbia-cen-mon-0001"
     assert body["voltage_v"] == pytest.approx(122.0)
 
     # 404 cuando no hay registros.
-    response = await client.get("/meters/AMI-MNZ-99999/telemetry/latest")
+    response = await client.get("/meters/urbia-uni-tri-9999/telemetry/latest")
     assert response.status_code == 404
 
     # 422 cuando meter_id no matchea el regex.
@@ -155,20 +159,20 @@ async def test_meter_telemetry_history_with_limit(
     for i in range(5):
         await fake_db.insert_telemetry(
             make_payload(
-                "AMI-MNZ-00001",
-                timestamp=base + timedelta(seconds=i),
-                voltage_v=120.0 + i,
+                "urbia-cen-mon-0001",
+                timestamp_utc=base + timedelta(seconds=i),
+                voltaje_v=120.0 + i,
             )
         )
 
-    response = await client.get("/meters/AMI-MNZ-00001/telemetry?limit=2")
+    response = await client.get("/meters/urbia-cen-mon-0001/telemetry?limit=2")
     assert response.status_code == 200
     body = response.json()
     assert len(body) == 2
     # Más recientes primero (received_at DESC).
     assert body[0]["voltage_v"] >= body[1]["voltage_v"]
 
-    response = await client.get("/meters/AMI-MNZ-00001/telemetry")
+    response = await client.get("/meters/urbia-cen-mon-0001/telemetry")
     assert len(response.json()) == 5
 
 
@@ -198,13 +202,13 @@ async def test_mqtt_message_persists_to_db() -> None:
     except (asyncpg.PostgresError, OSError) as exc:
         pytest.skip(f"PostgreSQL no accesible: {exc}")
 
-    sentinel_meter = "AMI-MNZ-99001"
+    sentinel_meter = "urbia-uni-tri-9001"
     try:
         await probe.execute(
-            "DELETE FROM ami_telemetry WHERE meter_id = $1", sentinel_meter
+            "DELETE FROM ami_telemetry WHERE device_id = $1", sentinel_meter
         )
         await probe.execute(
-            "DELETE FROM ami_meters WHERE meter_id = $1", sentinel_meter
+            "DELETE FROM ami_meters WHERE device_id = $1", sentinel_meter
         )
     finally:
         await probe.close()
@@ -220,16 +224,20 @@ async def test_mqtt_message_persists_to_db() -> None:
     await database.connect()
     try:
         payload = TelemetryPayload(
-            meter_id=sentinel_meter,
-            timestamp=fresh_timestamp(),
-            voltage_v=120.5,
-            current_a=8.1,
-            power_kw=0.93,
-            energy_kwh=42.0,
-            frequency_hz=60.01,
-            power_factor=0.96,
-            zone="MNZ-TEST",
-            status="NORMAL",
+            device_id=sentinel_meter,
+            device_type="tri",
+            zona="universitario",
+            timestamp_utc=fresh_timestamp(),
+            voltaje_v=120.5,
+            corriente_a=8.1,
+            potencia_kw=0.93,
+            energia_kwh=42.0,
+            frecuencia_hz=60.01,
+            factor_potencia=0.96,
+            estado="activo",
+            nodo_origen="192.168.0.103",
+            lenguaje="python",
+            seed=7,
         )
         await database.insert_telemetry(payload)
 
@@ -237,14 +245,14 @@ async def test_mqtt_message_persists_to_db() -> None:
         assert latest is not None
         assert latest.meter_id == sentinel_meter
         assert latest.voltage_v == pytest.approx(120.5)
-        assert latest.zone == "MNZ-TEST"
+        assert latest.zone == "universitario"
 
         meters = await database.list_meters()
         sentinel = next(
             (m for m in meters if m.meter_id == sentinel_meter), None
         )
         assert sentinel is not None
-        assert sentinel.zone == "MNZ-TEST"
+        assert sentinel.zone == "universitario"
         assert sentinel.last_seen is not None
 
         # ping + history + recent ejercen las demás queries del wrapper.
@@ -258,17 +266,17 @@ async def test_mqtt_message_persists_to_db() -> None:
         assert any(r.meter_id == sentinel_meter for r in recent)
 
         # latest_for_meter sobre un id inexistente devuelve None.
-        missing = await database.latest_for_meter("AMI-MNZ-99998")
+        missing = await database.latest_for_meter("urbia-uni-tri-9998")
         assert missing is None
     finally:
         cleanup = await asyncpg.connect(dsn=dsn)
         try:
             await cleanup.execute(
-                "DELETE FROM ami_telemetry WHERE meter_id = $1",
+                "DELETE FROM ami_telemetry WHERE device_id = $1",
                 sentinel_meter,
             )
             await cleanup.execute(
-                "DELETE FROM ami_meters WHERE meter_id = $1", sentinel_meter
+                "DELETE FROM ami_meters WHERE device_id = $1", sentinel_meter
             )
         finally:
             await cleanup.close()

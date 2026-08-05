@@ -29,13 +29,18 @@ class Settings(BaseSettings):
     postgres_user: str = "urbia"
     postgres_password: str = ""
 
-    # MQTT — el broker vive en .101 en modo anónimo. Si username y
-    # password vienen vacíos, el consumer no envía credenciales.
-    mqtt_host: str = "192.168.0.101"
+    # MQTT — el broker vive en 192.168.40.12 en modo anónimo (el
+    # segmento 192.168.0.x ya no lo sirve). Si username y password
+    # vienen vacíos, el consumer no envía credenciales.
+    mqtt_host: str = "192.168.40.12"
     mqtt_port: int = 1883
     mqtt_username: str = ""
     mqtt_password: str = ""
-    mqtt_topic_telemetry: str = "urbia/ami/+/telemetry"
+    # El productor v2 publica bajo el árbol `urbia/manizales/`. Se
+    # suscribe con `#` (multinivel) porque la profundidad del topic
+    # depende del productor y el consumidor no la usa: enruta por el
+    # `device_id` del payload, no por el topic.
+    mqtt_topic_telemetry: str = "urbia/manizales/#"
     mqtt_client_id: str = "urbia-backend"
     mqtt_keepalive: int = 60
 

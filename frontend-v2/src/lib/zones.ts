@@ -7,11 +7,12 @@ import type { KnownZone } from '@/api/types';
  * la paleta.
  */
 export const ZONE_COLOR: Record<KnownZone, string> = {
-  'MNZ-CENTRO': '#1A3A6E',
-  'MNZ-NORTE': '#2E5A9E',
-  'MNZ-SUR': '#10B981',
-  'MNZ-ESTE': '#F59E0B',
-  'MNZ-OESTE': '#A855F7',
+  centro: '#1A3A6E',
+  chipre: '#2E5A9E',
+  la_enea: '#10B981',
+  palermo: '#F59E0B',
+  palogrande: '#A855F7',
+  universitario: '#0EA5E9',
 };
 
 export const ZONE_FALLBACK = '#64748B';
@@ -22,11 +23,12 @@ export function colorForZone(zone: string | null | undefined): string {
 }
 
 export const ZONE_LABEL: Record<KnownZone, string> = {
-  'MNZ-CENTRO': 'Centro',
-  'MNZ-NORTE': 'Norte',
-  'MNZ-SUR': 'Sur',
-  'MNZ-ESTE': 'Este',
-  'MNZ-OESTE': 'Oeste',
+  centro: 'Centro',
+  chipre: 'Chipre',
+  la_enea: 'La Enea',
+  palermo: 'Palermo',
+  palogrande: 'Palogrande',
+  universitario: 'Universitario',
 };
 
 export function labelForZone(zone: string | null | undefined): string {

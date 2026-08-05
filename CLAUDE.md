@@ -69,12 +69,18 @@ UrbIA corre sobre el cluster del datacenter Neusi (UNAL Manizales).
 | Nodo | IP | Hostname | CPU | RAM | Rol UrbIA |
 |---|---|---|---|---|---|
 | .100 | 192.168.0.100 | innova-produccion | Ryzen 5 5600GT | 14 GB | Observabilidad pública (Grafana ngrok) + entrenamiento RL |
-| .101 | 192.168.0.101 | innova-desarrollo | Ryzen 5 5600GT | 15 GB | MQTT broker + ThingsBoard. Sostiene proyectos cliente. **NO desarrollar aquí.** |
+| .101 | 192.168.0.101 | innova-desarrollo | Ryzen 5 5600GT | 15 GB | ThingsBoard. Sostiene proyectos cliente. **NO desarrollar aquí.** Ya NO sirve el broker MQTT de UrbIA (ver nota abajo). |
 | **.102** | **192.168.0.102** | **innova-pruebas** | **Ryzen 7 5700G** | **15 GB** | **CEREBRO. Esta es la máquina donde corre todo el código nuevo.** Backend, frontend, simulador, monitor GSP, bases de datos activas, Jupyter, Mininet/Ryu. |
 | .103 | 192.168.0.103 | simulador1 | AMD A6-5200 | 3.3 GB | Gateway IoT + generador de tráfico hostil (cuando se recupere de problema térmico) |
 | .104 | 192.168.0.104 | camposjulca | i5-2450M | 11 GB | Datos + NAS WD 10 TB (NFS). Backups, datasets, modelos, snapshots |
 | .105 | 192.168.0.105 | manjaro-daniel | i5-8250U | 19 GB | Auditoría de seguridad (Kali) + Prometheus + Wireshark |
 | .106 | (futura) | RPi5 edge | ARM | 8 GB | Edge gateway con monitor GSP distribuido — núcleo PhD |
+
+> **Broker MQTT de UrbIA: `192.168.40.12:1883`** (modo anónimo), fuera
+> del segmento `192.168.0.x` de la tabla. El backend se suscribe ahí a
+> `urbia/manizales/#`. Verificado el 2026-08-05: `192.168.40.12:1883`
+> responde y `192.168.0.101:1883` no. Toda referencia a "el broker en
+> .101" es histórica.
 
 ### 4.2 Reglas operativas del cluster
 
