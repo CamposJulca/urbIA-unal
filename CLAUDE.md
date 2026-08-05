@@ -85,7 +85,7 @@ UrbIA corre sobre el cluster del datacenter Neusi (UNAL Manizales).
 ### 4.2 Reglas operativas del cluster
 
 - **.100 está libre durante el doctorado** porque la producción real se hará en el servidor del cliente o en nube post-doctorado.
-- **.101 NO se toca para desarrollo nuevo.** Sostiene MQTT broker UrbIA (`urbia-mqtt`) y proyectos cliente productivos (Finagro, Serviparamo, Joz, etc.).
+- **.101 NO se toca para desarrollo nuevo.** Sostiene proyectos cliente productivos (Finagro, Serviparamo, Joz, etc.). El broker MQTT de UrbIA ya no vive aquí: está en `192.168.40.12` (§4.1).
 - **.102 es la máquina de trabajo principal.** Tiene la mejor CPU, red 10 Gbps, y está limpia.
 - **.104 NO corre aplicaciones**. Solo I/O al NAS. Los servicios stateful viven en .102, pero los respaldos se mandan a .104 vía NFS.
 - **.105 audita .102.** Pentesting, captura de tráfico, métricas Prometheus. No participa en el flujo de datos productivo.
@@ -103,7 +103,7 @@ UrbIA corre sobre el cluster del datacenter Neusi (UNAL Manizales).
 | Base relacional | **PostgreSQL 16** | JSON nativo, extensiones científicas, robustez |
 | Base documental | **MongoDB 7** | Telemetría cruda y eventos |
 | Cache/cola | **Redis 7** | Suficiente, simple |
-| Mensajería IoT | **Mosquitto MQTT** | Estándar de facto, broker ya operativo en .101 |
+| Mensajería IoT | **Mosquitto MQTT** | Estándar de facto, broker ya operativo en `192.168.40.12` |
 | Monitor GSP | **Python + PyGSP + NetworkX** | Prototipado rápido; optimizar con NumPy/Numba si es necesario |
 | Controlador SDN | **Ryu** (Python) | Aristizábal lo usa, Giraldo lo usa, transición natural |
 | Simulación SDN | **Mininet** | Estándar académico |
@@ -344,7 +344,7 @@ pero no en el historial de git.
 
 ### 10.4 Coordinación con servicios productivos
 
-.101 sostiene proyectos cliente productivos (Finagro, Serviparamo, Joz, BarranquIA, ICR, Coofisam — vía contenedores Docker). Cualquier cosa que pueda afectar la red interna o el broker MQTT de .101 se conversa antes.
+.101 sostiene proyectos cliente productivos (Finagro, Serviparamo, Joz, BarranquIA, ICR, Coofisam — vía contenedores Docker). Cualquier cosa que pueda afectar la red interna o el broker MQTT de `192.168.40.12` se conversa antes: ese broker es compartido, no exclusivo de UrbIA.
 
 ---
 
@@ -383,7 +383,7 @@ Ver `PLAN_IMPLEMENTACION_SEMANA_1.md` (si existe) o el plan equivalente. Resumen
 
 ### 11.4 Deuda técnica conocida
 
-- **MQTT broker .101 en modo anónimo** (`allow_anonymous=true`). Aceptable
+- **MQTT broker `192.168.40.12` en modo anónimo** (`allow_anonymous=true`). Aceptable
   mientras la red sea el cluster cerrado Neusi; **no es aceptable para
   producción**. A resolver antes de la defensa doctoral: habilitar
   autenticación con `passwd_file` + ACLs por topic. No urgente.
