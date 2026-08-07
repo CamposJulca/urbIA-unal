@@ -1,0 +1,114 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "urbia-monitor-gsp"
+version = "0.1.0"
+description = "Monitor espectral GSP de UrbIA-UNAL: construcción del grafo AMI, Laplaciano y transformada de Fourier sobre grafos."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Cristhiam Daniel Campos Julca", email = "ccamposj@unal.edu.co" },
+]
+
+# El núcleo depende SÓLO de numpy. El notebook 01_gsp_hello_world (E6)
+# validó que la pipeline A → L → L_norm → eigh → GFT no necesita pygsp
+# ni scipy: con 20–30 nodos por zona, la matriz densa de distancias y
+# `np.linalg.eigh` resuelven en milisegundos. Mantener una única
+# dependencia es lo que permite importar `urbia_monitor_gsp.graph`
+# desde los notebooks sin arrastrar el servicio.
+dependencies = [
+    "numpy>=1.26,<3",
+]
+
+[project.optional-dependencies]
+# Lectura de medidores desde PostgreSQL. Vive fuera del núcleo a
+# propósito: `urbia_monitor_gsp.graph` no importa nada de esto.
+db = [
+    "psycopg[binary]>=3.2,<4",
+    "pydantic-settings>=2.4,<3",
+]
+dev = [
+    "pytest>=8.3,<9",
+    "pytest-cov>=5.0,<6",
+    "ruff>=0.6,<0.13",
+    "mypy>=1.11,<2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/urbia_monitor_gsp"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "integration: requiere PostgreSQL real (no corre en CI por defecto)",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["urbia_monitor_gsp"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+# 90% es el mínimo que CLAUDE.md §8.2 exige al núcleo doctoral, no el
+# 80% general de services/.
+fail_under = 90
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "D",    # pydocstyle
+    "UP",   # pyupgrade
+    "ANN",  # flake8-annotations (type hints obligatorios, CLAUDE.md §8.1)
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "RUF",  # reglas propias de ruff
+]
+ignore = [
+    "D203",  # incompatible con D211
+    "D213",  # incompatible con D212
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+# Los tests no necesitan docstring por función; el nombre del test
+# (test_<funcion>_<escenario>_<resultado>) ya documenta el caso.
+"tests/**" = ["D100", "D101", "D102", "D103", "ANN201"]
+
+[tool.ruff.lint.pep8-naming]
+# Nomenclatura matemática: A (adyacencia), D (grados), L (Laplaciano),
+# U (base de Fourier). Renombrarlas a snake_case alejaría el código de
+# las fórmulas del Capítulo 3 de Aristizábal que implementa.
+ignore-names = ["A", "D", "L", "U", "L_norm", "D_inv_sqrt", "x_hat"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
