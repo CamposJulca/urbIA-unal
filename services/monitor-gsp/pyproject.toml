@@ -85,8 +85,14 @@ select = [
     "RUF",  # reglas propias de ruff
 ]
 ignore = [
-    "D203",  # incompatible con D211
-    "D213",  # incompatible con D212
+    "D203",    # incompatible con D211
+    "D213",    # incompatible con D212
+    # RUF002/RUF003 marcan como "ambiguos" los caracteres unicode que
+    # parecen letras latinas. Este módulo documenta fórmulas: sigma, lambda,
+    # tau y el signo × aparecen en los docstrings porque así están escritas
+    # en la tesis. Sustituirlos por ASCII alejaría el código de las fórmulas.
+    "RUF002",  # carácter ambiguo en docstring
+    "RUF003",  # carácter ambiguo en comentario
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -109,6 +115,5 @@ strict = true
 warn_unreachable = true
 files = ["src", "tests"]
 
-[[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false
+# Sin excepciones para tests: `strict` aplica igual a src/ y a tests/. Un
+# test mal tipado es un test que puede estar verificando otra cosa.
