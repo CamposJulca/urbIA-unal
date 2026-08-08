@@ -11,31 +11,36 @@ reales de `ami_meters`.
 
 ## Estado
 
-En construcción, paso 4 de 10. El núcleo puro del grafo ya está completo:
+En construcción, paso 5 de 10. El ciclo dato → grafo ya está cerrado:
 
-| Módulo | Qué hace |
-|---|---|
-| `graph/geo` | Proyección WGS84 a plano local en metros y distancias |
-| `graph/types` | Contrato: `MeterNode`, `GraphConfig`, `ZoneGraph`, `AmiGraph` |
-| `graph/spectral` | `A → L → L_norm → eigh → GFT`, sobre matrices |
-| `graph/builder` | De medidores a subgrafos zonales con espectro |
+| Módulo | Qué hace | Depende de |
+|---|---|---|
+| `graph/geo` | Proyección WGS84 a plano local en metros y distancias | numpy |
+| `graph/types` | Contrato: `MeterNode`, `GraphConfig`, `ZoneGraph`, `AmiGraph` | numpy |
+| `graph/spectral` | `A → L → L_norm → eigh → GFT`, sobre matrices | numpy |
+| `graph/builder` | De medidores a subgrafos zonales con espectro | numpy |
+| `db/` | Lectura de `ami_meters` | extra `[db]` |
+
+La dependencia va en un solo sentido: `db` importa de `graph` y nunca al
+revés. Por eso el núcleo depende sólo de numpy y puede correr en un nodo
+de borde sin driver de base de datos.
 
 ```python
-from urbia_monitor_gsp.graph import build_ami_graph, gft
+# desde la base
+from urbia_monitor_gsp.db import load_ami_graph
+grafo = load_ami_graph()
 
-grafo = build_ami_graph(meters)              # un ZoneGraph por zona
+# o sin base, desde medidores en memoria o un JSON de topología
+from urbia_monitor_gsp.graph import build_ami_graph, gft
+grafo = build_ami_graph(meters)
+
 zona = grafo.zones["la_enea"]
 x_hat = gft(lecturas, zona.eigenvectors)     # espectro de la señal
 ```
 
-`build_ami_graph` no lee de ninguna parte: recibe `MeterNode` y devuelve
-`AmiGraph`. De dónde salen los medidores —PostgreSQL, un JSON de
-topología, una celda de notebook— es problema de quien llama, y es lo que
-permite construir el mismo grafo en un nodo de borde sin base de datos.
-
-Falta: detector espectral, wavelet multiescala, difuminador y lector de
-PostgreSQL. El puente inter-zona está declarado en `GraphConfig` pero no
-implementado; encenderlo levanta `InvalidGraphConfigError`.
+Falta: detector espectral, wavelet multiescala y difuminador. El puente
+inter-zona está declarado en `GraphConfig` pero no implementado;
+encenderlo levanta `InvalidGraphConfigError`.
 
 Los números de este README y de los docstrings están medidos contra
 `data/topologies/manizales_150.json`, la topología versionada de los 150
@@ -100,12 +105,35 @@ nada de base de datos, de modo que puede instalarse e importarse desde
 notebooks/.venv/bin/pip install -e services/monitor-gsp
 ```
 
+## Configuración de la base
+
+Sólo la usa `urbia_monitor_gsp.db`. Mismos nombres de variable que
+`services/backend`, para que un único `.env` sirva a los dos:
+
+| Variable | Por defecto | Qué es |
+|---|---|---|
+| `POSTGRES_HOST` | `postgres` | DNS interno de docker; fuera del compose, sobreescribir |
+| `POSTGRES_PORT` | `5432` | |
+| `POSTGRES_DB` | `urbia` | |
+| `POSTGRES_USER` | `urbia` | |
+| `POSTGRES_PASSWORD` | *(vacío)* | Nunca se registra en el log |
+| `CONNECT_TIMEOUT_S` | `10` | Un monitor de borde no puede colgarse esperando |
+
 ## Verificación
 
 ```bash
 ruff check . && ruff format --check .
 mypy
-pytest --cov
+pytest --cov                    # sin base de datos
 ```
 
 Cobertura mínima exigida: 90% (CLAUDE.md §8.2, núcleo doctoral).
+
+Los tests marcados `integration` necesitan PostgreSQL real y quedan fuera
+de la corrida normal. Verifican que `ami_meters` siga coincidiendo con
+`data/topologies/manizales_150.json`: si fallan, la base cambió y las
+cifras de los docstrings dejaron de describir el padrón vivo.
+
+```bash
+POSTGRES_HOST=localhost POSTGRES_PASSWORD=... pytest -m integration
+```

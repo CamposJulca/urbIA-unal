@@ -7,8 +7,13 @@ hacia adentro:
   y devuelve el grafo con su Laplaciano y descomposición espectral. Sólo
   depende de numpy: no importa drivers de base de datos ni configuración,
   de modo que puede usarse desde un notebook sin levantar el servicio.
-* `urbia_monitor_gsp.io` — adaptadores de entrada/salida. Único punto que
-  habla con PostgreSQL. Requiere el extra `[db]`.
+* `urbia_monitor_gsp.db` — adaptadores de entrada. Único punto que habla
+  con PostgreSQL. Requiere el extra `[db]`.
+
+La dependencia va en un solo sentido: `db` importa de `graph` y nunca al
+revés. Eso es lo que permite que el grafo se construya en un nodo de borde
+sin base de datos, a partir de un JSON de topología o de medidores en
+memoria.
 """
 
 __version__ = "0.1.0"

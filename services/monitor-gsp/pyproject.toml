@@ -31,6 +31,10 @@ db = [
     "pydantic-settings>=2.4,<3",
 ]
 dev = [
+    # Autorreferencia al extra `db`: la suite de tests incluye
+    # tests/test_db.py, que importa psycopg en el nivel de módulo. Sin
+    # esto, instalar sólo [dev] rompe la recolección de pytest entera.
+    "urbia-monitor-gsp[db]",
     "pytest>=8.3,<9",
     "pytest-cov>=5.0,<6",
     "ruff>=0.6,<0.13",
