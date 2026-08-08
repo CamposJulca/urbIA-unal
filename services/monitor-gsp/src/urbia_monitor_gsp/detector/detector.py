@@ -11,7 +11,8 @@ resumen, con puntero al experimento que lo sostiene:
 | Contraste de dos muestras | AUC 0,73–0,81 contra 0,65–0,80 del umbral |
 | Sobre ventana promediada | Integrar N instantes mejora la detección en `√N` |
 | Sin centrado | Proyectar fuera de `u₀` cuesta de 40 a 77 puntos |
-| Radios 1 y 2 | Un evento a profundidad 2 abarca ~12 nodos; radio 1 da ~6 |
+| Radios 1 y 2 | Con radio 1 solo, el recall por nodo cae de 42,0 % a 16,8 % |
+| Sin prefiltro | El Difuminador marca el modo comun en el 100 % de los casos |
 
 ## Dónde pierde
 

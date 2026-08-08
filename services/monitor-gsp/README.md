@@ -97,11 +97,21 @@ puntual y este escaneo para lo colectivo.
 
 ### Sobre el punto de operación
 
-`window=32` por defecto, configurable. A ese N el detector llega a ~100 %
-sobre eventos de σ ≥ 0,5 — **y también un umbral simple**, porque integrar
-32 instantes convierte un evento colectivo sutil en uno individualmente
-visible. La ventaja del método ahí es nula; donde aporta es en `window ≤ 2`,
-con 2,3–2,5× sobre el umbral a costa de una tasa absoluta cercana al 45 %.
+`window=16` por defecto, configurable. Elegido por **ventaja sobre el
+umbral**, no por detección absoluta. Medido sobre σ=0,5 al 1 % de falsos
+positivos:
+
+| N | Escaneo | Umbral | Ventaja |
+|---|---|---|---|
+| **16** | 93,6 % | 54,8 % | **+38,8** |
+| 32 | 99,9 % | 90,2 % | +9,7 |
+| 64 | 100 % | 100 % | +0,0 |
+
+La ventaja obedece a **`σ·√N ≈ 2`**: es máxima justo por debajo del punto
+donde un umbral por medidor empieza a funcionar. De ahí una regla
+transferible: ante un evento de magnitud σ conocida, la ventana que más
+aporta es `N ≈ (2/σ)²`. Perseguir detección lleva a N=64, donde el método
+no aporta nada.
 
 ### Dos opciones apagadas por defecto, con medición detrás
 
@@ -113,9 +123,22 @@ proyección no aporta nada y sí introduce un sesgo determinista por bola:
 de grado del grupo, llega a 42σ. El daño crece con la ventana, porque el
 sesgo es fijo y el ruido baja como `√N`.
 
-`prefilter_tau` aplica el Difuminador antes de puntuar. Sin medir todavía:
-la firma colectiva es de baja frecuencia y el Difuminador es un paso-bajo,
-pero suaviza la frontera del grupo, que es de donde sale la señal.
+`prefilter_tau` aplica el Difuminador antes de puntuar. **Medido, y
+rechazado.** Sube la detección de 55,8 % a 100 %, pero la ganancia es
+espuria: el filtro rompe la invariancia a sumar una constante, porque
+`diffuse(1)` no es constante —va de 0,8524 a 1,2426 con τ=0,05—. Sobre un
+**modo común**, toda la zona corrida 2σ, que el detector no debe marcar:
+
+| | Sin filtro | τ=0,05 | τ=0,447 | τ=1,0 |
+|---|---|---|---|---|
+| Modo común marcado | 0,0–0,7 % | 100 % | 100 % | 100 % |
+
+Convierte un detector de discordancia local en uno de nivel medio.
+
+De paso deja un resultado propio: **el τ óptimo depende del uso**. Para
+filtrar el rango estable es `[0,447, 2,239]`; para detectar la meseta llega
+hasta τ=0,05, en plena región que para filtrar se declaró degenerada. El
+Afinador tiene que saber para qué está ajustando.
 
 ### Advertencia: tres veces un argumento de invariancia sonó correcto y falló
 

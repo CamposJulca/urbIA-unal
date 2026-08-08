@@ -39,6 +39,15 @@ el filtro, y eso es un resultado propio.
 cuánto cuesta contra la ventana conocida, que es lo que suponían los
 experimentos anteriores y que inflaba sus cifras.
 
+**D7 — Las comparaciones secundarias corren en el punto de máxima
+resolución**, definido como el `(σ, N)` donde la configuración de
+referencia detecta más cerca del 50 %. *Agregado tras la primera corrida,
+que dejó las cuatro comparaciones secundarias en 100 % y por lo tanto sin
+poder distinguir nada.* No toca el punto de operación, que lo eligen D1 a
+D3 y no cambia: D7 sólo dice **dónde se miden** las comparaciones entre
+configuraciones. Un punto saturado no puede separar dos radios ni dos
+valores de τ, y medir ahí no es un resultado sino una ceguera.
+
 Uso:
 
     python experiments/detector-colectivo/run.py --json results/medicion.json
@@ -233,7 +242,9 @@ def medir_ventaja(grafo: Any, perfil: Any, limites: Any) -> list[dict[str, Any]]
 # ─────────────────────────────────────────────── M2. ventana deslizante
 
 
-def medir_deslizante(grafo: Any, perfil: Any, limites: Any, ventana: int) -> list[dict[str, Any]]:
+def medir_deslizante(
+    grafo: Any, perfil: Any, limites: Any, ventana: int, sigma: float
+) -> list[dict[str, Any]]:
     """Cuánto cuesta no saber dónde está el evento.
 
     La señal dura cuatro ventanas y el evento ocupa una. Se prueba con el
@@ -253,7 +264,7 @@ def medir_deslizante(grafo: Any, perfil: Any, limites: Any, ventana: int) -> lis
     for zona_nombre in grafo.zone_order:
         zona = grafo.zones[zona_nombre]
         p = perfil.get(MAGNITUD, device_type_of(zona.device_ids[0]))
-        deltas = deltas_por_semilla(zona, perfil, limites, 1.0)
+        deltas = deltas_por_semilla(zona, perfil, limites, sigma)
         n = zona.n_meters
         total = 4 * ventana
 
@@ -296,7 +307,9 @@ def medir_deslizante(grafo: Any, perfil: Any, limites: Any, ventana: int) -> lis
 # ──────────────────────────────────────────────────────── M3. radios
 
 
-def medir_radios(grafo: Any, perfil: Any, limites: Any, ventana: int) -> list[dict[str, Any]]:
+def medir_radios(
+    grafo: Any, perfil: Any, limites: Any, ventana: int, sigma: float
+) -> list[dict[str, Any]]:
     """Detección y recall por nodo según los radios que escanea.
 
     Args:
@@ -312,7 +325,7 @@ def medir_radios(grafo: Any, perfil: Any, limites: Any, ventana: int) -> list[di
     for zona_nombre in grafo.zone_order:
         zona = grafo.zones[zona_nombre]
         p = perfil.get(MAGNITUD, device_type_of(zona.device_ids[0]))
-        deltas = deltas_por_semilla(zona, perfil, limites, 1.0)
+        deltas = deltas_por_semilla(zona, perfil, limites, sigma)
         n = zona.n_meters
         grupos = [k_hop_indices(zona.adjacency, j, DEPTH) for j in range(n)]
 
@@ -354,7 +367,9 @@ def medir_radios(grafo: Any, perfil: Any, limites: Any, ventana: int) -> list[di
 # ───────────────────────────────────────────────────── M4. barrido de τ
 
 
-def medir_tau(grafo: Any, perfil: Any, limites: Any, ventana: int) -> list[dict[str, Any]]:
+def medir_tau(
+    grafo: Any, perfil: Any, limites: Any, ventana: int, sigma: float
+) -> list[dict[str, Any]]:
     """Detección en función de τ del Difuminador, más el caso sin filtro.
 
     Args:
@@ -370,7 +385,7 @@ def medir_tau(grafo: Any, perfil: Any, limites: Any, ventana: int) -> list[dict[
     for zona_nombre in grafo.zone_order:
         zona = grafo.zones[zona_nombre]
         p = perfil.get(MAGNITUD, device_type_of(zona.device_ids[0]))
-        deltas = deltas_por_semilla(zona, perfil, limites, 1.0)
+        deltas = deltas_por_semilla(zona, perfil, limites, sigma)
         for tau in (None, *TAUS):
             rng = np.random.default_rng([SEMILLA, 33, int((tau or 0) * 1000)])
             escaneo, umbral = _tasas(zona, p, deltas, ventana, (1, 2), tau, rng)
@@ -389,7 +404,9 @@ def medir_tau(grafo: Any, perfil: Any, limites: Any, ventana: int) -> list[dict[
 # ──────────────────────────────────────────────── M5. anomalía individual
 
 
-def medir_individual(grafo: Any, perfil: Any, limites: Any, ventana: int) -> list[dict[str, Any]]:
+def medir_individual(
+    grafo: Any, perfil: Any, limites: Any, ventanas: tuple[int, ...]
+) -> list[dict[str, Any]]:
     """Dónde el detector pierde: anomalías de un solo medidor.
 
     Args:
@@ -406,12 +423,13 @@ def medir_individual(grafo: Any, perfil: Any, limites: Any, ventana: int) -> lis
         zona = grafo.zones[zona_nombre]
         p = perfil.get(MAGNITUD, device_type_of(zona.device_ids[0]))
         deltas = deltas_por_semilla(zona, perfil, limites, SIGMA_INDIVIDUAL, depth=0)
-        rng = np.random.default_rng([SEMILLA, 99, ventana])
-        escaneo, umbral = _tasas(zona, p, deltas, ventana, (1, 2), None, rng)
-        filas.append(
-            {"zona": zona_nombre, "ventana": ventana,
-             "tasa_escaneo": escaneo, "tasa_umbral": umbral}
-        )
+        for ventana in ventanas:
+            rng = np.random.default_rng([SEMILLA, 99, ventana])
+            escaneo, umbral = _tasas(zona, p, deltas, ventana, (1, 2), None, rng)
+            filas.append(
+                {"zona": zona_nombre, "ventana": ventana,
+                 "tasa_escaneo": escaneo, "tasa_umbral": umbral}
+            )
     return filas
 
 
@@ -498,14 +516,27 @@ def main() -> int:
     print(f"  D1-D3 eligen N = {ventana} (sigma = {elegido['sigma']})")
     print(f"  D4: el N de maxima deteccion seria {elegido['n_por_deteccion']}\n")
 
-    radios = medir_radios(grafo, perfil, limites, ventana)
-    tau = medir_tau(grafo, perfil, limites, ventana)
-    deslizante = medir_deslizante(grafo, perfil, limites, ventana)
-    individual = medir_individual(grafo, perfil, limites, ventana)
+    # D7: las comparaciones secundarias van donde hay resolucion.
+    celdas = _promedio(
+        [{**f, "celda": (f["sigma_multiple"], f["ventana"])} for f in ventaja],
+        "celda",
+        ("tasa_escaneo",),
+    )
+    sigma_res, ventana_res = min(
+        celdas, key=lambda c: abs(celdas[c]["tasa_escaneo"] - 0.50)
+    )
+    print(f"  D7: comparaciones secundarias en sigma={sigma_res}, N={ventana_res} "
+          f"(deteccion {celdas[(sigma_res, ventana_res)]['tasa_escaneo']:.1%})\n")
+
+    radios = medir_radios(grafo, perfil, limites, ventana_res, sigma_res)
+    tau = medir_tau(grafo, perfil, limites, ventana_res, sigma_res)
+    deslizante = medir_deslizante(grafo, perfil, limites, ventana_res, sigma_res)
+    individual = medir_individual(grafo, perfil, limites, (1, ventana))
 
     print("\n== M2. VENTANA DESLIZANTE CONTRA VENTANA CONOCIDA ==\n")
     conocida = float(np.mean([f["tasa_escaneo"] for f in ventaja
-                              if f["ventana"] == ventana and f["sigma_multiple"] == 1.0]))
+                              if f["ventana"] == ventana_res
+                              and f["sigma_multiple"] == sigma_res]))
     print(f"  ventana conocida (lo que suponian los experimentos previos): {conocida:.1%}")
     for alineacion, d in _promedio(deslizante, "alineacion",
                                    ("tasa_deslizante", "fpr_por_senal")).items():
@@ -542,9 +573,10 @@ def main() -> int:
           f"con el mejor tau: {con_filtro[mejor_tau]['tasa_escaneo']:.1%}")
 
     print("\n== M5. DONDE PIERDE: ANOMALIA INDIVIDUAL DE +6 SIGMA ==\n")
-    d = _promedio(individual, "ventana", ("tasa_escaneo", "tasa_umbral"))[ventana]
-    print(f"  umbral por medidor {d['tasa_umbral']:.1%}   escaneo {d['tasa_escaneo']:.1%}   "
-          f"ventaja {d['tasa_escaneo'] - d['tasa_umbral']:+.1%}")
+    print(f"  {'N':>5} {'umbral':>9} {'escaneo':>9} {'ventaja':>9}")
+    for n, d in _promedio(individual, "ventana", ("tasa_escaneo", "tasa_umbral")).items():
+        print(f"  {n:>5} {d['tasa_umbral']:>8.1%} {d['tasa_escaneo']:>9.1%} "
+              f"{d['tasa_escaneo'] - d['tasa_umbral']:>+9.1%}")
 
     if args.json is not None:
         args.json.parent.mkdir(parents=True, exist_ok=True)

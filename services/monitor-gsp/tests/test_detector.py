@@ -18,6 +18,7 @@ from urbia_monitor_gsp.detector import (
     k_hop_indices,
 )
 from urbia_monitor_gsp.graph.builder import build_ami_graph, build_zone_graph
+from urbia_monitor_gsp.graph.filter import diffuse
 from urbia_monitor_gsp.graph.types import GraphConfig, MeterNode, ZoneGraph
 
 SEMILLA = 20260808
@@ -164,9 +165,15 @@ class TestConfig:
         with pytest.raises(DetectorError, match="al menos un radio"):
             DetectorConfig(scan_radii=())
 
-    def test_el_defecto_de_la_ventana_es_treinta_y_dos(self) -> None:
-        """Punto de operación declarado, no constante enterrada."""
-        assert DetectorConfig().window == 32
+    def test_el_defecto_de_la_ventana_es_dieciseis(self) -> None:
+        """Punto de operación declarado, elegido por ventaja y no por detección.
+
+        Medido en `experiments/detector-colectivo/` sobre σ=0,5: a N=16 el
+        escaneo detecta 93,6 % contra 54,8 % del umbral, ventaja +38,8. A
+        N=64 los dos llegan al 100 % y la ventaja es +0,0. Perseguir
+        detección lleva al régimen donde el método no aporta.
+        """
+        assert DetectorConfig().window == 16
 
     def test_la_proyeccion_viene_apagada(self) -> None:
         """Medido: encenderla cuesta entre 40 y 77 puntos de detección."""
@@ -430,3 +437,58 @@ class TestRegresionContraLosExperimentos:
         assert inflaciones[0] > 5.0
         assert inflaciones[1] > 25.0
         assert inflaciones[1] > inflaciones[0]
+
+
+class TestModoComun:
+    """El caso negativo: un corrimiento de toda la zona no es una anomalía.
+
+    Si toda la zona se mueve junta no hay discordancia con la vecindad, y
+    un detector definido sobre el grafo que lo marque está produciendo un
+    falso positivo.
+    """
+
+    def test_sin_prefiltro_el_modo_comun_no_se_marca(self, zona_rejilla: ZoneGraph) -> None:
+        config = DetectorConfig(window=2, scan_radii=(1, 2), calibration_samples=1000)
+        detector = CollectiveScanDetector(zona_rejilla, SIGMA, config)
+        detector.calibrate(SEMILLA)
+
+        rng = np.random.default_rng(4321)
+        marcadas = sum(
+            detector.detect(rng.normal(220.0 + 2 * SIGMA, SIGMA, size=(2, zona_rejilla.n_meters)))[
+                0
+            ].detected
+            for _ in range(200)
+        )
+        assert marcadas / 200 < 0.05
+
+    def test_el_prefiltro_rompe_el_rechazo_del_modo_comun(self, zona_rejilla: ZoneGraph) -> None:
+        """La medición que descarta al Difuminador como prefiltro.
+
+        `diffuse(1)` no es constante —el vector constante no está en el
+        núcleo de `L_norm`—, así que el filtro deforma un corrimiento
+        uniforme y el contraste después lo detecta. Medido sobre las seis
+        zonas reales: sin filtro el modo común se marca en el 0,0–0,7 % de
+        los casos, con filtro en el 100 % con cualquier τ probado.
+
+        El test fija el mecanismo, que es lo que no debe volver a
+        perderse: si algún día `diffuse` preservara la constante, esto
+        falla y hay que rehacer la medición.
+        """
+        uno = np.ones(zona_rejilla.n_meters)
+        filtrado = diffuse(zona_rejilla, uno, 0.447)
+        assert filtrado.max() - filtrado.min() > 0.05
+
+        config = DetectorConfig(
+            window=2, scan_radii=(1, 2), prefilter_tau=0.447, calibration_samples=1000
+        )
+        detector = CollectiveScanDetector(zona_rejilla, SIGMA, config)
+        detector.calibrate(SEMILLA)
+
+        rng = np.random.default_rng(4321)
+        marcadas = sum(
+            detector.detect(rng.normal(220.0 + 2 * SIGMA, SIGMA, size=(2, zona_rejilla.n_meters)))[
+                0
+            ].detected
+            for _ in range(200)
+        )
+        assert marcadas / 200 > 0.50

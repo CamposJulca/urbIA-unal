@@ -15,21 +15,26 @@ import numpy.typing as npt
 
 from ..graph.types import MonitorGspError
 
-DEFAULT_WINDOW: Final = 32
+DEFAULT_WINDOW: Final = 16
 """Instantes sobre los que se integra. Punto de operación declarado.
 
-**Lo que implica, medido.** El barrido de `experiments/magnitud-duracion/`
-dice que integrar mejora la detección en `√N` y que **el umbral por medidor
-mejora igual**: a σ=0,5 y N=20 el escaneo da 90,9 % contra 79,2 % del
-umbral, y a N mayor los dos saturan. Con N=32 este detector alcanza
-prácticamente el 100 % sobre eventos de σ ≥ 0,5, y **su ventaja sobre un
-umbral simple en ese punto es nula**.
+Elegido por **ventaja sobre el umbral por medidor**, no por detección
+absoluta: el segundo objetivo ya lo resuelve un método más barato. Medido
+en `experiments/detector-colectivo/` sobre eventos de σ=0,5 y profundidad
+2, al 1 % de falsos positivos por ventana:
 
-La región donde el método de grafo aporta de verdad es la contraria:
-N ≤ 2, donde detecta entre 2,3 y 2,5 veces más que el umbral, a costa de
-una tasa absoluta cercana al 45 %. Cuál de los dos regímenes conviene
-depende de si la tesis reclama "detecta eventos sutiles" o "el método
-aporta sobre el umbral". Por eso es configurable.
+    N=16    escaneo 93,6 %   umbral 54,8 %   ventaja +38,8   <- este
+    N=32    escaneo 99,9 %   umbral 90,2 %   ventaja  +9,7
+    N=64    escaneo  100 %   umbral  100 %   ventaja  +0,0   <- maxima deteccion
+
+**La ventaja obedece a `σ·√N ≈ 2`**, la magnitud efectiva por medidor tras
+integrar: es máxima justo por debajo del punto donde un umbral por medidor
+empieza a funcionar. Por debajo ninguno ve nada; por encima los dos ven
+todo. De ahí una regla transferible: ante un evento de magnitud σ conocida,
+la ventana que más aporta es `N ≈ (2/σ)²`.
+
+Perseguir detección en vez de ventaja lleva a N=64, donde el método no
+aporta nada. Por eso es configurable y por eso el defecto es 16.
 """
 
 
@@ -53,11 +58,17 @@ class DetectorConfig:
             muchas oportunidades: la tasa por señal es mayor y hay que
             leerla como tal.
         prefilter_tau: τ del Difuminador aplicado antes de puntuar, o
-            `None` para no filtrar. La firma colectiva es de baja
-            frecuencia y el Difuminador es un paso-bajo, así que en
-            principio debería mejorar la relación señal-ruido; pero suaviza
-            la frontera del grupo, que es de donde sale la señal. Es una
-            pregunta medible y por eso es opción, no supuesto.
+            `None` para no filtrar. **Apagado por defecto, y medido: no
+            usarlo.** Sube la detección de 55,8 % a 100 %, pero la ganancia
+            es espuria. El filtro **rompe la invariancia a sumar una
+            constante**, que es lo que hacía robusto al escaneo:
+            `diffuse(1)` no es constante —va de 0,8524 a 1,2426 con
+            τ=0,05— porque el vector constante no está en el núcleo de
+            `L_norm`. Consecuencia medida sobre un modo común, toda la zona
+            corrida 2σ, que el detector *no* debe marcar: sin filtro lo
+            marca en el 0,0–0,7 % de los casos, con filtro en el 100 % con
+            cualquier τ probado. Convierte un detector de discordancia
+            local en uno de nivel medio.
         project_out_kernel: Proyectar la señal fuera de `u₀` antes de
             puntuar. **Apagado por defecto, y con medición detrás.** El
             contraste de dos muestras ya es invariante al nivel medio, así
