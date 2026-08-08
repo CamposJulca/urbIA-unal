@@ -44,6 +44,32 @@ class InvalidGraphConfigError(MonitorGspError, ValueError):
     """La configuración del grafo es inconsistente o incompleta."""
 
 
+class InvalidAdjacencyError(MonitorGspError, ValueError):
+    """La matriz de adyacencia no cumple las condiciones del aparato espectral."""
+
+
+class ZeroDegreeNodeError(MonitorGspError, ValueError):
+    """Hay nodos de grado cero y el Laplaciano normalizado no está definido.
+
+    `L_norm = D^(-1/2) · L · D^(-1/2)` exige dividir por la raíz del grado.
+    Un nodo aislado haría aparecer un infinito que se propaga como NaN por
+    todo el espectro sin que nada avise.
+    """
+
+    def __init__(self, indices: tuple[int, ...]) -> None:
+        """Inicializa el error con los nodos culpables.
+
+        Args:
+            indices: Posiciones de los nodos con grado cero.
+        """
+        self.indices = indices
+        super().__init__(
+            f"nodos de grado cero en las posiciones {list(indices)}: el Laplaciano "
+            f"normalizado exige dividir por la raíz del grado. Filtrá los nodos "
+            f"aislados o usá el Laplaciano combinatorio, que sí los admite"
+        )
+
+
 class InsufficientMetersError(MonitorGspError, ValueError):
     """Una zona no tiene medidores suficientes para construir un grafo."""
 

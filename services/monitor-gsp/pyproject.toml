@@ -107,7 +107,14 @@ convention = "google"
 # Nomenclatura matemática: A (adyacencia), D (grados), L (Laplaciano),
 # U (base de Fourier). Renombrarlas a snake_case alejaría el código de
 # las fórmulas del Capítulo 3 de Aristizábal que implementa.
-ignore-names = ["A", "D", "L", "U", "L_norm", "D_inv_sqrt", "x_hat"]
+ignore-names = [
+    "A", "D", "L", "U",
+    "L_norm", "D_inv_sqrt", "x_hat",
+    # Variantes derivadas de las anteriores en los tests, donde hacen
+    # falta dos versiones de la misma matriz a la vez (original y
+    # permutada, o la misma base recalculada).
+    "A_perm", "U_perm", "U_otra_vez",
+]
 
 [tool.mypy]
 python_version = "3.12"
