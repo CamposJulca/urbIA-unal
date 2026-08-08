@@ -133,21 +133,45 @@ class MeterNode:
 class GraphConfig:
     """Parámetros de construcción del grafo.
 
-    Los valores por defecto son la configuración justificada en
-    `docs/decisions/ADR-003`: k-NN simetrizado con k=4, pesos binarios y
+    Los valores por defecto son k-NN simetrizado con k=4, pesos binarios y
     seis subgrafos independientes sin puente inter-zona.
+
+    **Construcción de referencia de las cifras de este docstring.** Todos
+    los números medidos que aparecen abajo salen de la misma construcción,
+    y sin ella no son verificables: los 150 medidores activos de
+    `ami_meters`, agrupados por zona; un marco de proyección local por
+    zona (`geo.local_frame` sobre los medidores de esa zona); k-NN sobre
+    distancias euclídeas en metros, **simetrizado por unión**; pesos
+    binarios; y `L_norm` diagonalizado con `spectral.graph_fourier_basis`.
+    El marco por zona y el marco global dan resultados idénticos a esta
+    escala, así que la elección no afecta las cifras.
+
+    Barrido de k bajo esa construcción, Fiedler de `L_norm` por zona:
+
+        k=1    las seis zonas fragmentadas (6 a 9 componentes)
+        k=2    cinco zonas fragmentadas; sólo chipre conecta (0,0155)
+        k=3    la_enea se parte en 2 componentes; las otras cinco conectan,
+               con Fiedler mínimo 0,0219 en universitario
+        k=4    las seis conectadas, Fiedler mínimo 0,0505 en chipre
+        k=5    las seis conectadas, Fiedler mínimo 0,0725 en centro
+
+    De ahí el valor por defecto: **k=4 es el mínimo que conecta las seis
+    zonas**, y además duplica el Fiedler de la peor zona respecto de k=3.
+    Subir a k=5 sigue mejorando la conectividad, pero cada vecino extra
+    agrega aristas que ya no corresponden a proximidad física real.
 
     Attributes:
         strategy: Criterio de vecindad. `"knn"` se adapta a la densidad
             local; `"radius"` existe para reproducir la comparación.
-        k: Vecinos por nodo bajo `"knn"`. k=4 es el valor por defecto;
-            k=3 es el mínimo que conecta las seis zonas de Manizales, pero
-            deja un Fiedler de 0,018 en la_enea y es un punto de operación
-            frágil.
+        k: Vecinos por nodo bajo `"knn"`. k=4 por defecto, por el barrido
+            de arriba: es el mínimo que deja las seis zonas conexas.
         radius_m: Radio de vecindad en metros bajo `"radius"`. Obligatorio
             con esa estrategia.
         knn_mode: `"union"` conecta si cualquiera de los dos elige al otro;
-            `"mutual"` exige reciprocidad y fragmenta mucho más.
+            `"mutual"` exige reciprocidad. La reciprocidad fragmenta: con
+            k=4 sobre las seis zonas, `"mutual"` deja conexa sólo a
+            palogrande (Fiedler 0,0270) y parte las otras cinco en 2 a 5
+            componentes. Por eso el defecto es `"union"`.
         weighting: `"binary"` (0/1, lo validado en E6) o `"gaussian"`
             (`exp(-d²/2σ²)`).
         sigma_m: Escala del peso gaussiano. Si es `None` se deriva de la

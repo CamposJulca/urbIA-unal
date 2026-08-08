@@ -40,14 +40,18 @@ una topología externa sin cambiar su interfaz.
 k-NN simetrizado con **k = 4** por defecto, seis subgrafos independientes
 (uno por zona), sin aristas de puente inter-zona.
 
-La justificación cuantitativa —comparación contra radio fijo sobre los 150
-medidores reales, densidades zonales, espectro resultante— queda registrada
-en `docs/decisions/ADR-003`. Resumen: las seis zonas difieren en densidad
-por un factor 1,85, así que ningún radio único las sirve bien (a r=450 m,
-el mínimo que las conecta, palogrande llega a grado 21 mientras la_enea
-conserva nodos de grado 2); k-NN se adapta por construcción y garantiza
-grado mínimo k, lo que además evita los nodos hoja que el notebook E6
-identificó como punto ciego del detector de ventana abrupta.
+La justificación, medida sobre los 150 medidores reales de `ami_meters`:
+las seis zonas difieren en densidad por un factor 1,85 (de 20,8 a 38,5
+medidores por km² de bounding box zonal), así que ningún radio único las
+sirve bien. El radio mínimo que deja las seis zonas conexas es r = 399 m,
+y a ese radio la dispersión de grados va de 2 en la_enea a 17 en
+palogrande. k-NN se adapta por construcción y garantiza grado mínimo k, lo
+que además evita los nodos hoja que el notebook E6 identificó como punto
+ciego del detector de ventana abrupta.
+
+El barrido completo de k que fija el valor por defecto está en el
+docstring de `GraphConfig`, junto con la construcción exacta con la que se
+midió. La comparación entra a un ADR en el paso 7.
 
 El puente inter-zona existe como opción configurable, apagada por defecto,
 para poder comparar ambas construcciones.

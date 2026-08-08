@@ -143,7 +143,7 @@ class TestProjection:
         assert 0.01 < error < 0.30
 
     def test_project_to_local_meters_supera_a_la_esfera_de_radio_medio(self) -> None:
-        """Test de regresión de la decisión de diseño (ADR-003).
+        """Test de regresión de la decisión de diseño documentada en `geo`.
 
         Documenta por qué se usan los dos radios de curvatura y no un radio
         esférico medio: el error de la esfera es de metros, no de

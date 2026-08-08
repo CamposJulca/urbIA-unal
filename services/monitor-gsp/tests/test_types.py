@@ -49,7 +49,7 @@ class TestMeterNode:
 
 class TestGraphConfig:
     def test_graph_config_por_defecto_es_knn_k4_binario_sin_puente(self) -> None:
-        """Los valores por defecto son la configuración justificada en ADR-003."""
+        """Los valores por defecto son los justificados en el docstring de GraphConfig."""
         config = GraphConfig()
         assert config.strategy == "knn"
         assert config.k == 4
