@@ -45,9 +45,83 @@ suave = diffuse(zona, lecturas, tau=0.5)
 dirichlet_energy(zona, suave) < dirichlet_energy(zona, lecturas)   # True
 ```
 
-Falta: detector espectral y wavelet multiescala. El puente inter-zona está
-declarado en `GraphConfig` pero no implementado; encenderlo levanta
+Falta: wavelet multiescala. El puente inter-zona está declarado en
+`GraphConfig` pero no implementado; encenderlo levanta
 `InvalidGraphConfigError`.
+
+## Detector de eventos colectivos
+
+`detector/` contrasta cada vecindario del grafo contra el resto de su zona,
+sobre una ventana promediada, y reporta **qué nodos** marcó.
+
+```python
+from urbia_monitor_gsp.detector import CollectiveScanDetector, DetectorConfig
+
+detector = CollectiveScanDetector(zona, sigma_spatial=4.4012,
+                                  config=DetectorConfig(window=32))
+detector.calibrate(seed=20260808)
+detecciones = detector.detect(lecturas)          # (T, n)
+detecciones[0].device_ids                        # los nodos marcados
+detector.node_mask(detecciones, len(lecturas))   # para la matriz de confusión
+```
+
+Cada decisión sale de una medición, y están en `experiments/firma-espectral/`
+y `experiments/magnitud-duracion/`:
+
+| Decisión | Por qué |
+|---|---|
+| Escaneo local, no escalar por zona | Todo escalar global da AUC 0,48–0,57 sobre eventos colectivos |
+| Contraste de dos muestras sobre bolas | AUC 0,73–0,81 contra 0,65–0,80 del umbral por medidor |
+| Sobre ventana promediada | Integrar N instantes mejora la detección en `√N` |
+| Sin centrado de ninguna clase | El contraste ya es invariante al nivel medio |
+| Radios 1 y 2 | Un evento a profundidad 2 abarca ~12 nodos; una bola de radio 1 tiene ~6 |
+
+### Dónde pierde
+
+**Es peor que un umbral por medidor en anomalías individuales.** No es un
+defecto a corregir: es el alcance del método. Medido sobre un instante al
+1 % de falsos positivos:
+
+| Caso | Umbral por medidor | Este detector |
+|---|---|---|
+| Anomalía individual de +6σ | **99,0 %** | 33,4 % |
+| Evento colectivo, profundidad 2 | 6,7 % | **18,9 %** |
+
+La anomalía individual es un impulso en el dominio de los nodos —79,2 % de
+su energía en banda alta— y promediar una bola de vecinos la diluye. El
+evento colectivo es una meseta sobre un subconjunto conexo —16–19 % en banda
+alta— y promediar la bola es lo que lo concentra.
+
+**Un monitor completo necesita los dos**: una regla por medidor para lo
+puntual y este escaneo para lo colectivo.
+
+### Sobre el punto de operación
+
+`window=32` por defecto, configurable. A ese N el detector llega a ~100 %
+sobre eventos de σ ≥ 0,5 — **y también un umbral simple**, porque integrar
+32 instantes convierte un evento colectivo sutil en uno individualmente
+visible. La ventaja del método ahí es nula; donde aporta es en `window ≤ 2`,
+con 2,3–2,5× sobre el umbral a costa de una tasa absoluta cercana al 45 %.
+
+### Dos opciones apagadas por defecto, con medición detrás
+
+`project_out_kernel` proyecta fuera de `u₀` antes de puntuar. **Cuesta de 40
+a 77 puntos de detección** (78,8–97,2 % → 19,0–55,0 % sobre las seis zonas a
+σ=1,0 y N=5). El contraste ya es invariante al nivel medio, así que la
+proyección no aporta nada y sí introduce un sesgo determinista por bola:
+`u₀ᵀx` vale ~1 092 en una señal de 220 V y, multiplicado por el desbalance
+de grado del grupo, llega a 42σ. El daño crece con la ventana, porque el
+sesgo es fijo y el ruido baja como `√N`.
+
+`prefilter_tau` aplica el Difuminador antes de puntuar. Sin medir todavía:
+la firma colectiva es de baja frecuencia y el Difuminador es un paso-bajo,
+pero suaviza la frontera del grupo, que es de donde sale la señal.
+
+### El paso-alto de E6 quedó descartado como núcleo
+
+`experiments/firma-espectral/RESULTADOS.md` §3.2: está afinado para
+anomalías individuales, que un umbral ya resuelve al 99,0 %. Amerita un ADR
+propio, pendiente.
 
 ## Mediciones pendientes
 

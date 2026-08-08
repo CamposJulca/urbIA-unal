@@ -91,10 +91,12 @@ select = [
 ignore = [
     "D203",    # incompatible con D211
     "D213",    # incompatible con D212
-    # RUF002/RUF003 marcan como "ambiguos" los caracteres unicode que
+    # RUF001/002/003 marcan como "ambiguos" los caracteres unicode que
     # parecen letras latinas. Este módulo documenta fórmulas: sigma, lambda,
-    # tau y el signo × aparecen en los docstrings porque así están escritas
-    # en la tesis. Sustituirlos por ASCII alejaría el código de las fórmulas.
+    # tau y el signo × aparecen en docstrings, comentarios y mensajes de
+    # error porque así están escritas en la tesis. Sustituirlos por ASCII
+    # alejaría el código de las fórmulas y empeoraría lo que ve quien depura.
+    "RUF001",  # carácter ambiguo en string
     "RUF002",  # carácter ambiguo en docstring
     "RUF003",  # carácter ambiguo en comentario
 ]
