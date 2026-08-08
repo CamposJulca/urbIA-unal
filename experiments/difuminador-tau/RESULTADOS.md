@@ -270,9 +270,11 @@ donde participa todo el espectro.
   no sirve para un monitor distribuido, que es precisamente el caso de
   uso.
 * **La respuesta es suave y monótona.** La sensibilidad se mantiene entre
-  0,69 en el extremo superior y 2,38 en el inferior, sin divergencias. Un ajuste incremental de
-  τ produce un cambio proporcional en la salida: es la condición para que
-  un agente pueda ajustarla por realimentación.
+  0,687 en el extremo superior y 2,375 en el inferior, sin divergencias.
+  Un ajuste incremental de τ produce un cambio proporcional en la salida:
+  es la condición para que un agente pueda ajustarla por realimentación.
+  (El 2,375 es el valor en el codo inferior, τ=0,447. El 2,384 que se lee
+  un punto más a la izquierda, en τ=0,316, ya cae fuera del rango.)
 * **El filtro efectivamente filtra.** La banda alta retiene entre 4,4 % y
   45 % de su energía, mientras la energía total se conserva casi intacta.
 

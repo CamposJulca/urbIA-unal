@@ -130,7 +130,7 @@ una grilla de 81 puntos en log(τ) y criterios fijados de antemano: por
 abajo, donde las seis zonas dejan de discrepar entre sí (dispersión ≤
 1,5); por arriba, donde el filtro todavía remueve al menos la mitad de
 `E_D`. Dentro de ese rango la sensibilidad `|d ln E_D / d ln τ|` se
-mantiene entre 0,69 y 2,38: un ajuste incremental de τ produce un cambio
+mantiene entre 0,687 y 2,375: un ajuste incremental de τ produce un cambio
 proporcional en la salida, que es la condición para que el Afinador pueda
 ajustarla por realimentación. Fuera, las dos puntas son degeneradas —por
 debajo de τ≈0,25 el resultado es indistinguible del núcleo, por encima de
