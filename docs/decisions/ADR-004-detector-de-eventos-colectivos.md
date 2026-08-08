@@ -149,7 +149,51 @@ mediciones idealizadas estaban **subestimando** el método.
 En ese punto el detector además localiza: **recall por nodo 92,1 %,
 precisión 77,2 %, F1 0,839.**
 
-### 3.4 Radios {1, 2}
+### 3.4 Un solo principio: no mezclar los dos lados de la frontera
+
+Dos de los resultados de este ADR —el rechazo del Difuminador como
+prefiltro y la elección de radios— parecen hallazgos sueltos y son **el
+mismo mecanismo por tres vías distintas**.
+
+El contraste que el detector mide es la diferencia entre la media del grupo
+afectado y la media del resto. **Cualquier operación que mezcle los dos
+lados de la frontera del grupo destruye esa señal.** Hay tres formas de
+mezclarlos:
+
+1. **Filtrar a través de la frontera.** Un paso-bajo promedia cada nodo con
+   sus vecinos, incluidos los del otro lado. La discontinuidad de frontera
+   —que es exactamente lo que el contraste mide— se suaviza.
+2. **Dejar afectados fuera del candidato.** Un grupo candidato más chico
+   que el evento es puro por dentro, pero los afectados que quedan afuera
+   contaminan la muestra de control y suben su media.
+3. **Meter sanos dentro del candidato.** Un grupo candidato más grande que
+   el evento diluye la media de la muestra afectada.
+
+Medido sobre la topología real, contraste teórico de cada candidato contra
+un evento a profundidad 2, normalizado al candidato que coincide:
+
+| Candidato | Tamaño | Afectados dentro | Sanos dentro | Contraste |
+|---|---|---|---|---|
+| Bola radio 1 | 5,9 | 5,9 | 0,0 | 1,44 — **59 %** |
+| **Bola radio 2** | 11,9 | 11,9 | 0,0 | **2,46 — 100 %** |
+| Bola radio 3 | 17,8 | 11,8 | 6,0 | 1,48 — **60 %** |
+
+**Las dos formas de errar el tamaño cuestan casi lo mismo**: 41 % del
+contraste por quedarse corto, 40 % por pasarse. La simetría no es
+casualidad: en un caso la contaminación entra por la muestra de control y
+en el otro por la muestra afectada, y el estadístico las trata igual.
+
+El Difuminador es la tercera vía, y la más difícil de ver porque no cambia
+qué nodos se comparan sino los valores que se comparan. Por eso su efecto
+aparece como una mejora en la tabla de detección —§3.5— hasta que se mide
+contra un modo común.
+
+**El corolario de diseño**: el escaneo tiene que ofrecer candidatos que
+puedan coincidir con el tamaño del evento, y nada en la ruta de detección
+puede promediar a través de la frontera. Es lo que fija los radios y lo que
+descarta cualquier prefiltrado espectral.
+
+### 3.5 Radios {1, 2}
 
 Un evento a profundidad 2 abarca ~12 nodos y una bola de radio 1 tiene ~6,
 así que ni acertando de lleno puede cubrirlo. Medido en condición realista:
@@ -165,7 +209,7 @@ así que ni acertando de lleno puede cubrirlo. Medido en condición realista:
 detección 2,5 puntos pero baja la precisión 5,6 —más candidatos es más
 oportunidad de acertar por casualidad— y empeora el F1.
 
-### 3.5 Sin preprocesado espectral en la ruta de detección
+### 3.6 Sin preprocesado espectral en la ruta de detección
 
 Dos opciones se implementaron, se midieron y quedaron apagadas.
 
@@ -201,12 +245,17 @@ entre vecinos. La firma de un evento colectivo está precisamente en la
 lo que el contraste mide. Un paso-bajo suaviza esa discontinuidad. El
 componente hace bien su trabajo; su trabajo no es éste.
 
+Es la primera vía del principio de §3.4, y la única de las tres que no
+cambia qué nodos se comparan sino los valores que se comparan. Por eso su
+efecto se ve como mejora en la tabla de detección y sólo se delata al
+medirlo contra un modo común.
+
 Esto no dice nada en contra del Difuminador como filtro, que es para lo que
 está construido y donde sus propiedades —invariancia a la degeneración
 espectral, rango estable de τ, límites correctos— siguen medidas y
 vigentes en `experiments/difuminador-tau/`.
 
-### 3.6 El τ óptimo depende del uso
+### 3.7 El τ óptimo depende del uso
 
 Un resultado lateral que conviene registrar. La grilla de τ para detección
 tiene su óptimo en una **meseta de τ=0,05 a 1,5**, mientras el rango estable
@@ -266,10 +315,10 @@ región donde destruye sobre todo el ruido.
 | Detector paso-alto (E6) como núcleo | Afinado para el caso que un umbral resuelve al 99,7 % | §3.2 |
 | Escalar espectral global por zona | AUC 0,48–0,57 sobre eventos colectivos | §3.1 |
 | Energía de Dirichlet con `L_norm` cruda | El 98 % de su valor penaliza el estado normal | ADR pendiente / README de `monitor-gsp` |
-| Proyectar fuera de `u₀` antes de puntuar | 40 a 77 puntos de detección | §3.5 |
-| Difuminador como prefiltro | Marca el 100 % de los modos comunes | §3.5 |
-| Escanear sólo radio 1 | Mitad de la ventaja, mitad del recall | §3.4 |
-| Escanear radios {1,2,3} | Más candidatos, peor precisión y peor F1 | §3.4 |
+| Proyectar fuera de `u₀` antes de puntuar | 40 a 77 puntos de detección | §3.6 |
+| Difuminador como prefiltro | Marca el 100 % de los modos comunes | §3.6 |
+| Escanear sólo radio 1 | Mitad de la ventaja, mitad del recall; conserva el 59 % del contraste | §3.4, §3.5 |
+| Escanear radios {1,2,3} | Mete sanos en la muestra afectada; conserva el 60 % del contraste | §3.4, §3.5 |
 | Elegir N por detección máxima | Lleva a N=64, donde la ventaja es +0,0 | §3.3 |
 
 ---
@@ -310,7 +359,33 @@ N=16):
 Y con su alcance declarado: sobre anomalías individuales el mismo detector
 rinde 33,3 % contra 99,7 % del umbral.
 
-### 6.3 Por qué el enunciado nuevo es mejor, y no sólo más chico
+### 6.3 Dos cosas que el enunciado tiene que decir en voz alta
+
+**La ventaja es acotada y la cota se declara.** El mismo detector, sobre
+anomalías individuales de +6σ y a un instante, rinde **33,3 % contra el
+99,7 % del umbral**: pierde por 66 puntos. No es un defecto pendiente de
+corregir sino el alcance del método, y sale del mismo mecanismo que lo hace
+bueno en lo colectivo —promediar una bola de vecinos concentra una meseta y
+diluye un impulso—. Un monitor completo necesita los dos detectores. Un
+enunciado de H3 que omita esto sería más fuerte y menos cierto.
+
+**El punto de operación se eligió por ventaja, no por detección**, y decir
+cuál de los dos criterios se persiguió es parte del resultado. Son
+objetivos distintos y dan respuestas distintas:
+
+| Criterio | N | Escaneo | Umbral | Ventaja |
+|---|---|---|---|---|
+| **Máxima ventaja** (el elegido) | **16** | 79,4 % | 29,8 % | **+49,6** |
+| Máxima detección | 32 | 99,5 % | 70,2 % | +29,3 |
+
+Perseguir detección lleva a un régimen donde el método aporta menos, porque
+integrar más instantes convierte el evento colectivo en uno individualmente
+visible y el umbral alcanza al escaneo. Elegir por detección habría dado
+mejores cifras absolutas y una hipótesis peor sostenida. El criterio se
+declaró antes de mirar los resultados, en D1–D3 de
+`experiments/detector-colectivo/`.
+
+### 6.4 Por qué el enunciado nuevo es mejor, y no sólo más chico
 
 Es **falsable**: nombra el régimen, el comparador, la calibración y el
 punto de operación, así que puede desmentirse midiendo. El anterior no
@@ -320,6 +395,9 @@ Es **más informativo**: incorpora la ley `σ·√N ≈ 2`, que predice dónde
 esperar la ventaja en un despliegue distinto.
 
 Y **declara dónde pierde**, que es lo que le da crédito a lo demás.
+
+Un trabajo que sólo reporta dónde gana es menos creíble que uno que dice
+dónde pierde y con cuánto.
 
 ---
 
