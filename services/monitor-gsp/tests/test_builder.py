@@ -20,8 +20,7 @@ existiera.
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
+from collections import Counter
 from typing import ClassVar
 
 import numpy as np
@@ -30,23 +29,13 @@ import pytest
 from urbia_monitor_gsp.graph.builder import build_ami_graph, build_zone_graph
 from urbia_monitor_gsp.graph.spectral import degenerate_groups
 from urbia_monitor_gsp.graph.types import (
+    AmiGraph,
     GraphConfig,
     InsufficientMetersError,
     InvalidGraphConfigError,
     MeterNode,
     ZeroDegreeNodeError,
 )
-
-TOPOLOGIA = Path(__file__).parents[3] / "data" / "topologies" / "manizales_150.json"
-
-
-@pytest.fixture(scope="module")
-def manizales() -> list[MeterNode]:
-    """Los 150 medidores reales, desde la topología versionada."""
-    if not TOPOLOGIA.exists():
-        pytest.fail(f"falta la topología de regresión: {TOPOLOGIA}")
-    datos = json.loads(TOPOLOGIA.read_text(encoding="utf-8"))
-    return [MeterNode(**m) for m in datos["meters"]]
 
 
 def rejilla(zona: str, filas: int, columnas: int, paso_grados: float = 0.001) -> list[MeterNode]:
@@ -353,3 +342,92 @@ class TestRegresionManizales:
         grados = [(z.stats.degree_min, z.stats.degree_max) for z in grafo.zones.values()]
         assert min(g[0] for g in grados) == 2
         assert max(g[1] for g in grados) == 17
+
+    DENSIDAD_MED_KM2: ClassVar[dict[str, float]] = {
+        "centro": 26.79,
+        "chipre": 33.29,
+        "la_enea": 20.79,
+        "palermo": 31.46,
+        "palogrande": 38.50,
+        "universitario": 23.43,
+    }
+    """Medidores por km² del bounding box de cada zona, en su marco local.
+
+    La cifra que sostiene el argumento de §3.3 del ADR-003: ningún radio
+    único de vecindad sirve a seis zonas cuya densidad difiere por 1,85.
+    """
+
+    @staticmethod
+    def _densidad(grafo: AmiGraph, zona: str) -> float:
+        """Medidores por km² del bounding box de la zona ya proyectada.
+
+        Se mide sobre `coords_m`, la proyección que usó el propio
+        constructor, y no sobre una reproyección aparte: si la proyección
+        cambiara, esta cifra tiene que moverse con ella.
+        """
+        z = grafo.zones[zona]
+        ancho = float(z.coords_m[:, 0].max() - z.coords_m[:, 0].min())
+        alto = float(z.coords_m[:, 1].max() - z.coords_m[:, 1].min())
+        return float(z.n_meters / (ancho * alto / 1e6))
+
+    @pytest.mark.parametrize("zona", sorted(DENSIDAD_MED_KM2))
+    def test_densidad_por_zona(self, manizales: list[MeterNode], zona: str) -> None:
+        grafo = build_ami_graph(manizales, GraphConfig(k=4))
+        assert self._densidad(grafo, zona) == pytest.approx(self.DENSIDAD_MED_KM2[zona], abs=5e-3)
+
+    def test_la_enea_es_la_mas_rala_y_palogrande_la_mas_densa(
+        self, manizales: list[MeterNode]
+    ) -> None:
+        """El hallazgo: la zona que fija el punto de operación es la más rala.
+
+        la_enea es la que se parte con k=3 y con r=398 m, y es también la de
+        menor densidad. Dos criterios de vecindad independientes señalando la
+        misma zona no es coincidencia del criterio: es la distribución
+        espacial de los medidores.
+        """
+        grafo = build_ami_graph(manizales, GraphConfig(k=4))
+        densidades = {z: self._densidad(grafo, z) for z in grafo.zone_order}
+        assert min(densidades, key=lambda z: densidades[z]) == "la_enea"
+        assert max(densidades, key=lambda z: densidades[z]) == "palogrande"
+
+    def test_la_densidad_difiere_por_un_factor_1852(self, manizales: list[MeterNode]) -> None:
+        """Por qué ningún radio único sirve a las seis zonas."""
+        grafo = build_ami_graph(manizales, GraphConfig(k=4))
+        densidades = [self._densidad(grafo, z) for z in grafo.zone_order]
+        assert max(densidades) / min(densidades) == pytest.approx(1.852, abs=1e-3)
+
+    def test_un_knn_global_cruzaria_34_aristas_entre_zonas(
+        self, manizales: list[MeterNode]
+    ) -> None:
+        """La partición zonal es administrativa, no geográfica.
+
+        Si se ignoran las zonas y se corre k-NN k=4 sobre los 150 medidores,
+        34 de las 377 aristas cruzan frontera zonal. La partición las suprime,
+        y ése es el costo declarado en el ADR-003 §3.2. La contrapartida es
+        que el grafo global tampoco quedaría conexo: deja 3 componentes, así
+        que no compra la conectividad que sería su único argumento.
+        """
+        # Los mismos medidores en una única zona: el grafo que habría si la
+        # columna `zona` no existiera.
+        global_ = build_zone_graph(
+            [MeterNode(m.device_id, "global", m.lat, m.lon) for m in manizales],
+            GraphConfig(k=4),
+        )
+        zona_de = {m.device_id: m.zona for m in manizales}
+        etiquetas = [zona_de[d] for d in global_.device_ids]
+
+        n = global_.n_meters
+        cruzadas = [
+            tuple(sorted((etiquetas[i], etiquetas[j])))
+            for i in range(n)
+            for j in range(i + 1, n)
+            if global_.adjacency[i, j] > 0 and etiquetas[i] != etiquetas[j]
+        ]
+        por_par = Counter(cruzadas)
+
+        assert global_.stats.n_edges == 377
+        assert len(cruzadas) == 34
+        assert por_par[("palermo", "universitario")] == 18
+        assert por_par[("centro", "chipre")] == 10
+        assert por_par[("palermo", "palogrande")] == 6
+        assert global_.stats.n_components == 3

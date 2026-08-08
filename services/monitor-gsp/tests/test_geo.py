@@ -18,6 +18,7 @@ from urbia_monitor_gsp.graph.geo import (
     pairwise_distances_m,
     project_to_local_meters,
 )
+from urbia_monitor_gsp.graph.types import MeterNode
 
 # Extensión real de los 150 medidores de Manizales en ami_meters.
 MANIZALES_LAT = (5.049, 5.078)
@@ -238,3 +239,137 @@ class TestPairwiseDistances:
     def test_pairwise_distances_m_forma_invalida_levanta_error(self) -> None:
         with pytest.raises(ValueError, match=r"forma \(n, 2\)"):
             pairwise_distances_m(np.array([1.0, 2.0, 3.0]))
+
+
+class TestProyeccionSobreLosCientoCincuenta:
+    """Fija el error de proyección medido sobre los medidores reales.
+
+    Los tests de arriba usan rejillas sintéticas y verifican el orden de
+    magnitud del error. Éstos fijan las cifras exactas que el docstring de
+    `geo` y el ADR-003 §3.4 usan como justificación, sobre los 1 825 pares
+    intra-zona de `manizales_150.json`.
+
+    La distinción no es cosmética: el error de la esfera de radio medio es
+    sistemático —estira las distancias norte-sur— y a escala de vecindad
+    llega a cambiar qué medidor es vecino de cuál. El último test mide
+    justamente eso.
+    """
+
+    R_MEDIO_M = 6_371_000.0
+    """Radio esférico medio, la aproximación que se descartó."""
+
+    @staticmethod
+    def _por_zona(manizales: list[MeterNode]) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+        """Latitudes y longitudes de cada zona, en el orden del archivo."""
+        return {
+            zona: (
+                np.array([m.lat for m in manizales if m.zona == zona]),
+                np.array([m.lon for m in manizales if m.zona == zona]),
+            )
+            for zona in sorted({m.zona for m in manizales})
+        }
+
+    @classmethod
+    def _esferica(cls, lats: np.ndarray, lons: np.ndarray, frame: LocalFrame) -> np.ndarray:
+        """Proyección plana con un único radio medio, para el mismo origen."""
+        return np.column_stack(
+            [
+                cls.R_MEDIO_M
+                * math.cos(math.radians(frame.lat0_deg))
+                * np.radians(lons - frame.lon0_deg),
+                cls.R_MEDIO_M * np.radians(lats - frame.lat0_deg),
+            ]
+        )
+
+    @classmethod
+    def _errores(cls, manizales: list[MeterNode]) -> tuple[np.ndarray, np.ndarray]:
+        """Error de cada proyección contra Vincenty, sobre los pares intra-zona.
+
+        Returns:
+            Par `(elipsoidal, esferica)` con un error en metros por pareja.
+        """
+        elipsoidal: list[float] = []
+        esferica: list[float] = []
+        for lats, lons in cls._por_zona(manizales).values():
+            frame = local_frame(lats, lons)
+            d_eli = pairwise_distances_m(frame.project(lats, lons))
+            d_esf = pairwise_distances_m(np.ascontiguousarray(cls._esferica(lats, lons, frame)))
+            for i, j in itertools.combinations(range(lats.size), 2):
+                geodesica = geodesic_distance_m(lats[i], lons[i], lats[j], lons[j])
+                elipsoidal.append(abs(d_eli[i, j] - geodesica))
+                esferica.append(abs(d_esf[i, j] - geodesica))
+        return np.array(elipsoidal), np.array(esferica)
+
+    def test_hay_1825_pares_intra_zona(self, manizales: list[MeterNode]) -> None:
+        """El tamaño de la muestra sobre la que se midió el error."""
+        elipsoidal, esferica = self._errores(manizales)
+        assert elipsoidal.size == esferica.size == 1825
+
+    def test_la_esfera_de_radio_medio_yerra_metros(self, manizales: list[MeterNode]) -> None:
+        _, esferica = self._errores(manizales)
+        assert esferica.mean() == pytest.approx(1.3491, abs=5e-4)
+        assert esferica.max() == pytest.approx(5.4422, abs=5e-4)
+
+    def test_la_elipsoidal_yerra_milimetros(self, manizales: list[MeterNode]) -> None:
+        elipsoidal, _ = self._errores(manizales)
+        assert elipsoidal.mean() == pytest.approx(0.00069, abs=5e-6)
+        assert elipsoidal.max() == pytest.approx(0.00623, abs=5e-6)
+
+    def test_el_radio_medio_estira_las_distancias_norte_sur(
+        self, manizales: list[MeterNode]
+    ) -> None:
+        """El error de la esfera es sistemático, no ruido.
+
+        A la latitud de Manizales el radio medio se desvía +0,55 % del
+        meridional, que es el que gobierna los desplazamientos norte-sur.
+        Ése es el sesgo direccional que mueve las aristas.
+        """
+        lat0 = float(np.mean([m.lat for m in manizales]))
+        meridional, normal = curvature_radii(lat0)
+        assert lat0 == pytest.approx(5.0617, abs=5e-5)
+        assert 100 * (self.R_MEDIO_M / meridional - 1) == pytest.approx(0.5534, abs=5e-4)
+        assert 100 * (self.R_MEDIO_M / normal - 1) == pytest.approx(-0.1145, abs=5e-4)
+
+    def test_la_esfera_cambia_dos_aristas_del_knn_en_la_enea(
+        self, manizales: list[MeterNode]
+    ) -> None:
+        """La consecuencia topológica: no es un error de redondeo, es el grafo.
+
+        Reconstruido el k-NN k=4 contra distancias geodésicas exactas, la
+        proyección esférica difiere en 2 aristas —todas en la_enea, la zona
+        rala que ya fija el punto de operación— y la elipsoidal en ninguna,
+        en las seis zonas.
+        """
+
+        def aristas(distancias: np.ndarray, k: int = 4) -> set[tuple[int, int]]:
+            d = distancias.copy()
+            np.fill_diagonal(d, np.inf)
+            n = d.shape[0]
+            mascara = np.zeros((n, n), dtype=bool)
+            for i in range(n):
+                mascara[i, np.argsort(d[i])[:k]] = True
+            mascara |= mascara.T
+            return {(i, j) for i in range(n) for j in range(i + 1, n) if mascara[i, j]}
+
+        diferencias = {}
+        for zona, (lats, lons) in self._por_zona(manizales).items():
+            n = lats.size
+            geodesicas = np.zeros((n, n))
+            for i, j in itertools.combinations(range(n), 2):
+                g = geodesic_distance_m(lats[i], lons[i], lats[j], lons[j])
+                geodesicas[i, j] = geodesicas[j, i] = g
+
+            frame = local_frame(lats, lons)
+            de_referencia = aristas(geodesicas)
+            de_elipsoidal = aristas(pairwise_distances_m(frame.project(lats, lons)))
+            de_esferica = aristas(
+                pairwise_distances_m(np.ascontiguousarray(self._esferica(lats, lons, frame)))
+            )
+            diferencias[zona] = (
+                len(de_esferica ^ de_referencia),
+                len(de_elipsoidal ^ de_referencia),
+            )
+
+        assert diferencias["la_enea"][0] == 2
+        assert sum(esf for esf, _ in diferencias.values()) == 2
+        assert all(eli == 0 for _, eli in diferencias.values())
