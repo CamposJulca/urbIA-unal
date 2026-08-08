@@ -1,6 +1,6 @@
 # ESTADO — Punto de partida para retomar
 
-Última actualización: **2026-08-08**, commit `28b5911`.
+Última actualización: **2026-08-08**, commit `ebf477d`.
 
 Este archivo existe para que alguien —el autor incluido, dentro de dos
 semanas— pueda retomar sin releer toda la historia. Si algo de acá
@@ -122,8 +122,12 @@ respuestas distintas (N=16 contra N=32).
 
 ## 5. Advertencias metodológicas
 
-Las dos cosas que más caro salieron de aprender. Quien toque el
-preprocesado o el escaneo debería leer esto antes que el código.
+Lo que más caro salió de aprender. Quien toque el preprocesado, el escaneo
+o cualquier cifra de la tesis debería leer esto antes que el código.
+
+Las tres primeras son formas de equivocarse que **ningún test detecta**,
+porque en las tres el código está bien y lo que falla es el razonamiento
+sobre lo que el código significa.
 
 ### 5.1 Cuatro veces un argumento de invariancia sonó correcto y falló
 
