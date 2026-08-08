@@ -117,6 +117,44 @@ sesgo es fijo y el ruido baja como `√N`.
 la firma colectiva es de baja frecuencia y el Difuminador es un paso-bajo,
 pero suaviza la frontera del grupo, que es de donde sale la señal.
 
+### Advertencia: tres veces un argumento de invariancia sonó correcto y falló
+
+Quien vaya a tocar el preprocesado de esta ruta debería leer esto antes.
+**Tres veces en este desarrollo se razonó sobre invariancia, el argumento
+era formalmente correcto, y la conclusión que se sacó de él resultó falsa
+al medirla.** No son tres descuidos distintos: son el mismo error tres
+veces.
+
+**1. "`E_D` es invariante al modo cero, así que no hay que centrar."** La
+invariancia es cierta. La conclusión, falsa: `E_D` es invariante al
+**núcleo** —la dirección `√d`— y no al **nivel medio**. Una señal AMI es
+sobre todo nivel medio, y una plana de 220 V da `E_D_norm` de 8 876 a
+21 672 según la zona contra ~286 que aporta el ruido. El 98 % de la medida
+era una penalización al estado normal.
+
+**2. "Centrar por la media corrompe `E_D`."** También sonaba bien: restar
+la media cambia el valor de 45,02 a 22,03, y un cambio así parece daño.
+Era la lectura equivocada. Lo que remueve es un término de estorbo, y
+removerlo sube el AUC de detección de 0,661 a 0,986.
+
+**3. "El contraste de dos muestras ya es invariante al nivel medio, así que
+proyectar fuera de `u₀` da lo mismo."** La invariancia vuelve a ser cierta
+y la conclusión vuelve a ser falsa. Proyectar cuesta de 40 a 77 puntos de
+detección, porque `u₀ ∝ √d` **no** es constante: la proyección deja un
+sesgo determinista de hasta 42σ por bola, y el máximo cae siempre en la
+misma sin importar los datos.
+
+**El patrón.** Una invariancia siempre lo es **respecto de un subespacio**.
+Decir "es invariante" sin decir *a qué* invita a concluir que cualquier
+preprocesado es inocuo, y no lo es: basta que la transformación toque una
+dirección que el subespacio no contiene. Y el estado físicamente normal de
+esta señal —todos los medidores en 220 V— **no vive en el núcleo del
+operador que se estaba usando**, que es la raíz de los tres casos.
+
+**La regla que queda.** Ninguna decisión de preprocesado entra a esta ruta
+sin medirla contra la tasa de detección. El argumento formal sirve para
+saber qué medir, no para saltearse la medición.
+
 ### El paso-alto de E6 quedó descartado como núcleo
 
 `experiments/firma-espectral/RESULTADOS.md` §3.2: está afinado para
