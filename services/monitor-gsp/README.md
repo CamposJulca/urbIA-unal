@@ -49,6 +49,30 @@ Falta: detector espectral y wavelet multiescala. El puente inter-zona está
 declarado en `GraphConfig` pero no implementado; encenderlo levanta
 `InvalidGraphConfigError`.
 
+## Mediciones pendientes
+
+Lo que hoy está decidido pero **no medido**, para que no se lea como
+resultado (ADR-003 §4.3 y §6):
+
+- **Pesos binarios contra gaussianos sobre los 150 medidores.** El defecto
+  es binario por continuidad con el notebook E6 y por simplicidad
+  interpretativa, no porque se haya comparado. Los gaussianos están
+  implementados y probados en corrección —ponderan entre 0 y 1, pesan menos
+  a mayor distancia, derivan σ de la mediana de las aristas— pero sólo
+  sobre rejillas sintéticas de juguete. Falta medir sobre la topología
+  real cómo se mueven el espectro, el Fiedler por zona y la detección de
+  la anomalía inyectada al pasar de unos a otros, y si σ derivado de la
+  mediana es defendible o hay que barrerlo. Es la única decisión del
+  ADR-003 que no tiene medición detrás.
+- **Efecto del Difuminador sobre anomalías extendidas.** Todo lo medido usa
+  un pico en un único medidor. El caso de varios medidores vecinos
+  afectados a la vez —donde un filtro definido por la vecindad debería
+  lucirse— requiere el inyector de eventos correlacionados, que no existe.
+- **Grafo geográfico contra grafo eléctrico.** Cuando aparezca el catálogo
+  de transformadores: cuántas de las 369 aristas actuales sobreviven, y
+  cuánto cambia el diagnóstico del detector. Es lo que convertiría el
+  supuesto de vecindad geográfica de limitación declarada en error acotado.
+
 El Difuminador implementa el exponente **negativo**, `exp(−λ/(τ·λmax))`.
 La formulación publicada en la tesis de Aristizábal (2022, Cap. 3) lo
 escribe positivo, con lo que amplifica la alta frecuencia en vez de

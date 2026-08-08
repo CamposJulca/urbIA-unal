@@ -110,7 +110,18 @@ La ruta de validación está en §6.
 
 ### 3.2 Seis subgrafos independientes
 
-La decisión tiene dos apoyos de naturaleza distinta, y conviene no confundirlos.
+**Una premisa que había que corregir.** La justificación de trabajo para no
+puentear las zonas era que *"las zonas están separadas por kilómetros"*. Medida
+contra los datos, esa afirmación resultó **parcialmente falsa**: es cierta para
+doce de los quince pares de zonas y falsa para tres, y en el peor caso —palermo
+y universitario— hay dos medidores de zonas distintas a **25 m** el uno del otro.
+La corrección no cambia la decisión, pero sí cambia el argumento que la sostiene,
+y por eso queda registrada acá: lo que hace defendible la partición **no es la
+separación geográfica**, que en tres pares no existe, sino los dos apoyos que
+siguen.
+
+La decisión tiene entonces dos apoyos de naturaleza distinta, y conviene no
+confundirlos.
 
 **Apoyo de despliegue.** La partición zonal coincide con la distribución prevista
 del monitor: un nodo de borde por zona, cada uno analizando su propio subgrafo sin
@@ -122,9 +133,9 @@ por zona sea **exacto**, no una aproximación: el espectro del grafo global es l
 unión de los espectros zonales, y la multiplicidad del autovalor cero es 6, una
 por zona.
 
-**Apoyo geométrico, con una limitación medida.** Las zonas están separadas, pero
-no uniformemente. Distancia entre centroides zonales y distancia entre los dos
-medidores más próximos de cada par:
+**Apoyo geométrico, parcial y con una limitación medida.** Las zonas están
+separadas, pero no uniformemente. Distancia entre centroides zonales y distancia
+entre los dos medidores más próximos de cada par:
 
 | Par de zonas | Centroides | Medidores más próximos |
 |---|---|---|
