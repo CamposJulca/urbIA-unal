@@ -84,6 +84,37 @@ Los números de este README y de los docstrings están medidos contra
 `data/topologies/manizales_150.json`, la topología versionada de los 150
 medidores, y fijados como tests de regresión en `tests/test_builder.py`.
 
+## Centrar la señal: no para `E_D`, y nunca por la media
+
+El modo de frecuencia cero se lleva entre el 97,8 % y el 99,1 % de la
+energía de una señal AMI, así que cualquier lectura por modo o por banda
+queda dominada por la media. Centrar antes de analizar es lo natural, y
+tiene dos trampas medidas:
+
+| Operación | Coeficiente del modo 0 | `E_D` en centro |
+|---|---|---|
+| Cruda | 98,34 % de la energía | 45,0239 |
+| `x − mean(x)` | \|x̂₀\| = 0,153 — **no lo anula** | **22,0260** |
+| `x − (u₀ᵀx)·u₀` | ≈ 2e-14 | 45,0239 — idéntico |
+
+El núcleo de `L_norm` es `D^(1/2)·1`, proporcional a `√dᵢ`, **no** el vector
+constante: `cos(u₀, √d) = 1,000000000000` contra `cos(u₀, 1) = 0,992` a
+0,996. Restar la media no remueve el modo cero, y además **corrompe la
+energía de Dirichlet** —en centro la baja a menos de la mitad, en
+universitario la sube de 19,72 a 24,76— porque la constante no es un
+elemento del núcleo.
+
+**La regla:**
+
+* Con `dirichlet_energy` o cualquier detector sobre `L_norm·x`: **no
+  centrar**. `E_D` ya es invariante al modo cero, y centrar sólo puede
+  romper esa invariancia.
+* Con GFT, bandas o cualquier lectura por modo: **proyectar fuera de
+  `u₀`**, nunca restar la media.
+
+El detalle completo está en el docstring de `graph/filter`. Se documenta acá
+porque es un error que produce resultados plausibles y falsos.
+
 ## Supuesto de vecindad geográfica
 
 **La vecindad entre medidores se deriva de proximidad geográfica. Esto es

@@ -100,6 +100,29 @@ Respetar el primero no basta: una desviación puede caber holgadamente en el
 esquema y ser evidente para un umbral estadístico. La que importa es la
 segunda.
 
+## Inconsistencia detectada entre el contrato y su consumidor
+
+Al versionar `data/schemas/payload_schema_v1.json` apareció una divergencia
+que **no es de este paquete pero lo afecta**, porque el inyector garantiza
+sus límites contra ese contrato:
+
+El esquema declara `additionalProperties: false` y **no incluye
+`energia_kwh`** entre sus propiedades. `services/backend/SCHEMA.md` sí lo
+lista como campo de entrada, nullable, con la nota de que "el productor no
+siempre reporta acumulado". Las dos cosas no pueden ser ciertas a la vez:
+un payload que trajera `energia_kwh` sería rechazado por el
+`PayloadValidator` del productor antes de publicarse.
+
+Las lecturas posibles son que el productor no lo envíe nunca —y entonces la
+documentación del backend describe un campo que no llega—, o que valide
+contra otra versión del contrato que la copiada acá.
+
+**A revisar cuando se toque `urbia-platform`.** No bloquea al inyector: la
+familia actual desvía voltaje, corriente o potencia, y `energia_kwh` es
+acumulado monotónico, que no es una magnitud sobre la que tenga sentido
+inyectar una desviación colectiva instantánea. Queda anotado para que no se
+pierda.
+
 ## Por qué es un paquete separado de monitor-gsp
 
 Porque produce la verdad de referencia contra la que se puntúa el detector,

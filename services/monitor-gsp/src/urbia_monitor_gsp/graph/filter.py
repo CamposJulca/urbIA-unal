@@ -79,6 +79,44 @@ subespacio degenerado y repartir entre las dos bandas una energía que no
 tiene reparto definido —depende de la base arbitraria—, que es exactamente
 el defecto de la ventana abrupta que E6 descartó.
 
+## Centrar la señal: cuándo sí, cuándo no, y cómo
+
+El modo de frecuencia cero se lleva casi toda la energía de una señal AMI
+—medido sobre las seis zonas, entre el 97,8 % y el 99,1 %—, así que
+cualquier lectura por modo o por banda queda dominada por la media y no
+dice nada. La reacción natural es centrar la señal antes de analizarla, y
+**ahí hay dos trampas**.
+
+**Primera: centrar por la media no remueve el modo cero.** El núcleo de
+`L_norm` no es el vector constante sino `D^(1/2)·1`, proporcional a `√dᵢ`.
+Medido: el coseno entre `u₀` y `√d` vale 1 a doce decimales en las seis
+zonas, mientras que contra la constante se queda entre 0,992 y 0,996.
+Restar la media deja un residuo real en el coeficiente cero —entre 0,064 y
+0,268 en módulo— mientras que proyectar fuera de `u₀` lo lleva a ~1e-14.
+
+    x_centrada    = x − mean(x)              ✗  deja residuo en el modo 0
+    x_proyectada  = x − (u₀ᵀx)·u₀            ✓  lo anula
+
+**Segunda, y peor: centrar por la media corrompe la energía de Dirichlet.**
+`E_D` ya es invariante al modo cero por construcción, porque `L_norm·u₀ = 0`
+y sumar cualquier múltiplo del núcleo no la cambia. Proyectar fuera de `u₀`
+la deja bit a bit igual. Restar la media **no**, porque la constante no es
+un elemento del núcleo: medido con la señal sintética del experimento,
+`E_D` pasa de 45,0239 a 22,0260 en centro —menos de la mitad— y de 19,7213
+a 24,7631 en universitario, hacia arriba. El resultado sigue siendo un
+número plausible y ya no mide desacuerdo entre vecinos.
+
+**La regla, entonces:**
+
+* Para `dirichlet_energy` y para cualquier detector construido sobre
+  `L_norm·x`: **no centrar**. La invariancia ya está, y centrar sólo puede
+  romperla.
+* Para el reparto por bandas, la GFT o cualquier lectura por modo:
+  **proyectar fuera de `u₀`**, nunca restar la media.
+
+Es un error que produce resultados plausibles y falsos, que es la clase de
+error que no se detecta mirando la salida.
+
 ## Por qué el filtro es reproducible pese a la degeneración
 
 `g` depende sólo de λ, así que es constante dentro de cada subespacio
