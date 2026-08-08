@@ -84,36 +84,58 @@ Los números de este README y de los docstrings están medidos contra
 `data/topologies/manizales_150.json`, la topología versionada de los 150
 medidores, y fijados como tests de regresión en `tests/test_builder.py`.
 
-## Centrar la señal: no para `E_D`, y nunca por la media
+## Núcleo, nivel medio y qué Laplaciano usar
 
-El modo de frecuencia cero se lleva entre el 97,8 % y el 99,1 % de la
-energía de una señal AMI, así que cualquier lectura por modo o por banda
-queda dominada por la media. Centrar antes de analizar es lo natural, y
-tiene dos trampas medidas:
+Dos hechos medidos que se confunden con facilidad y que juntos deciden si
+un detector funciona:
 
-| Operación | Coeficiente del modo 0 | `E_D` en centro |
+**1. El núcleo de `L_norm` es `D^(1/2)·1`, no el vector constante.**
+`cos(u₀, √d) = 1,000000000000` contra `cos(u₀, 1) = 0,992` a 0,996. Por eso
+restar la media **no** remueve el modo cero: deja `|x̂₀|` entre 0,064 y
+0,268, mientras que proyectar fuera de `u₀` lo lleva a ~1e-14. Para leer el
+espectro por modo o por banda, **proyectar fuera de `u₀`**.
+
+**2. `E_D` es invariante al núcleo pero no al nivel medio.** Sumar un
+múltiplo de `√d` no la cambia; sumar una constante sí, porque la constante
+no está en el núcleo. Y una señal AMI es sobre todo una constante. Energía
+de una señal perfectamente plana de 220 V:
+
+| Zona | `E_D` con `L_norm` | `E_D` con `L = D − A` |
 |---|---|---|
-| Cruda | 98,34 % de la energía | 45,0239 |
-| `x − mean(x)` | \|x̂₀\| = 0,153 — **no lo anula** | **22,0260** |
-| `x − (u₀ᵀx)·u₀` | ≈ 2e-14 | 45,0239 — idéntico |
+| centro | 14 656 | **0** |
+| chipre | 12 120 | **0** |
+| la_enea | 21 671 | **0** |
+| palermo | 14 256 | **0** |
+| palogrande | 12 094 | **0** |
+| universitario | 8 876 | **0** |
 
-El núcleo de `L_norm` es `D^(1/2)·1`, proporcional a `√dᵢ`, **no** el vector
-constante: `cos(u₀, √d) = 1,000000000000` contra `cos(u₀, 1) = 0,992` a
-0,996. Restar la media no remueve el modo cero, y además **corrompe la
-energía de Dirichlet** —en centro la baja a menos de la mitad, en
-universitario la sube de 19,72 a 24,76— porque la constante no es un
-elemento del núcleo.
+El ruido real de la señal aporta ~286. Es decir: **el 98 % de `E_D_norm` de
+una señal AMI penaliza el estado normal** y depende sólo de la irregularidad
+de los grados.
+
+Medido en detección, AUC para separar una anomalía individual de +6σ sobre
+500 realizaciones por zona:
+
+| Estadístico | AUC |
+|---|---|
+| `E_D` normalizado, señal cruda | 0,661 |
+| `E_D` normalizado, señal centrada | 0,986 |
+| `E_D` combinatorio | 0,982 |
 
 **La regla:**
 
-* Con `dirichlet_energy` o cualquier detector sobre `L_norm·x`: **no
-  centrar**. `E_D` ya es invariante al modo cero, y centrar sólo puede
-  romper esa invariancia.
-* Con GFT, bandas o cualquier lectura por modo: **proyectar fuera de
-  `u₀`**, nunca restar la media.
+* Espectro por modo o banda → proyectar fuera de `u₀`, nunca restar la
+  media.
+* Rugosidad con intención de detectar → sacar el nivel medio. `L_norm`
+  sobre la señal cruda está dominado por el término constante. El
+  **Laplaciano combinatorio** lo resuelve sin preprocesar: su núcleo sí es
+  la constante.
+* `L_norm` sigue siendo el operador correcto para el Difuminador, que
+  necesita el espectro acotado en `[0, 2]`.
 
-El detalle completo está en el docstring de `graph/filter`. Se documenta acá
-porque es un error que produce resultados plausibles y falsos.
+No hay un único Laplaciano correcto: depende de qué estado se considera
+"sin anomalía". El detalle está en el docstring de `graph/filter` y las
+mediciones en `experiments/firma-espectral/`.
 
 ## Supuesto de vecindad geográfica
 

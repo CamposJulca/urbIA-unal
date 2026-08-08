@@ -97,22 +97,45 @@ Restar la media deja un residuo real en el coeficiente cero —entre 0,064 y
     x_centrada    = x − mean(x)              ✗  deja residuo en el modo 0
     x_proyectada  = x − (u₀ᵀx)·u₀            ✓  lo anula
 
-**Segunda, y peor: centrar por la media corrompe la energía de Dirichlet.**
-`E_D` ya es invariante al modo cero por construcción, porque `L_norm·u₀ = 0`
-y sumar cualquier múltiplo del núcleo no la cambia. Proyectar fuera de `u₀`
-la deja bit a bit igual. Restar la media **no**, porque la constante no es
-un elemento del núcleo: medido con la señal sintética del experimento,
-`E_D` pasa de 45,0239 a 22,0260 en centro —menos de la mitad— y de 19,7213
-a 24,7631 en universitario, hacia arriba. El resultado sigue siendo un
-número plausible y ya no mide desacuerdo entre vecinos.
+**Segunda: `E_D` es invariante al núcleo, pero NO al nivel medio de la
+señal.** Son cosas distintas y confundirlas cuesta caro. Sumar un múltiplo
+de `√d` no cambia `E_D`; sumar una constante **sí**, porque el vector
+constante no está en el núcleo de `L_norm`. Y una señal AMI es sobre todo
+una constante: todos los medidores cerca de 220 V.
+
+Medido sobre las seis zonas, la energía de una señal perfectamente plana
+de 220 V bajo `L_norm`:
+
+    centro         14 656        la_enea        21 671
+    chipre         12 120        palermo        14 256
+    palogrande     12 094        universitario   8 876
+
+contra **~286 que aporta el ruido real** de la señal. Es decir: el 98 % de
+`E_D_norm` de una señal AMI es una penalización al estado normal, que
+depende sólo de la irregularidad de los grados y no de que pase nada.
+
+La consecuencia es directa sobre la detección. Medido sobre 500
+realizaciones por zona, AUC para separar una anomalía individual de +6σ:
+
+    E_D_norm sobre la señal cruda          0,661
+    E_D_norm sobre la señal centrada       0,986
+    E_D combinatorio (L = D − A)           0,982
 
 **La regla, entonces:**
 
-* Para `dirichlet_energy` y para cualquier detector construido sobre
-  `L_norm·x`: **no centrar**. La invariancia ya está, y centrar sólo puede
-  romperla.
-* Para el reparto por bandas, la GFT o cualquier lectura por modo:
-  **proyectar fuera de `u₀`**, nunca restar la media.
+* Para leer el espectro por modo o por banda: **proyectar fuera de `u₀`**,
+  nunca restar la media.
+* Para medir rugosidad con intención de detectar: **el nivel medio hay que
+  sacarlo**. `L_norm` sobre la señal cruda está dominado por el término
+  constante y no sirve. Restar la media funciona; usar el **Laplaciano
+  combinatorio** `L = D − A` funciona mejor y sin preprocesar, porque su
+  núcleo **sí** es el vector constante y una señal plana le da cero exacto.
+
+`L_norm` es el operador correcto para el Difuminador —la respuesta `g(λ)`
+necesita el espectro acotado en `[0, 2]`— y el operador equivocado para
+medir desacuerdo entre vecinos en una señal con nivel medio grande. No hay
+un único Laplaciano correcto: depende de qué estado se considera "sin
+anomalía".
 
 Es un error que produce resultados plausibles y falsos, que es la clase de
 error que no se detecta mirando la salida.
