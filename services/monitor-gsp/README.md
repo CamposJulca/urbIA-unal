@@ -58,15 +58,15 @@ sobre una ventana promediada, y reporta **qué nodos** marcó.
 from urbia_monitor_gsp.detector import CollectiveScanDetector, DetectorConfig
 
 detector = CollectiveScanDetector(zona, sigma_spatial=4.4012,
-                                  config=DetectorConfig(window=32))
+                                  config=DetectorConfig(window=16))
 detector.calibrate(seed=20260808)
 detecciones = detector.detect(lecturas)          # (T, n)
 detecciones[0].device_ids                        # los nodos marcados
 detector.node_mask(detecciones, len(lecturas))   # para la matriz de confusión
 ```
 
-Cada decisión sale de una medición, y están en `experiments/firma-espectral/`
-y `experiments/magnitud-duracion/`:
+Cada decisión sale de una medición: `experiments/firma-espectral/`,
+`experiments/magnitud-duracion/` y `experiments/detector-colectivo/`.
 
 | Decisión | Por qué |
 |---|---|
@@ -140,13 +140,13 @@ filtrar el rango estable es `[0,447, 2,239]`; para detectar la meseta llega
 hasta τ=0,05, en plena región que para filtrar se declaró degenerada. El
 Afinador tiene que saber para qué está ajustando.
 
-### Advertencia: tres veces un argumento de invariancia sonó correcto y falló
+### Advertencia: cuatro veces un argumento de invariancia sonó correcto y falló
 
 Quien vaya a tocar el preprocesado de esta ruta debería leer esto antes.
-**Tres veces en este desarrollo se razonó sobre invariancia, el argumento
-era formalmente correcto, y la conclusión que se sacó de él resultó falsa
-al medirla.** No son tres descuidos distintos: son el mismo error tres
-veces.
+**Cuatro veces en este desarrollo se razonó sobre invariancia o sobre
+filtrado, el argumento era formalmente correcto, y la conclusión que se
+sacó de él resultó falsa al medirla.** No son cuatro descuidos distintos:
+es el mismo error cuatro veces.
 
 **1. "`E_D` es invariante al modo cero, así que no hay que centrar."** La
 invariancia es cierta. La conclusión, falsa: `E_D` es invariante al
@@ -166,6 +166,13 @@ y la conclusión vuelve a ser falsa. Proyectar cuesta de 40 a 77 puntos de
 detección, porque `u₀ ∝ √d` **no** es constante: la proyección deja un
 sesgo determinista de hasta 42σ por bola, y el máximo cae siempre en la
 misma sin importar los datos.
+
+**4. "La firma colectiva es de baja frecuencia y el Difuminador es un
+paso-bajo, luego debería ayudar."** Y ayuda, en apariencia: la detección
+sube de 55,8 % a 100 %. Pero el filtro rompe la invariancia a sumar una
+constante —`diffuse(1)` va de 0,8524 a 1,2426— y con eso marca el 100 % de
+los modos comunes, que debe ignorar. La ganancia no era detectar mejor: era
+dejar de distinguir.
 
 **El patrón.** Una invariancia siempre lo es **respecto de un subespacio**.
 Decir "es invariante" sin decir *a qué* invita a concluir que cualquier
