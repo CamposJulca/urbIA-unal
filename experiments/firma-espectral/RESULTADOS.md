@@ -3,6 +3,16 @@
 Medición previa al diseño del detector: qué mira el detector tiene que
 salir de acá y no de una suposición.
 
+> **Cómo leer las cifras de detección de este documento.** Se midieron con
+> el instrumento de entonces: **escaneo de radio 1 sobre un solo instante**.
+> El detector que salió después escanea radios {1, 2} sobre una ventana, y
+> sus cifras son otras —mejores en todos los casos—. Las de acá siguen
+> siendo correctas para la configuración que describen y son las que
+> justifican el diseño; las vigentes del módulo están en
+> `experiments/detector-colectivo/` y `experiments/detector-deslizante/`.
+> Las mediciones **espectrales** (§1 a §4) no dependen del detector y no
+> caducan.
+
 | | |
 |---|---|
 | Fecha | 2026-08-08 |

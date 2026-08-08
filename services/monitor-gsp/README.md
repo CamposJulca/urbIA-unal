@@ -84,8 +84,14 @@ defecto a corregir: es el alcance del método. Medido sobre un instante al
 
 | Caso | Umbral por medidor | Este detector |
 |---|---|---|
-| Anomalía individual de +6σ | **99,0 %** | 33,4 % |
-| Evento colectivo, profundidad 2 | 6,7 % | **18,9 %** |
+| Anomalía individual de +6σ | **99,7 %** | 33,3 % |
+| Evento colectivo, profundidad 2 | 6,3 % | **23,4 %** |
+
+*Medido con la configuración por defecto —radios {1,2}, un instante, 1 % de
+falsos positivos— en `experiments/detector-colectivo/`. Las cifras que esta
+tabla traía antes (99,0 / 33,4 y 6,7 / 18,9) venían de
+`experiments/firma-espectral/`, que escaneaba sólo radio 1; siguen siendo
+correctas para esa configuración pero ya no describen el módulo.*
 
 La anomalía individual es un impulso en el dominio de los nodos —79,2 % de
 su energía en banda alta— y promediar una bola de vecinos la diluye. El
