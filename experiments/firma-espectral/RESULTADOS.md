@@ -86,9 +86,55 @@ ocupan regiones distintas del espectro.**
 La respuesta a la pregunta que decide H3 es entonces afirmativa: la firma
 colectiva y la individual **no** se ven iguales. Pero con un matiz que
 importa, y va invertido respecto de la intuición: la anomalía individual es
-la que vive en **alta** frecuencia, y la colectiva en **baja**. Un detector
-paso-alto —el que E6 validó— está afinado para la individual, que es
-justamente la que un umbral ya resuelve.
+la que vive en **alta** frecuencia, y la colectiva en **baja**.
+
+### 3.1 Resultado de tesis: qué era la "firma de banda ancha" de E6
+
+**El notebook E6 observó que la firma de anomalía no se concentraba en alta
+frecuencia sino que se repartía por el espectro, y lo registró como una
+firma de banda ancha. Esta medición dice que no era una firma sin patrón:
+eran dos firmas distintas mezcladas.**
+
+Sobre el grafo de juguete de E6 no había forma de separarlas, porque las
+anomalías inyectadas eran individuales y el grafo tenía 10 nodos. Con los
+150 medidores reales y eventos colectivos construidos aparte, las dos
+poblaciones se separan sin solapamiento:
+
+* Anomalía **individual**: banda alta 79,20 % ± 5,76 %, Rayleigh 1,0000. Es
+  un impulso en el dominio de los nodos, y un impulso es plano en el
+  dominio de la frecuencia del grafo — de ahí que su energía llegue hasta
+  el modo más alto.
+* Evento **colectivo**: banda alta 16,39 % a 18,59 %, Rayleigh 0,17 a 0,30.
+  Es una meseta sobre un subconjunto conexo, y su energía de alta
+  frecuencia proviene sólo del **perímetro** del grupo.
+
+Lo que se leía como una única firma dispersa es la superposición de una
+componente de alta frecuencia —los eventos individuales— y una de baja —los
+colectivos—. Promediarlas produce un espectro aparentemente plano y sin
+estructura.
+
+### 3.2 Consecuencia sobre el aparato heredado
+
+**El detector paso-alto que E6 validó está afinado para el caso que un
+umbral por medidor ya resuelve.** No es que funcione mal: funciona bien, y
+funciona bien para lo que no hace falta.
+
+Las cifras lo cierran. Sobre la anomalía individual, a un punto de
+operación del 1 % de falsos positivos, un umbral por medidor detecta el
+99,0 % de los eventos. Cualquier ganancia que un detector espectral pueda
+aportar ahí está acotada por ese 1 % restante. Sobre los eventos
+colectivos, que son los que el umbral no ve —3,8 % a 9,2 %—, el paso-alto
+mira justamente la banda donde la firma colectiva **no** está: su energía
+de banda alta es del 16 % al 19 %, contra el 79 % de la individual.
+
+Esto no invalida el trabajo de E6, que era correcto para lo que evaluó. Lo
+que hace es reubicarlo: el paso-alto es el detector adecuado para
+anomalías puntuales, un caso que ya tiene solución barata, y el detector de
+eventos colectivos tiene que construirse mirando otra cosa.
+
+**Va al capítulo, y amerita un ADR propio** que registre la decisión de no
+continuar con el detector paso-alto como núcleo del monitor y la evidencia
+que la sostiene.
 
 ---
 
