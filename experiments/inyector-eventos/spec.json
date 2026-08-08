@@ -1,0 +1,12 @@
+{
+  "topologia": "data/topologies/manizales_150.json",
+  "esquema": "data/schemas/payload_schema_v1.json",
+  "perfil": "data/profiles/manizales_signal_v1.json",
+  "seed": 20260808,
+  "n_instantes": 60,
+  "zonas": ["centro", "chipre", "la_enea", "palermo", "palogrande", "universitario"],
+  "on_violation": "raise",
+  "eventos": [
+    {"magnitude": "voltaje_v", "depth": 1, "sigma_multiple": 1.0, "start": 20, "duration": 10}
+  ]
+}
