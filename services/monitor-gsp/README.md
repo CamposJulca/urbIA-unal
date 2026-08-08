@@ -107,6 +107,18 @@ positivos:
 | 32 | 99,9 % | 90,2 % | +9,7 |
 | 64 | 100 % | 100 % | +0,0 |
 
+**Reverificado en condición realista** —ventana deslizante, evento en
+posición sorteada, FPR calibrado por señal— en
+`experiments/detector-deslizante/`: N=16 sobrevive y la ventaja **sube** a
++49,6 (escaneo 79,4 % contra umbral 29,8 %). Deslizar le cuesta más al
+umbral, que toma el máximo sobre 49 ventanas × 25 medidores casi
+independientes, que al escaneo, cuyas 41 bolas se solapan. Los experimentos
+con ventana conocida estaban **subestimando** la ventaja.
+
+En ese punto el detector además localiza bien: **recall por nodo 92,1 %,
+precisión 77,2 %, F1 0,839**. Con radios {1} solamente caen a 49,2 %,
+67,8 % y 0,570.
+
 La ventaja obedece a **`σ·√N ≈ 2`**: es máxima justo por debajo del punto
 donde un umbral por medidor empieza a funcionar. De ahí una regla
 transferible: ante un evento de magnitud σ conocida, la ventana que más
