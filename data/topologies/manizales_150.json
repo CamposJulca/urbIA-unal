@@ -1,0 +1,908 @@
+{
+    "meters": [
+        {
+            "lat": 5.068755,
+            "lon": -75.517165,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0001"
+        },
+        {
+            "lat": 5.065475,
+            "lon": -75.515302,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0002"
+        },
+        {
+            "lat": 5.069628,
+            "lon": -75.511039,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0003"
+        },
+        {
+            "lat": 5.07103,
+            "lon": -75.516583,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0004"
+        },
+        {
+            "lat": 5.066797,
+            "lon": -75.51712,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0005"
+        },
+        {
+            "lat": 5.064968,
+            "lon": -75.51265,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0006"
+        },
+        {
+            "lat": 5.063239,
+            "lon": -75.515531,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0007"
+        },
+        {
+            "lat": 5.068849,
+            "lon": -75.512278,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0008"
+        },
+        {
+            "lat": 5.064984,
+            "lon": -75.511861,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0009"
+        },
+        {
+            "lat": 5.070285,
+            "lon": -75.517339,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0010"
+        },
+        {
+            "lat": 5.070252,
+            "lon": -75.510837,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0011"
+        },
+        {
+            "lat": 5.066062,
+            "lon": -75.515938,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0012"
+        },
+        {
+            "lat": 5.071615,
+            "lon": -75.514236,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0013"
+        },
+        {
+            "lat": 5.063835,
+            "lon": -75.516491,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0014"
+        },
+        {
+            "lat": 5.070627,
+            "lon": -75.511725,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0015"
+        },
+        {
+            "lat": 5.070264,
+            "lon": -75.510541,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0016"
+        },
+        {
+            "lat": 5.067826,
+            "lon": -75.508253,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0017"
+        },
+        {
+            "lat": 5.066407,
+            "lon": -75.512211,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0018"
+        },
+        {
+            "lat": 5.070465,
+            "lon": -75.511586,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0019"
+        },
+        {
+            "lat": 5.070755,
+            "lon": -75.511973,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0020"
+        },
+        {
+            "lat": 5.069341,
+            "lon": -75.516969,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0021"
+        },
+        {
+            "lat": 5.065051,
+            "lon": -75.51468,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0022"
+        },
+        {
+            "lat": 5.063718,
+            "lon": -75.515212,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0023"
+        },
+        {
+            "lat": 5.063909,
+            "lon": -75.514787,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0024"
+        },
+        {
+            "lat": 5.068721,
+            "lon": -75.513971,
+            "zona": "centro",
+            "device_id": "urbia-cen-mon-0025"
+        },
+        {
+            "lat": 5.072961,
+            "lon": -75.523114,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0001"
+        },
+        {
+            "lat": 5.072136,
+            "lon": -75.51657,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0002"
+        },
+        {
+            "lat": 5.075184,
+            "lon": -75.519518,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0003"
+        },
+        {
+            "lat": 5.071369,
+            "lon": -75.518438,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0004"
+        },
+        {
+            "lat": 5.071307,
+            "lon": -75.521585,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0005"
+        },
+        {
+            "lat": 5.077916,
+            "lon": -75.51924,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0006"
+        },
+        {
+            "lat": 5.074456,
+            "lon": -75.518838,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0007"
+        },
+        {
+            "lat": 5.076743,
+            "lon": -75.518016,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0008"
+        },
+        {
+            "lat": 5.071832,
+            "lon": -75.524711,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0009"
+        },
+        {
+            "lat": 5.072524,
+            "lon": -75.52259,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0010"
+        },
+        {
+            "lat": 5.071688,
+            "lon": -75.516514,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0011"
+        },
+        {
+            "lat": 5.077011,
+            "lon": -75.522168,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0012"
+        },
+        {
+            "lat": 5.075244,
+            "lon": -75.521439,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0013"
+        },
+        {
+            "lat": 5.077316,
+            "lon": -75.52087,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0014"
+        },
+        {
+            "lat": 5.072119,
+            "lon": -75.52278,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0015"
+        },
+        {
+            "lat": 5.074491,
+            "lon": -75.522635,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0016"
+        },
+        {
+            "lat": 5.074677,
+            "lon": -75.51692,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0017"
+        },
+        {
+            "lat": 5.073195,
+            "lon": -75.523026,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0018"
+        },
+        {
+            "lat": 5.07798,
+            "lon": -75.520414,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0019"
+        },
+        {
+            "lat": 5.070727,
+            "lon": -75.524576,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0020"
+        },
+        {
+            "lat": 5.070877,
+            "lon": -75.519353,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0021"
+        },
+        {
+            "lat": 5.076337,
+            "lon": -75.521201,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0022"
+        },
+        {
+            "lat": 5.070508,
+            "lon": -75.521565,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0023"
+        },
+        {
+            "lat": 5.077969,
+            "lon": -75.520238,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0024"
+        },
+        {
+            "lat": 5.077769,
+            "lon": -75.517253,
+            "zona": "chipre",
+            "device_id": "urbia-chi-mon-0025"
+        },
+        {
+            "lat": 5.052115,
+            "lon": -75.473351,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0001"
+        },
+        {
+            "lat": 5.058817,
+            "lon": -75.475556,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0002"
+        },
+        {
+            "lat": 5.054668,
+            "lon": -75.474308,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0003"
+        },
+        {
+            "lat": 5.053116,
+            "lon": -75.476783,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0004"
+        },
+        {
+            "lat": 5.056537,
+            "lon": -75.470554,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0005"
+        },
+        {
+            "lat": 5.060759,
+            "lon": -75.478839,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0006"
+        },
+        {
+            "lat": 5.057006,
+            "lon": -75.479856,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0007"
+        },
+        {
+            "lat": 5.061126,
+            "lon": -75.471554,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0008"
+        },
+        {
+            "lat": 5.054984,
+            "lon": -75.474333,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0009"
+        },
+        {
+            "lat": 5.05809,
+            "lon": -75.480166,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0010"
+        },
+        {
+            "lat": 5.059625,
+            "lon": -75.475527,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0011"
+        },
+        {
+            "lat": 5.059786,
+            "lon": -75.475636,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0012"
+        },
+        {
+            "lat": 5.052006,
+            "lon": -75.47811,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0013"
+        },
+        {
+            "lat": 5.052195,
+            "lon": -75.470851,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0014"
+        },
+        {
+            "lat": 5.060787,
+            "lon": -75.47202,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0015"
+        },
+        {
+            "lat": 5.055075,
+            "lon": -75.481305,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0016"
+        },
+        {
+            "lat": 5.06078,
+            "lon": -75.470637,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0017"
+        },
+        {
+            "lat": 5.052857,
+            "lon": -75.476168,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0018"
+        },
+        {
+            "lat": 5.052692,
+            "lon": -75.472873,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0019"
+        },
+        {
+            "lat": 5.059658,
+            "lon": -75.480459,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0020"
+        },
+        {
+            "lat": 5.056753,
+            "lon": -75.475402,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0021"
+        },
+        {
+            "lat": 5.054651,
+            "lon": -75.471531,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0022"
+        },
+        {
+            "lat": 5.056231,
+            "lon": -75.479458,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0023"
+        },
+        {
+            "lat": 5.057393,
+            "lon": -75.473241,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0024"
+        },
+        {
+            "lat": 5.054012,
+            "lon": -75.478259,
+            "zona": "la_enea",
+            "device_id": "urbia-ena-tri-0025"
+        },
+        {
+            "lat": 5.065961,
+            "lon": -75.498501,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0001"
+        },
+        {
+            "lat": 5.061505,
+            "lon": -75.499824,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0002"
+        },
+        {
+            "lat": 5.058968,
+            "lon": -75.502753,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0003"
+        },
+        {
+            "lat": 5.060705,
+            "lon": -75.499117,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0004"
+        },
+        {
+            "lat": 5.059841,
+            "lon": -75.502798,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0005"
+        },
+        {
+            "lat": 5.058568,
+            "lon": -75.498689,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0006"
+        },
+        {
+            "lat": 5.059832,
+            "lon": -75.495946,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0007"
+        },
+        {
+            "lat": 5.064877,
+            "lon": -75.504291,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0008"
+        },
+        {
+            "lat": 5.059904,
+            "lon": -75.49831,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0009"
+        },
+        {
+            "lat": 5.059714,
+            "lon": -75.503677,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0010"
+        },
+        {
+            "lat": 5.065484,
+            "lon": -75.49929,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0011"
+        },
+        {
+            "lat": 5.061781,
+            "lon": -75.497154,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0012"
+        },
+        {
+            "lat": 5.06446,
+            "lon": -75.503096,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0013"
+        },
+        {
+            "lat": 5.058775,
+            "lon": -75.500689,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0014"
+        },
+        {
+            "lat": 5.061389,
+            "lon": -75.50033,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0015"
+        },
+        {
+            "lat": 5.063833,
+            "lon": -75.498266,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0016"
+        },
+        {
+            "lat": 5.065873,
+            "lon": -75.504016,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0017"
+        },
+        {
+            "lat": 5.061221,
+            "lon": -75.501607,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0018"
+        },
+        {
+            "lat": 5.064893,
+            "lon": -75.502513,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0019"
+        },
+        {
+            "lat": 5.059522,
+            "lon": -75.500514,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0020"
+        },
+        {
+            "lat": 5.061375,
+            "lon": -75.502215,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0021"
+        },
+        {
+            "lat": 5.059998,
+            "lon": -75.495767,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0022"
+        },
+        {
+            "lat": 5.061545,
+            "lon": -75.496387,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0023"
+        },
+        {
+            "lat": 5.062403,
+            "lon": -75.504494,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0024"
+        },
+        {
+            "lat": 5.065994,
+            "lon": -75.49664,
+            "zona": "palermo",
+            "device_id": "urbia-pal-tri-0025"
+        },
+        {
+            "lat": 5.056752,
+            "lon": -75.504663,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0001"
+        },
+        {
+            "lat": 5.05579,
+            "lon": -75.511503,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0002"
+        },
+        {
+            "lat": 5.052885,
+            "lon": -75.511076,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0003"
+        },
+        {
+            "lat": 5.052208,
+            "lon": -75.512472,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0004"
+        },
+        {
+            "lat": 5.052032,
+            "lon": -75.504132,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0005"
+        },
+        {
+            "lat": 5.051122,
+            "lon": -75.505943,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0006"
+        },
+        {
+            "lat": 5.05264,
+            "lon": -75.509193,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0007"
+        },
+        {
+            "lat": 5.056659,
+            "lon": -75.504041,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0008"
+        },
+        {
+            "lat": 5.053446,
+            "lon": -75.506534,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0009"
+        },
+        {
+            "lat": 5.050238,
+            "lon": -75.51033,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0010"
+        },
+        {
+            "lat": 5.05675,
+            "lon": -75.507787,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0011"
+        },
+        {
+            "lat": 5.053338,
+            "lon": -75.506268,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0012"
+        },
+        {
+            "lat": 5.049457,
+            "lon": -75.507742,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0013"
+        },
+        {
+            "lat": 5.053023,
+            "lon": -75.505326,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0014"
+        },
+        {
+            "lat": 5.050259,
+            "lon": -75.504353,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0015"
+        },
+        {
+            "lat": 5.049641,
+            "lon": -75.511328,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0016"
+        },
+        {
+            "lat": 5.05376,
+            "lon": -75.506923,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0017"
+        },
+        {
+            "lat": 5.050882,
+            "lon": -75.511921,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0018"
+        },
+        {
+            "lat": 5.056122,
+            "lon": -75.510784,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0019"
+        },
+        {
+            "lat": 5.053756,
+            "lon": -75.507426,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0020"
+        },
+        {
+            "lat": 5.052354,
+            "lon": -75.507747,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0021"
+        },
+        {
+            "lat": 5.053182,
+            "lon": -75.504588,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0022"
+        },
+        {
+            "lat": 5.050634,
+            "lon": -75.506554,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0023"
+        },
+        {
+            "lat": 5.050909,
+            "lon": -75.509438,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0024"
+        },
+        {
+            "lat": 5.054374,
+            "lon": -75.5103,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0025"
+        },
+        {
+            "lat": 5.051529,
+            "lon": -75.506233,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0026"
+        },
+        {
+            "lat": 5.04958,
+            "lon": -75.508875,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0027"
+        },
+        {
+            "lat": 5.056988,
+            "lon": -75.504035,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0028"
+        },
+        {
+            "lat": 5.049586,
+            "lon": -75.511082,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0029"
+        },
+        {
+            "lat": 5.051122,
+            "lon": -75.504601,
+            "zona": "palogrande",
+            "device_id": "urbia-pgr-mon-0030"
+        },
+        {
+            "lat": 5.061928,
+            "lon": -75.489087,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0001"
+        },
+        {
+            "lat": 5.057326,
+            "lon": -75.49558,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0002"
+        },
+        {
+            "lat": 5.061504,
+            "lon": -75.490668,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0003"
+        },
+        {
+            "lat": 5.059505,
+            "lon": -75.488115,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0004"
+        },
+        {
+            "lat": 5.059886,
+            "lon": -75.49693,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0005"
+        },
+        {
+            "lat": 5.061354,
+            "lon": -75.494306,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0006"
+        },
+        {
+            "lat": 5.05997,
+            "lon": -75.48855,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0007"
+        },
+        {
+            "lat": 5.055209,
+            "lon": -75.495961,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0008"
+        },
+        {
+            "lat": 5.054963,
+            "lon": -75.492021,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0009"
+        },
+        {
+            "lat": 5.056451,
+            "lon": -75.491557,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0010"
+        },
+        {
+            "lat": 5.060459,
+            "lon": -75.495168,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0011"
+        },
+        {
+            "lat": 5.059708,
+            "lon": -75.494624,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0012"
+        },
+        {
+            "lat": 5.058397,
+            "lon": -75.488852,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0013"
+        },
+        {
+            "lat": 5.061615,
+            "lon": -75.496169,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0014"
+        },
+        {
+            "lat": 5.057812,
+            "lon": -75.49451,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0015"
+        },
+        {
+            "lat": 5.054032,
+            "lon": -75.49006,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0016"
+        },
+        {
+            "lat": 5.059734,
+            "lon": -75.494642,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0017"
+        },
+        {
+            "lat": 5.060671,
+            "lon": -75.492035,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0018"
+        },
+        {
+            "lat": 5.057849,
+            "lon": -75.496913,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0019"
+        },
+        {
+            "lat": 5.054677,
+            "lon": -75.489052,
+            "zona": "universitario",
+            "device_id": "urbia-uni-tri-0020"
+        }
+    ],
+    "source": "tabla ami_meters de urbia-postgres, exportada el 2026-08-07",
+    "version": "manizales-v1",
+    "n_meters": 150,
+    "description": "Topologia AMI sintetica de Manizales: 150 medidores en 6 zonas, generada por services/simulator-ami. Coordenadas WGS84. Es la topologia contra la que estan medidas las cifras de los docstrings de graph/."
+}

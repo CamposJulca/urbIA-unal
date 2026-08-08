@@ -56,17 +56,34 @@ class ZeroDegreeNodeError(MonitorGspError, ValueError):
     todo el espectro sin que nada avise.
     """
 
-    def __init__(self, indices: tuple[int, ...]) -> None:
+    def __init__(
+        self,
+        indices: tuple[int, ...],
+        zona: str | None = None,
+        device_ids: tuple[str, ...] | None = None,
+    ) -> None:
         """Inicializa el error con los nodos culpables.
 
         Args:
             indices: Posiciones de los nodos con grado cero.
+            zona: Zona donde aparecieron, si se conoce. El aparato
+                espectral no la conoce; el constructor sí.
+            device_ids: Identificadores de los medidores aislados, si se
+                conocen. Un índice de fila no alcanza para ir a mirar el
+                dato: el `device_id` sí.
         """
         self.indices = indices
+        self.zona = zona
+        self.device_ids = device_ids
+
+        donde = f"la zona '{zona}'" if zona is not None else "el grafo"
+        quienes = (
+            f" ({', '.join(device_ids)})" if device_ids else f" en las posiciones {list(indices)}"
+        )
         super().__init__(
-            f"nodos de grado cero en las posiciones {list(indices)}: el Laplaciano "
-            f"normalizado exige dividir por la raíz del grado. Filtrá los nodos "
-            f"aislados o usá el Laplaciano combinatorio, que sí los admite"
+            f"nodos de grado cero en {donde}{quienes}: el Laplaciano normalizado exige "
+            f"dividir por la raíz del grado. Subí k, ampliá radius_m, filtrá los nodos "
+            f"aislados, o usá el Laplaciano combinatorio, que sí los admite"
         )
 
 
@@ -231,8 +248,9 @@ class BuildStats:
     Attributes:
         n_meters: Nodos del subgrafo.
         n_edges: Aristas no dirigidas.
-        k_effective: k realmente aplicado. Puede ser menor que el pedido si
-            la zona tiene menos de k+1 medidores.
+        k_effective: k realmente aplicado bajo `strategy="knn"`. Puede ser
+            menor que el pedido si la zona tiene menos de k+1 medidores.
+            Vale 0 bajo `strategy="radius"`, donde no hay k.
         degree_min: Grado mínimo. Con k-NN simetrizado nunca baja de
             `k_effective`, que es lo que evita los nodos hoja que E6
             identificó como punto ciego del detector.

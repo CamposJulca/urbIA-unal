@@ -5,6 +5,7 @@ configuración de servicio, así que puede usarse desde un notebook sin
 levantar nada.
 """
 
+from .builder import build_ami_graph, build_zone_graph
 from .geo import (
     LocalFrame,
     curvature_radii,
@@ -55,6 +56,8 @@ __all__ = [
     "MonitorGspError",
     "ZeroDegreeNodeError",
     "ZoneGraph",
+    "build_ami_graph",
+    "build_zone_graph",
     "connected_components",
     "curvature_radii",
     "degenerate_groups",

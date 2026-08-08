@@ -11,8 +11,35 @@ reales de `ami_meters`.
 
 ## Estado
 
-En construcción. Entrega actual: empaquetado (paso 1 de 10). El código del
-constructor todavía no existe.
+En construcción, paso 4 de 10. El núcleo puro del grafo ya está completo:
+
+| Módulo | Qué hace |
+|---|---|
+| `graph/geo` | Proyección WGS84 a plano local en metros y distancias |
+| `graph/types` | Contrato: `MeterNode`, `GraphConfig`, `ZoneGraph`, `AmiGraph` |
+| `graph/spectral` | `A → L → L_norm → eigh → GFT`, sobre matrices |
+| `graph/builder` | De medidores a subgrafos zonales con espectro |
+
+```python
+from urbia_monitor_gsp.graph import build_ami_graph, gft
+
+grafo = build_ami_graph(meters)              # un ZoneGraph por zona
+zona = grafo.zones["la_enea"]
+x_hat = gft(lecturas, zona.eigenvectors)     # espectro de la señal
+```
+
+`build_ami_graph` no lee de ninguna parte: recibe `MeterNode` y devuelve
+`AmiGraph`. De dónde salen los medidores —PostgreSQL, un JSON de
+topología, una celda de notebook— es problema de quien llama, y es lo que
+permite construir el mismo grafo en un nodo de borde sin base de datos.
+
+Falta: detector espectral, wavelet multiescala, difuminador y lector de
+PostgreSQL. El puente inter-zona está declarado en `GraphConfig` pero no
+implementado; encenderlo levanta `InvalidGraphConfigError`.
+
+Los números de este README y de los docstrings están medidos contra
+`data/topologies/manizales_150.json`, la topología versionada de los 150
+medidores, y fijados como tests de regresión en `tests/test_builder.py`.
 
 ## Supuesto de vecindad geográfica
 
