@@ -170,7 +170,41 @@ igual. **Corolario**: el escaneo tiene que ofrecer candidatos que puedan
 coincidir con el tamaño del evento, y nada en la ruta de detección puede
 promediar a través de la frontera.
 
-### 5.3 Sobre la disciplina de medición
+### 5.3 Una cifra correcta, citada fuera de su configuración
+
+**Es la forma de error que más veces apareció en este desarrollo, y la
+única que ningún test detecta.** No hay número mal calculado ni cuenta mal
+hecha: la cifra reproduce exacto contra su medición. Lo que está mal es
+que se la lee en un contexto que no es el suyo.
+
+Ejemplos reales, todos corregidos:
+
+* El README del módulo decía que el detector rinde **33,4 %** en anomalías
+  individuales. Correcto — para `firma-espectral`, que escaneaba radio 1
+  sobre un instante. El módulo tiene por defecto radios {1,2}, donde la
+  cifra es 33,3 %, y el evento colectivo pasa de 18,9 % a 23,4 %.
+* El docstring de `DEFAULT_WINDOW` justificaba N=16 con 93,6 % contra
+  54,8 %. Correcto — con ventana conocida y falso positivo por ventana. En
+  la condición realista es 79,4 % contra 29,8 %, y la ventaja **crece** de
+  +38,8 a +49,6.
+* Se afirmó que "la ventaja del método está en N ≤ 2". Correcto para σ=1,5;
+  falso en general, porque el óptimo obedece a `σ·√N ≈ 2` y para σ=0,5 cae
+  en N=16.
+* Se propuso cambiar el defecto de radios a {1} citando que {1,2} costaba
+  51 puntos y que r=1 daba 100 % de recall. Ninguna de las dos cifras
+  existe en ninguna medición; el recall con r=1 va de 29,6 % a 67,8 %.
+
+Los cuatro casos tienen la misma forma: una cifra tomada de un mensaje o de
+un documento anterior, sin volver a la medición que la produjo.
+
+**La regla.** Ninguna cifra se cita sin su configuración al lado. Cuando
+una cifra viaja de un documento a otro hay que preguntar de qué corrida
+salió y con qué parámetros, no si el número está bien copiado. Los
+`RESULTADOS.md` llevan encabezado de configuración por esto, y los
+`results/medicion.json` están versionados para poder volver a verificar sin
+rehacer la medición.
+
+### 5.4 Sobre la disciplina de medición
 
 Dos prácticas que se adoptaron sobre la marcha y conviene mantener:
 

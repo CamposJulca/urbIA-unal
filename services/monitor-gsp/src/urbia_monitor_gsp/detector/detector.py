@@ -11,7 +11,7 @@ resumen, con puntero al experimento que lo sostiene:
 | Contraste de dos muestras | AUC 0,73–0,81 contra 0,65–0,80 del umbral |
 | Sobre ventana promediada | Integrar N instantes mejora la detección en `√N` |
 | Sin centrado | Proyectar fuera de `u₀` cuesta de 40 a 77 puntos |
-| Radios 1 y 2 | Con radio 1 solo, el recall por nodo cae de 42,0 % a 16,8 % |
+| Radios 1 y 2 | Con radio 1 solo la detección cae de 79,4 % a 55,2 % |
 | Sin prefiltro | El Difuminador marca el modo comun en el 100 % de los casos |
 
 ## Dónde pierde
@@ -21,8 +21,14 @@ individuales, y eso no es un defecto a corregir sino el alcance del
 método.** Medido sobre un instante, a un punto de operación del 1 % de
 falsos positivos:
 
-    anomalía individual de +6σ    umbral 99,0 %    escaneo 33,4 %
-    evento colectivo, depth 2     umbral  6,7 %    escaneo 18,9 %
+    anomalía individual de +6σ    umbral 99,7 %    escaneo 33,3 %
+    evento colectivo, depth 2     umbral  6,3 %    escaneo 23,4 %
+
+Medido con **la configuración por defecto de este módulo** —radios {1,2},
+un instante, 1 % de falsos positivos— en `experiments/detector-colectivo/`.
+Toda cifra citada acá lleva su configuración a propósito: una cifra
+correcta leída fuera de la suya es el error más frecuente de este
+desarrollo, y ningún test lo detecta.
 
 La razón es estructural y está medida en `experiments/firma-espectral/`: la
 anomalía individual es un impulso en el dominio de los nodos, con el 79,2 %

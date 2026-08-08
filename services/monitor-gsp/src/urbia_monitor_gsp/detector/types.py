@@ -19,13 +19,21 @@ DEFAULT_WINDOW: Final = 16
 """Instantes sobre los que se integra. Punto de operación declarado.
 
 Elegido por **ventaja sobre el umbral por medidor**, no por detección
-absoluta: el segundo objetivo ya lo resuelve un método más barato. Medido
-en `experiments/detector-colectivo/` sobre eventos de σ=0,5 y profundidad
-2, al 1 % de falsos positivos por ventana:
+absoluta: el segundo objetivo ya lo resuelve un método más barato.
 
-    N=16    escaneo 93,6 %   umbral 54,8 %   ventaja +38,8   <- este
-    N=32    escaneo 99,9 %   umbral 90,2 %   ventaja  +9,7
-    N=64    escaneo  100 %   umbral  100 %   ventaja  +0,0   <- maxima deteccion
+Medido en **condición realista** —ventana deslizante, evento en posición
+sorteada, 1 % de falsos positivos **por señal**— en
+`experiments/detector-deslizante/`, sobre eventos de σ=0,5 y profundidad 2:
+
+    N=16    escaneo 79,4 %   umbral 29,8 %   ventaja +49,6   <- este
+    N=32    escaneo 99,5 %   umbral 70,2 %   ventaja +29,3   <- maxima deteccion
+
+La elección se había hecho antes con ventana conocida y 1 % por ventana
+(`experiments/detector-colectivo/`), donde N=16 daba 93,6 % contra 54,8 % y
+ventaja +38,8. N=16 sobrevive a las dos condiciones; lo que cambia es que
+la condición realista **agranda** la ventaja, porque deslizar penaliza más
+al umbral —49 ventanas × 25 medidores casi independientes— que al escaneo,
+cuyas bolas se solapan.
 
 **La ventaja obedece a `σ·√N ≈ 2`**, la magnitud efectiva por medidor tras
 integrar: es máxima justo por debajo del punto donde un umbral por medidor

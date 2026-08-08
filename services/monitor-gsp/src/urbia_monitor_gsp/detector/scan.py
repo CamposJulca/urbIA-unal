@@ -11,8 +11,9 @@ zona, y un estadístico global integra el ruido de todas.
 
 El escaneo, en cambio, contrasta cada vecindario contra el resto de su zona
 y se queda con el mayor desacuerdo. Sobre el mismo material da 0,73 a 0,81
-de AUC, y al punto de operación del 1 % de falsos positivos detecta el
-18,9 % contra el 6,7 % del umbral por medidor.
+de AUC, y al 1 % de falsos positivos detecta el 18,9 % contra el 6,7 % del
+umbral por medidor —cifras del instrumento de aquella medición, radio 1
+sobre un instante, no del detector que salió después—.
 
 ## El estadístico
 
