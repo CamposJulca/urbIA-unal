@@ -135,33 +135,69 @@ class CollectiveScanDetector:
             media = media - float(u0 @ media) * u0
         return media
 
-    def calibrate(self, seed: int) -> float:
+    def calibrate(self, seed: int, n_instants: int | None = None) -> float:
         """Calibra el umbral bajo la hipótesis nula, por Monte Carlo.
 
-        Simula ventanas sin evento con la dispersión declarada, las pasa
-        por el **mismo** preprocesado que usará en operación —incluido el
+        Simula señales sin evento con la dispersión declarada, las pasa por
+        el **mismo** preprocesado que usará en operación —incluido el
         Difuminador y la proyección si están activos— y toma el cuantil que
-        deja el `fpr_target` por ventana.
+        deja el `fpr_target`.
+
+        **Los dos modos no son intercambiables, y el que importa depende de
+        cómo se declare el punto de operación.**
+
+        * Sin `n_instants`, el `fpr_target` es **por ventana**. Es la
+          calibración simple, y la que infla el resultado si después el
+          detector recorre muchas ventanas: una señal de W ventanas dispara
+          en falso con probabilidad `1 − (1 − fpr)^W`, muy por encima del
+          objetivo.
+        * Con `n_instants`, el `fpr_target` es **por señal** de ese largo.
+          Simula señales completas, recorre sus ventanas como en operación
+          y calibra sobre el máximo. Es la condición realista, y la que hay
+          que usar para comparar contra un detector que también mira la
+          señal entera.
 
         Se calibra por simulación y no analíticamente porque el máximo
-        sobre bolas solapadas no tiene distribución cerrada, y porque así
-        el prefiltro queda incluido sin razonar aparte cómo cambia el ruido.
+        sobre bolas solapadas —y sobre ventanas solapadas— no tiene
+        distribución cerrada, y porque así el prefiltro queda incluido sin
+        razonar aparte cómo cambia el ruido.
 
         Args:
             seed: Semilla del generador. Fija el umbral de forma
                 reproducible.
+            n_instants: Largo de la señal si el objetivo es por señal.
+                `None` calibra por ventana.
 
         Returns:
             El corte calibrado.
+
+        Raises:
+            DetectorError: Si `n_instants` es menor que la ventana.
         """
         rng = np.random.default_rng(seed)
-        ventanas = rng.normal(
-            0.0,
-            self._sigma,
-            size=(self._config.calibration_samples, self._config.window, self._zone.n_meters),
+        if n_instants is None:
+            largo = self._config.window
+            ventanas_por_muestra = [(0, self._config.window)]
+        else:
+            if n_instants < self._config.window:
+                raise DetectorError(
+                    f"n_instants={n_instants} es menor que la ventana "
+                    f"{self._config.window}: no cabe ninguna"
+                )
+            largo = n_instants
+            ventanas_por_muestra = self._windows(n_instants)
+
+        muestras = rng.normal(
+            0.0, self._sigma, size=(self._config.calibration_samples, largo, self._zone.n_meters)
         )
         maximos = np.array(
-            [contrasts(self._prepare(v), self._masks, self._sigma_eff).max() for v in ventanas]
+            [
+                max(
+                    float(contrasts(self._prepare(x[i:f]), self._masks, self._sigma_eff).max())
+                    for i, f in ventanas_por_muestra
+                )
+                for x in muestras
+            ]
         )
         self._threshold = float(np.quantile(maximos, 1.0 - self._config.fpr_target))
         return self._threshold

@@ -492,3 +492,60 @@ class TestModoComun:
             for _ in range(200)
         )
         assert marcadas / 200 > 0.50
+
+
+class TestCalibracionPorSenal:
+    """Los dos modos de calibración, y por qué no son intercambiables."""
+
+    def test_calibrar_por_senal_da_un_umbral_mas_alto(self, zona_rejilla: ZoneGraph) -> None:
+        """Recorrer W ventanas multiplica las oportunidades de disparar."""
+        config = DetectorConfig(window=4, step=1, scan_radii=(1, 2), calibration_samples=600)
+        detector = CollectiveScanDetector(zona_rejilla, SIGMA, config)
+        por_ventana = detector.calibrate(SEMILLA)
+        por_senal = detector.calibrate(SEMILLA, n_instants=16)
+        assert por_senal > por_ventana
+
+    def test_el_fpr_por_senal_se_acerca_al_objetivo(self, zona_rejilla: ZoneGraph) -> None:
+        config = DetectorConfig(
+            window=4, step=1, scan_radii=(1, 2), fpr_target=0.05, calibration_samples=800
+        )
+        detector = CollectiveScanDetector(zona_rejilla, SIGMA, config)
+        detector.calibrate(SEMILLA, n_instants=16)
+
+        rng = np.random.default_rng(99)
+        disparos = sum(
+            any(
+                d.detected
+                for d in detector.detect(rng.normal(220.0, SIGMA, size=(16, zona_rejilla.n_meters)))
+            )
+            for _ in range(300)
+        )
+        assert 0.02 <= disparos / 300 <= 0.11
+
+    def test_calibrar_por_ventana_desborda_el_fpr_por_senal(self, zona_rejilla: ZoneGraph) -> None:
+        """El defecto que motiva el modo por señal.
+
+        Con el objetivo del 5 % por ventana y 13 ventanas por señal, la
+        tasa por señal se dispara muy por encima del 5 %.
+        """
+        config = DetectorConfig(
+            window=4, step=1, scan_radii=(1, 2), fpr_target=0.05, calibration_samples=800
+        )
+        detector = CollectiveScanDetector(zona_rejilla, SIGMA, config)
+        detector.calibrate(SEMILLA)
+
+        rng = np.random.default_rng(99)
+        disparos = sum(
+            any(
+                d.detected
+                for d in detector.detect(rng.normal(220.0, SIGMA, size=(16, zona_rejilla.n_meters)))
+            )
+            for _ in range(300)
+        )
+        assert disparos / 300 > 0.20
+
+    def test_una_senal_mas_corta_que_la_ventana_no_calibra(self, zona_rejilla: ZoneGraph) -> None:
+        config = DetectorConfig(window=8, calibration_samples=200)
+        detector = CollectiveScanDetector(zona_rejilla, SIGMA, config)
+        with pytest.raises(DetectorError, match="menor que la ventana"):
+            detector.calibrate(SEMILLA, n_instants=4)
