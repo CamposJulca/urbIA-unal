@@ -12,6 +12,11 @@ no en el `pyproject.toml` de ningún servicio.
 | Notebook | Contenido | Entregable |
 |---|---|---|
 | `01_gsp_hello_world.ipynb` | Grafo de juguete (10 nodos), GFT, detector espectral simple | E6 |
+| `02_grafo_ami_150.ipynb` | Grafo AMI de los 150 medidores reales: construcción, criterio de vecindad, espectro por zona y Difuminador | paso 7 |
+
+`figures/` guarda los PNG exportados por los notebooks, para incluirlos
+directamente en el documento LaTeX del anteproyecto sin recortarlos de la
+salida. Los nombres siguen `NN_figM_descripcion.png`.
 
 ## Instalación local del kernel (.102)
 
@@ -21,6 +26,27 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
+```
+
+`02_grafo_ami_150.ipynb` importa además el módulo del monitor, que no está en
+`requirements.txt` porque vive en el repositorio y se instala editable:
+
+```bash
+pip install -e ../services/monitor-gsp
+```
+
+No hace falta el extra `[db]`: el núcleo `urbia_monitor_gsp.graph` sólo depende
+de numpy, y el notebook lee la topología del JSON versionado en vez de
+consultar PostgreSQL.
+
+## Reejecución no interactiva
+
+Los notebooks se commitean **con sus salidas**, porque son material de
+capítulo y deben leerse en GitHub sin correrlos. Para regenerarlas:
+
+```bash
+cd ~/urbIA-unal/notebooks
+.venv/bin/jupyter nbconvert --to notebook --execute --inplace 02_grafo_ami_150.ipynb
 ```
 
 ## Levantar JupyterLab en .102
