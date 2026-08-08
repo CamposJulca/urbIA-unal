@@ -199,9 +199,9 @@ saber qué medir, no para saltearse la medición.
 
 ### El paso-alto de E6 quedó descartado como núcleo
 
-`experiments/firma-espectral/RESULTADOS.md` §3.2: está afinado para
-anomalías individuales, que un umbral ya resuelve al 99,0 %. Amerita un ADR
-propio, pendiente.
+Está afinado para anomalías individuales, que un umbral por medidor ya
+resuelve al 99,7 %. La decisión, su evidencia y la reformulación de H3
+están en **`docs/decisions/ADR-004-detector-de-eventos-colectivos.md`**.
 
 ## Mediciones pendientes
 
