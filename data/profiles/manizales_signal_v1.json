@@ -1,0 +1,112 @@
+{
+  "definicion_sigma_espacial": "raiz de la media sobre instantes de la varianza entre medidores del mismo device_type en ese instante; es la dispersion que ve un detector definido sobre el grafo",
+  "estado_incluido": "activo",
+  "fuente": "ami_telemetry en urbia-postgres (.102)",
+  "magnitudes": {
+    "corriente_a": {
+      "mono": {
+        "filas": 1281321,
+        "instantes": 33320,
+        "maximo_observado": 18.0,
+        "media": 7.146589,
+        "medidores": 80,
+        "medidores_por_instante": 38.13,
+        "minimo_observado": 0.9,
+        "p1": 0.984,
+        "p50": 6.865,
+        "p99": 17.243999,
+        "sigma_agrupada": 4.274752,
+        "sigma_espacial": 2.473207
+      },
+      "trifasico": {
+        "filas": 1172101,
+        "instantes": 28361,
+        "maximo_observado": 54.0,
+        "media": 21.45323,
+        "medidores": 70,
+        "medidores_por_instante": 41.262,
+        "minimo_observado": 2.7,
+        "p1": 2.951,
+        "p50": 20.611,
+        "p99": 51.702,
+        "sigma_agrupada": 12.828958,
+        "sigma_espacial": 7.47308
+      }
+    },
+    "potencia_kw": {
+      "mono": {
+        "filas": 1281321,
+        "instantes": 33320,
+        "maximo_observado": 4.0639,
+        "media": 1.46227,
+        "medidores": 80,
+        "medidores_por_instante": 38.13,
+        "minimo_observado": 0.1672,
+        "p1": 0.2011,
+        "p50": 1.4026,
+        "p99": 3.5473,
+        "sigma_agrupada": 0.876861,
+        "sigma_espacial": 0.509885
+      },
+      "trifasico": {
+        "filas": 1172101,
+        "instantes": 28361,
+        "maximo_observado": 20.3631,
+        "media": 7.153079,
+        "medidores": 70,
+        "medidores_por_instante": 41.262,
+        "minimo_observado": 0.7885,
+        "p1": 0.9811,
+        "p50": 6.8548,
+        "p99": 17.494499,
+        "sigma_agrupada": 4.300361,
+        "sigma_espacial": 2.531386
+      }
+    },
+    "voltaje_v": {
+      "mono": {
+        "filas": 1281321,
+        "instantes": 33320,
+        "maximo_observado": 240.46,
+        "media": 220.011637,
+        "medidores": 80,
+        "medidores_por_instante": 38.13,
+        "minimo_observado": 198.368,
+        "p1": 209.781006,
+        "p50": 220.009995,
+        "p99": 230.251007,
+        "sigma_agrupada": 4.399969,
+        "sigma_espacial": 4.401231
+      },
+      "trifasico": {
+        "filas": 1172101,
+        "instantes": 28361,
+        "maximo_observado": 241.025,
+        "media": 220.001243,
+        "medidores": 70,
+        "medidores_por_instante": 41.262,
+        "minimo_observado": 199.104,
+        "p1": 209.766998,
+        "p50": 219.998001,
+        "p99": 230.218994,
+        "sigma_agrupada": 4.39641,
+        "sigma_espacial": 4.397959
+      }
+    }
+  },
+  "min_medidores_por_instante": 10,
+  "ventana": {
+    "fin_utc": "2026-08-08T14:28:28.050000+00:00",
+    "horas": 24,
+    "inicio_utc": "2026-08-07T14:28:28.050000+00:00"
+  },
+  "version": "manizales-signal-v1",
+  "zona_a_device_type": {
+    "centro": "mono",
+    "chipre": "mono",
+    "la_enea": "trifasico",
+    "palermo": "trifasico",
+    "palogrande": "mono",
+    "universitario": "trifasico"
+  }
+}

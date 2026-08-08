@@ -76,3 +76,6 @@ logs/
 # Outputs experimentales (resultados van al NAS)
 experiments/*/results/
 experiments/*/output/
+
+# Venv del inyector de eventos
+services/event-injector/.venv/
