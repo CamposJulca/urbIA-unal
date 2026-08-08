@@ -1,4 +1,4 @@
-"""Núcleo puro del grafo AMI: geometría, tipos y aparato espectral.
+"""Núcleo puro del grafo AMI: geometría, tipos, espectro y Difuminador.
 
 Sólo depende de numpy. No importa drivers de base de datos ni
 configuración de servicio, así que puede usarse desde un notebook sin
@@ -6,6 +6,16 @@ levantar nada.
 """
 
 from .builder import build_ami_graph, build_zone_graph
+from .filter import (
+    DEFAULT_BAND_TARGET_RATIO,
+    DEFAULT_TAU,
+    BandEnergy,
+    band_cut_index,
+    band_energy,
+    diffuse,
+    dirichlet_energy,
+    low_pass_response,
+)
 from .geo import (
     LocalFrame,
     curvature_radii,
@@ -35,6 +45,7 @@ from .types import (
     InsufficientMetersError,
     InvalidAdjacencyError,
     InvalidCoordinateError,
+    InvalidFilterParameterError,
     InvalidGraphConfigError,
     MeterNode,
     MonitorGspError,
@@ -43,25 +54,33 @@ from .types import (
 )
 
 __all__ = [
+    "DEFAULT_BAND_TARGET_RATIO",
+    "DEFAULT_TAU",
     "MIN_METERS_PER_ZONE",
     "AmiGraph",
+    "BandEnergy",
     "BuildStats",
     "GraphConfig",
     "InsufficientMetersError",
     "InvalidAdjacencyError",
     "InvalidCoordinateError",
+    "InvalidFilterParameterError",
     "InvalidGraphConfigError",
     "LocalFrame",
     "MeterNode",
     "MonitorGspError",
     "ZeroDegreeNodeError",
     "ZoneGraph",
+    "band_cut_index",
+    "band_energy",
     "build_ami_graph",
     "build_zone_graph",
     "connected_components",
     "curvature_radii",
     "degenerate_groups",
     "degree_vector",
+    "diffuse",
+    "dirichlet_energy",
     "eigenvalue_zero_tolerance",
     "fiedler_value",
     "geodesic_distance_m",
@@ -70,6 +89,7 @@ __all__ = [
     "igft",
     "laplacian",
     "local_frame",
+    "low_pass_response",
     "normalized_laplacian",
     "pairwise_distances_m",
     "project_to_local_meters",

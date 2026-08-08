@@ -1,4 +1,4 @@
-"""Tipos, configuración y errores del constructor del grafo AMI.
+"""Tipos, configuración y errores del núcleo del grafo AMI.
 
 Estas estructuras son el contrato entre quien aporta los medidores (una
 consulta a PostgreSQL, un JSON de topología, una celda de notebook) y el
@@ -46,6 +46,14 @@ class InvalidGraphConfigError(MonitorGspError, ValueError):
 
 class InvalidAdjacencyError(MonitorGspError, ValueError):
     """La matriz de adyacencia no cumple las condiciones del aparato espectral."""
+
+
+class InvalidFilterParameterError(MonitorGspError, ValueError):
+    """Un parámetro del filtro espectral es inválido.
+
+    Cubre τ no positivo o no finito, señales de largo distinto al del
+    grafo, señales con NaN o infinitos, y espectros sin λmax positivo.
+    """
 
 
 class ZeroDegreeNodeError(MonitorGspError, ValueError):

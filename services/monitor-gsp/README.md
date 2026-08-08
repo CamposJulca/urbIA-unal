@@ -11,7 +11,8 @@ reales de `ami_meters`.
 
 ## Estado
 
-En construcción, paso 5 de 10. El ciclo dato → grafo ya está cerrado:
+En construcción, paso 6 de 10. El ciclo dato → grafo → señal filtrada ya
+está cerrado:
 
 | Módulo | Qué hace | Depende de |
 |---|---|---|
@@ -19,6 +20,7 @@ En construcción, paso 5 de 10. El ciclo dato → grafo ya está cerrado:
 | `graph/types` | Contrato: `MeterNode`, `GraphConfig`, `ZoneGraph`, `AmiGraph` | numpy |
 | `graph/spectral` | `A → L → L_norm → eigh → GFT`, sobre matrices | numpy |
 | `graph/builder` | De medidores a subgrafos zonales con espectro | numpy |
+| `graph/filter` | Difuminador: filtro paso-bajo `exp(−λ/(τ·λmax))` y métricas | numpy |
 | `db/` | Lectura de `ami_meters` | extra `[db]` |
 
 La dependencia va en un solo sentido: `db` importa de `graph` y nunca al
@@ -36,11 +38,23 @@ grafo = build_ami_graph(meters)
 
 zona = grafo.zones["la_enea"]
 x_hat = gft(lecturas, zona.eigenvectors)     # espectro de la señal
+
+# Difuminador: atenúa el desacuerdo entre vecinos
+from urbia_monitor_gsp.graph import diffuse, dirichlet_energy
+suave = diffuse(zona, lecturas, tau=0.5)
+dirichlet_energy(zona, suave) < dirichlet_energy(zona, lecturas)   # True
 ```
 
-Falta: detector espectral, wavelet multiescala y difuminador. El puente
-inter-zona está declarado en `GraphConfig` pero no implementado;
-encenderlo levanta `InvalidGraphConfigError`.
+Falta: detector espectral y wavelet multiescala. El puente inter-zona está
+declarado en `GraphConfig` pero no implementado; encenderlo levanta
+`InvalidGraphConfigError`.
+
+El Difuminador implementa el exponente **negativo**, `exp(−λ/(τ·λmax))`.
+La formulación publicada en la tesis de Aristizábal (2022, Cap. 3) lo
+escribe positivo, con lo que amplifica la alta frecuencia en vez de
+atenuarla; el docstring de `graph/filter` explica la corrección y
+`experiments/difuminador-tau/RESULTADOS.md` la mide sobre los 150
+medidores.
 
 Los números de este README y de los docstrings están medidos contra
 `data/topologies/manizales_150.json`, la topología versionada de los 150
