@@ -1,6 +1,10 @@
 # ESTADO — Punto de partida para retomar
 
-Última actualización: **2026-08-08**, commit `ebf477d`.
+Estado descrito: árbol en **`b3ed026`**, verificado el **2026-08-09**.
+
+La referencia es al árbol sobre el que se tomaron las mediciones de acá, no
+al commit que edita este archivo: un archivo no puede citar su propio hash,
+y las dos veces que se intentó quedó desactualizado al commitear.
 
 Este archivo existe para que alguien —el autor incluido, dentro de dos
 semanas— pueda retomar sin releer toda la historia. Si algo de acá
@@ -225,16 +229,46 @@ Dos prácticas que se adoptaron sobre la marcha y conviene mantener:
 
 ## 6. Qué está pendiente, por prioridad
 
-### 6.1 Familia de modo común en el inyector — **lo más urgente**
+### 6.1 La curva de degradación por tamaño de grupo — **lo más urgente**
 
-Un corrimiento uniforme de toda la zona **no es una anomalía**: no hay
-discordancia con la vecindad y el detector no debe marcarlo. Se construyó a
-mano para evaluar el prefiltro y **descartó un componente entero**, pero
-sigue sin familia en el inyector, sin verdad de referencia y sin casos
-negativos etiquetados.
+Durante un tiempo esto se anotó como "falta la familia de modo común en el
+inyector". Está mal planteado, y el planteo equivocado escondía el problema
+real.
 
-El contrato ya lo prevé: `InjectedEvent.expected_detectable` existe desde el
-principio para esto.
+**El modo común no es una familia aparte: es el régimen de grupo grande de
+la desviación colectiva.** Un corrimiento uniforme de toda la zona es el
+caso límite `m = n` de un grupo que crece, no un tipo distinto de evento. No
+hay discordancia con la vecindad y el detector no debe marcarlo. En medio
+—entre el medidor solo y la zona entera— hay un continuo del que **no se
+midió ningún punto**.
+
+Lo que falta, entonces, no es implementar una familia sino **medir la curva
+de detección contra tamaño de grupo**. El caso extremo se construyó a mano
+para evaluar el prefiltro, y con eso se **descartó un componente entero**
+—el Difuminador como prefiltro— sobre dos puntos saturados, 0 % y 100 %,
+sin verdad de referencia y sin nada medido entre ellos.
+
+Tres consecuencias, y ninguna se ve desde el planteo viejo:
+
+* Las cifras por zona que sostienen ese descarte (0,0–0,7 % contra 100 %)
+  **no tienen corrida trazable**: no hay código en `run.py` que las produzca
+  ni entrada en `results/medicion.json`. Sólo existe el test de mecanismo
+  sobre una rejilla sintética.
+* La comparación está **saturada en los dos extremos**, y por §5.4 eso no es
+  un resultado. El mecanismo (`diffuse(1)` no es constante) es sólido; la
+  medición que lo acompaña no tiene resolución.
+* **El punto de operación publicado está medido en el tamaño más favorable.**
+  La familia actual a `depth=2` da 11–12 nodos sobre zonas de 20 a 30, o sea
+  `m ≈ n/2`, que es donde el contraste de dos muestras predice su máximo. El
+  79,4 % es correcto y su configuración de tamaño no está declarada.
+
+El límite de aplicabilidad del método —a partir de qué tamaño de grupo el
+escaneo cae por debajo de un umbral por medidor— es material de tesis y hoy
+no existe.
+
+Lo mide `experiments/tamano-grupo/`. El contrato ya lo prevé:
+`InjectedEvent.expected_detectable` existe desde el principio, y con el
+tamaño como eje se deriva por álgebra (`m < n`) en vez de fijarse a mano.
 
 ### 6.2 Qué optimiza el Afinador — ADR-004 §7
 
