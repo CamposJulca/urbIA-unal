@@ -129,6 +129,110 @@ class DetectorConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class FrozenThreshold:
+    """Un umbral calibrado, con todo lo que hace falta para saber si aplica.
+
+    Un servicio en línea no puede recalibrar al arrancar: el umbral tiene
+    que ser el mismo entre reinicios, o dos ventanas idénticas darían
+    veredictos distintos según cuándo arrancó el proceso. Pero un umbral
+    suelto es exactamente la trampa de `ESTADO.md` §5.3 —una cifra correcta
+    operando fuera de su configuración— así que acá el número viaja siempre
+    con las condiciones bajo las que se lo obtuvo, y `load_threshold` las
+    verifica en vez de confiar.
+
+    **La calibración no se hace sobre datos vivos.** Una anomalía
+    persistente se volvería parte de la hipótesis nula y el detector
+    dejaría de verla: el umbral subiría hasta acomodarla. Por eso el nulo
+    es sintético y la σ sale del perfil congelado.
+
+    Attributes:
+        zona: Zona para la que vale. Un umbral de otra zona no aplica: el
+            estadístico depende del grafo, y los grados y el tamaño
+            cambian entre zonas.
+        threshold: El corte.
+        sigma_spatial: Dispersión espacial con la que se simuló el nulo.
+        config: Punto de operación con el que se calibró.
+        seed: Semilla del Monte Carlo, para poder rehacerlo.
+        n_instants: Largo de la señal si el objetivo era por señal, o
+            `None` si el objetivo era por ventana. **No son
+            intercambiables**: ver `CollectiveScanDetector.calibrate`.
+        source: De dónde salió, para poder rastrearlo. Típicamente el
+            archivo versionado y su versión.
+    """
+
+    zona: str
+    threshold: float
+    sigma_spatial: float
+    config: DetectorConfig
+    seed: int
+    n_instants: int | None
+    source: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serializa el umbral y su procedencia.
+
+        Returns:
+            Diccionario serializable.
+        """
+        return {
+            "zona": self.zona,
+            "threshold": self.threshold,
+            "sigma_spatial": self.sigma_spatial,
+            "seed": self.seed,
+            "n_instants": self.n_instants,
+            "source": self.source,
+            "config": {
+                "window": self.config.window,
+                "step": self.config.step,
+                "scan_radii": list(self.config.scan_radii),
+                "fpr_target": self.config.fpr_target,
+                "prefilter_tau": self.config.prefilter_tau,
+                "project_out_kernel": self.config.project_out_kernel,
+                "calibration_samples": self.config.calibration_samples,
+            },
+        }
+
+    @classmethod
+    def from_dict(cls, datos: dict[str, Any]) -> FrozenThreshold:
+        """Reconstruye un umbral congelado desde su forma serializada.
+
+        Args:
+            datos: Diccionario con la forma que produce `to_dict`.
+
+        Returns:
+            El umbral con su configuración.
+
+        Raises:
+            DetectorError: Si falta alguna clave o el punto de operación
+                serializado es inválido.
+        """
+        try:
+            crudo = datos["config"]
+            config = DetectorConfig(
+                window=int(crudo["window"]),
+                step=None if crudo["step"] is None else int(crudo["step"]),
+                scan_radii=tuple(int(r) for r in crudo["scan_radii"]),
+                fpr_target=float(crudo["fpr_target"]),
+                prefilter_tau=(
+                    None if crudo["prefilter_tau"] is None else float(crudo["prefilter_tau"])
+                ),
+                project_out_kernel=bool(crudo["project_out_kernel"]),
+                calibration_samples=int(crudo["calibration_samples"]),
+            )
+            return cls(
+                zona=str(datos["zona"]),
+                threshold=float(datos["threshold"]),
+                sigma_spatial=float(datos["sigma_spatial"]),
+                config=config,
+                seed=int(datos["seed"]),
+                n_instants=(None if datos["n_instants"] is None else int(datos["n_instants"])),
+                source=str(datos["source"]),
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            raise DetectorError(f"umbral congelado mal formado: {exc}") from exc
+
+
+@dataclass(frozen=True, slots=True)
 class Detection:
     """Lo que el detector afirma sobre una ventana.
 

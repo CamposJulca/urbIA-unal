@@ -58,7 +58,7 @@ import numpy.typing as npt
 from ..graph.filter import diffuse
 from ..graph.types import ZoneGraph
 from .scan import candidate_balls, contrasts
-from .types import Detection, DetectorConfig, DetectorError
+from .types import Detection, DetectorConfig, DetectorError, FrozenThreshold
 
 
 class CollectiveScanDetector:
@@ -94,6 +94,7 @@ class CollectiveScanDetector:
         self._config = config if config is not None else DetectorConfig()
         self._masks, self._meta = candidate_balls(zone, self._config.scan_radii)
         self._threshold: float | None = None
+        self._provenance: str | None = None
 
     @property
     def config(self) -> DetectorConfig:
@@ -114,9 +115,71 @@ class CollectiveScanDetector:
         """
         if self._threshold is None:
             raise DetectorError(
-                "el detector no está calibrado: llamá a calibrate(seed) antes de "
-                "detect(), o el umbral no significa nada"
+                "el detector no está calibrado: llamá a calibrate(seed) o "
+                "load_threshold(congelado) antes de detect(), o el umbral no "
+                "significa nada"
             )
+        return self._threshold
+
+    @property
+    def threshold_provenance(self) -> str | None:
+        """De dónde salió el umbral en uso, o `None` si no hay ninguno.
+
+        Existe para que el servicio pueda publicarlo junto a cada detección.
+        Un corte sin procedencia no se puede auditar después.
+        """
+        return self._provenance
+
+    def load_threshold(self, frozen: FrozenThreshold) -> float:
+        """Adopta un umbral calibrado de antemano, verificando que aplique.
+
+        Un servicio en línea no puede recalibrar en cada arranque: el umbral
+        tiene que ser estable entre reinicios. Lo que **sí** puede hacer es
+        negarse a usar un umbral que no corresponde a su configuración, que
+        es lo único que separa esto de enterrar una constante.
+
+        Verifica las tres cosas de las que depende el corte, y ninguna es
+        redundante: la zona porque el estadístico depende del grafo, σ
+        porque escala el contraste, y el punto de operación porque cambiar
+        la ventana o los radios cambia la distribución del máximo.
+
+        Args:
+            frozen: Umbral congelado con su procedencia.
+
+        Returns:
+            El corte adoptado.
+
+        Raises:
+            DetectorError: Si el umbral no corresponde a esta zona, a esta
+                σ o a este punto de operación, o si no es finito y positivo.
+        """
+        if frozen.zona != self._zone.zona:
+            raise DetectorError(
+                f"el umbral congelado es de la zona '{frozen.zona}' y este detector "
+                f"es de '{self._zone.zona}': el estadístico depende del grafo, así "
+                f"que un corte de otra zona no significa nada acá"
+            )
+        if not np.isclose(frozen.sigma_spatial, self._sigma, rtol=1e-9, atol=0.0):
+            raise DetectorError(
+                f"el umbral congelado de '{frozen.zona}' se calibró con "
+                f"sigma_spatial={frozen.sigma_spatial!r} y este detector usa "
+                f"{self._sigma!r}: σ escala el contraste y el corte deja de "
+                f"corresponder"
+            )
+        if frozen.config != self._config:
+            raise DetectorError(
+                f"el umbral congelado de '{frozen.zona}' se calibró con "
+                f"{frozen.config} y este detector opera con {self._config}: "
+                f"cambiar el punto de operación cambia la distribución del máximo "
+                f"y el corte deja de corresponder"
+            )
+        if not np.isfinite(frozen.threshold) or frozen.threshold <= 0.0:
+            raise DetectorError(
+                f"el umbral congelado debe ser finito y > 0, recibido {frozen.threshold}"
+            )
+
+        self._threshold = float(frozen.threshold)
+        self._provenance = frozen.source
         return self._threshold
 
     @property
@@ -206,7 +269,35 @@ class CollectiveScanDetector:
             ]
         )
         self._threshold = float(np.quantile(maximos, 1.0 - self._config.fpr_target))
+        self._provenance = f"calibrate(seed={seed}, n_instants={n_instants})"
         return self._threshold
+
+    def freeze_threshold(self, seed: int, n_instants: int | None, source: str) -> FrozenThreshold:
+        """Empaqueta el umbral en uso con las condiciones que lo produjeron.
+
+        Es la contraparte de `load_threshold`: lo que un script de
+        calibración serializa para que el servicio lo adopte después.
+
+        Args:
+            seed: Semilla con la que se calibró.
+            n_instants: Largo de señal del objetivo por señal, o `None`.
+            source: Procedencia legible.
+
+        Returns:
+            El umbral congelado.
+
+        Raises:
+            DetectorError: Si todavía no hay umbral.
+        """
+        return FrozenThreshold(
+            zona=self._zone.zona,
+            threshold=self.threshold,
+            sigma_spatial=self._sigma,
+            config=self._config,
+            seed=seed,
+            n_instants=n_instants,
+            source=source,
+        )
 
     def _windows(self, n_instants: int) -> list[tuple[int, int]]:
         """Ventanas que cubren la señal.
