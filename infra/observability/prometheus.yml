@@ -1,0 +1,55 @@
+# Configuración de Prometheus para el cluster Neusi.
+#
+# Dimensionamiento en `README.md`, con la medición que lo sostiene.
+# El intervalo de 15 s y la retención de 90 d salen de ahí.
+---
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: neusi
+    proyecto: urbia
+
+scrape_configs:
+  # ─────────────────────────────────────────── el propio Prometheus
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # ─────────────────────────────────────────── los seis nodos
+  #
+  # `instance` se reescribe al nombre del nodo y no al `host:puerto`: si
+  # algún día cambia el puerto o la IP, las series históricas siguen
+  # siendo la misma serie y los paneles no se parten en dos.
+  - job_name: node
+    static_configs:
+      - targets: ["192.168.40.10:9100"]
+        labels: {nodo: neusi-obs, rol: observabilidad}
+      - targets: ["192.168.40.11:9100"]
+        labels: {nodo: neusi-stage, rol: desarrollo_y_monitor}
+      - targets: ["192.168.40.12:9100"]
+        labels: {nodo: neusi-core, rol: broker_mqtt}
+      - targets: ["192.168.40.13:9100"]
+        labels: {nodo: neusi-edge-x86, rol: borde}
+      - targets: ["192.168.40.14:9100"]
+        labels: {nodo: neusi-data, rol: datos_y_nas}
+      - targets: ["192.168.40.105:9100"]
+        labels: {nodo: neusi-ops, rol: operacion}
+    relabel_configs:
+      - source_labels: [nodo]
+        target_label: instance
+
+  # ─────────────────────────────────────────── monitor GSP
+  #
+  # Preparado y apagado: el servicio del monitor todavía no existe. Cuando
+  # exista expone /metrics y esto se descomenta. Va como job aparte y no
+  # dentro de `node` porque su cardinalidad la manda el grafo —zonas y
+  # medidores—, no la máquina, y conviene poder acotarla por separado.
+  #
+  # - job_name: monitor-gsp
+  #   static_configs:
+  #     - targets: ["192.168.40.11:9101"]
+  #       labels: {nodo: neusi-stage, componente: monitor-gsp}
+  #   relabel_configs:
+  #     - source_labels: [nodo]
+  #       target_label: instance

@@ -1,0 +1,45 @@
+# Inventario del cluster Neusi.
+#
+# Los nombres resuelven por /etc/hosts en todos los nodos. Las IP van
+# explícitas igual: si /etc/hosts se desincroniza en un nodo, el playbook
+# tiene que fallar por conexión y no aplicar sobre la máquina equivocada.
+#
+# `ansible_user` está sin fijar a propósito. Hoy la única máquina con llave
+# hacia el resto es neusi-ops; desde neusi-stage no hay acceso saliente
+# (verificado 2026-08-09: publickey denegado en los cinco nodos remotos).
+# Quien corra esto define el usuario con `-u` o en su `ansible.cfg`.
+---
+all:
+  vars:
+    ansible_python_interpreter: auto_silent
+
+  children:
+    observabilidad:
+      hosts:
+        neusi-obs:
+          ansible_host: 192.168.40.10
+          rol: prometheus_grafana
+
+    cluster:
+      hosts:
+        neusi-obs:
+          ansible_host: 192.168.40.10
+          rol: observabilidad
+        neusi-stage:
+          ansible_host: 192.168.40.11
+          rol: desarrollo_y_monitor
+        neusi-core:
+          ansible_host: 192.168.40.12
+          rol: broker_mqtt
+        neusi-edge-x86:
+          ansible_host: 192.168.40.13
+          rol: borde
+          # 3,3 GB de RAM y disco mecánico: nada de contenedores acá.
+          # node_exporter va como binario estático + systemd.
+          recursos_limitados: true
+        neusi-data:
+          ansible_host: 192.168.40.14
+          rol: datos_y_nas
+        neusi-ops:
+          ansible_host: 192.168.40.105
+          rol: operacion

@@ -1,0 +1,104 @@
+# Despliegue de node_exporter en los seis nodos del cluster Neusi.
+#
+#   ansible-playbook -i inventory.yml node_exporter.yml -u <usuario> -K
+#
+# Idempotente: si la versión instalada ya coincide, no baja nada ni
+# reinicia el servicio.
+#
+# NO EJECUTADO TODAVÍA. Desde neusi-stage no hay acceso SSH saliente
+# (verificado 2026-08-09). Este playbook está escrito y versionado, pero el
+# despliegue queda pendiente de correrse desde una máquina con llaves —hoy
+# neusi-ops es la única candidata.
+---
+- name: node_exporter en todo el cluster
+  hosts: cluster
+  become: true
+
+  vars:
+    ne_version: "1.8.2"
+    ne_arch: "linux-amd64"
+    # Verificado el 2026-08-09 contra el sha256sums.txt del release y contra
+    # el tarball efectivamente descargado.
+    ne_checksum: >-
+      sha256:6809dd0b3ec45fd6e992c19071d6b5253aed3ead7bf0686885a51d85c6643c66
+    ne_bin: /usr/local/bin/node_exporter
+
+  tasks:
+    - name: Ver qué versión hay instalada
+      ansible.builtin.command: "{{ ne_bin }} --version"
+      register: ne_actual
+      changed_when: false
+      failed_when: false
+
+    - name: Usuario de sistema sin shell ni home
+      ansible.builtin.user:
+        name: node_exporter
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+
+    - name: Descargar y desplegar el binario
+      when: ne_version not in (ne_actual.stdout | default(''))
+      block:
+        - name: Descomprimir en un temporal
+          ansible.builtin.unarchive:
+            src: >-
+              https://github.com/prometheus/node_exporter/releases/download/v{{ ne_version }}/node_exporter-{{ ne_version }}.{{ ne_arch }}.tar.gz
+            dest: /tmp
+            remote_src: true
+            checksum: "{{ ne_checksum }}"
+
+        - name: Instalar el binario
+          ansible.builtin.copy:
+            src: "/tmp/node_exporter-{{ ne_version }}.{{ ne_arch }}/node_exporter"
+            dest: "{{ ne_bin }}"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0755"
+          notify: Reiniciar node_exporter
+
+        - name: Limpiar el temporal
+          ansible.builtin.file:
+            path: "/tmp/node_exporter-{{ ne_version }}.{{ ne_arch }}"
+            state: absent
+
+    - name: Instalar la unit
+      ansible.builtin.copy:
+        src: ../observability/node_exporter.service
+        dest: /etc/systemd/system/node_exporter.service
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reiniciar node_exporter
+
+    - name: Habilitar y arrancar
+      ansible.builtin.systemd:
+        name: node_exporter
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    # Verificación en el propio playbook: que el servicio esté "activo" no
+    # dice que exponga métricas. Esto lo comprueba y deja el conteo de
+    # series a la vista, que es el dato del que depende el dimensionamiento
+    # de `../observability/README.md`.
+    - name: Comprobar que responde y contar series
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          curl -sf --max-time 5 http://127.0.0.1:9100/metrics | grep -vc '^#'
+        executable: /bin/bash
+      register: ne_series
+      changed_when: false
+
+    - name: Series expuestas por nodo
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ ne_series.stdout }} series"
+
+  handlers:
+    - name: Reiniciar node_exporter
+      ansible.builtin.systemd:
+        name: node_exporter
+        state: restarted
+        daemon_reload: true

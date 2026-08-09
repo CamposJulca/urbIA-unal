@@ -1,0 +1,48 @@
+# Unit de node_exporter para los seis nodos del cluster Neusi.
+#
+# Binario estático y no contenedor. El motivo manda neusi-edge-x86, que
+# tiene 3,3 GB de RAM y disco mecánico: bajar capas de Docker y sostener el
+# runtime cuesta más que un binario de 20 MB. Por uniformidad va igual en
+# los seis, así el playbook es uno solo y el diagnóstico también.
+[Unit]
+Description=Prometheus node_exporter
+Documentation=https://github.com/prometheus/node_exporter
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=node_exporter
+Group=node_exporter
+ExecStart=/usr/local/bin/node_exporter \
+    --web.listen-address=:9100 \
+    --collector.netdev.device-exclude=^(veth|br-|docker|lo).*$ \
+    --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|run|var/lib/docker/.+)($|/) \
+    --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|cgroup.*|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
+
+# Medido en neusi-stage el 2026-08-09: con colectores por defecto expone
+# 1.605 series, de las cuales 719 son de red sobre 20 interfaces —casi
+# todas bridges y veth de Docker—. Las veth nacen y mueren con cada
+# contenedor, así que no son volumen sino churn de cardinalidad, que es lo
+# que degrada el TSDB. Por eso se excluyen en el origen y no con relabel.
+
+Restart=on-failure
+RestartSec=5
+
+# El exporter sólo lee de /proc y /sys. No necesita nada más.
+NoNewPrivileges=true
+ProtectSystem=strict
+# `read-only` y no `true`: con `true` systemd monta un directorio vacío
+# sobre /home, y entonces el colector de filesystem reportaría el uso de
+# ese vacío en vez del real. En neusi-stage el proyecto vive en /home, así
+# que sería justamente la métrica de disco que importa, y saldría mal.
+ProtectHome=read-only
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryMax=128M
+
+[Install]
+WantedBy=multi-user.target

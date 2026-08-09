@@ -1,0 +1,16 @@
+# Datasource provisionado, para que Grafana no dependa de que alguien lo
+# configure a mano después de un despliegue.
+---
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      # Tiene que coincidir con el `scrape_interval` de prometheus.yml: si
+      # Grafana cree que es más corto, dibuja huecos donde no los hay.
+      timeInterval: 15s

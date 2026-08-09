@@ -1,0 +1,74 @@
+# Prometheus + Grafana en neusi-obs.
+#
+#   docker compose -f infra/observability/docker-compose.yml up -d
+#
+# Sólo para neusi-obs. Los otros cinco nodos no llevan nada más que el
+# binario de node_exporter.
+#
+# NO DESPLEGADO TODAVÍA: desde neusi-stage no hay acceso SSH saliente
+# (verificado 2026-08-09).
+---
+name: urbia-observabilidad
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: urbia-prometheus
+    restart: unless-stopped
+    user: "65534:65534"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      # Retención doble: por tiempo y por tamaño. El tope de tamaño es la
+      # red de seguridad — 90 d se estimaron en 8–11 GB (ver README), y
+      # 20 GB deja ~2x de margen sin poder llenar los 79 GB del disco
+      # aunque la estimación esté mal o aparezca una explosión de series.
+      - --storage.tsdb.retention.time=90d
+      - --storage.tsdb.retention.size=20GB
+      - --web.enable-lifecycle
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    container_name: urbia-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana-datasource.yml:/etc/grafana/provisioning/datasources/prometheus.yml:ro
+    environment:
+      # Sin credenciales en el compose. Van en un .env que no se commitea,
+      # como manda CLAUDE.md §8.4.
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?definir en .env}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?definir en .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+# Volúmenes nombrados sobre el disco local de neusi-obs, nunca NFS: el TSDB
+# de Prometheus hace mmap y fsync sobre sus bloques, y sobre NFS es un modo
+# de corrupción conocido que upstream no soporta. El NAS de neusi-data entra
+# como destino de respaldo, no como almacenamiento vivo.
+volumes:
+  prometheus_data:
+    name: urbia_prometheus_data
+  grafana_data:
+    name: urbia_grafana_data
