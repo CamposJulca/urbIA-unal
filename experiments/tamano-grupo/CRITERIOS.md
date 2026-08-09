@@ -113,6 +113,27 @@ No se reutiliza ninguna cifra de umbral de otro experimento.
 El `m` donde la curva del escaneo cruza por debajo de la del umbral. Se
 reportan **todos** los cruces, no el primero. Si no hay ninguno, se dice.
 
+**El cruce se reporta por zona, no sólo promediado**, y en las dos escalas:
+`m` absoluto y `m/n`.
+
+*Predicción declarada antes de correr:* A puede reescribirse como
+
+```
+z = k·√N·√n·√((m/n)(1 − m/n))
+```
+
+o sea que la **forma** de la curva depende de `m/n` y sólo su altura depende
+de `n`. El mecanismo es que el complemento —la muestra de referencia contra
+la que se contrasta— se achica a medida que el grupo crece. Si eso gobierna,
+**el cruce debería caer a `m/n` aproximadamente constante entre zonas de `n`
+distinto**, y no a `m` constante. Las zonas tienen `n` de 20, 25 y 30, que da
+palanca suficiente para distinguirlo.
+
+Si el cruce sale a `m/n` constante, la consecuencia es de diseño y se
+registra: una zona más grande tolera un grupo afectado **absolutamente**
+mayor a igual proporción, lo que importa para cómo se particiona el monitor
+entre nodos de borde.
+
 ### C6 — Discriminación entre A y B
 Correlación de **Spearman** entre cada predictor y la tasa de detección,
 sobre todos los puntos `(zona, m)`. Gana el de mayor |ρ|.
@@ -132,7 +153,35 @@ En ese caso se baja σ y **se vuelve a declarar acá antes de mirar nada más**,
 dejando registrado el σ original y el motivo del cambio. Que se vea que fue
 por falta de resolución y no por buscar un resultado.
 
-> **Registro de cambios de σ.** Ninguno hasta ahora. σ original: **0,5**.
+> **Registro de cambios de σ.** Ninguno. σ: **0,5**.
+>
+> Verificado con un piloto de 300 ensayos antes de la corrida final, para no
+> descubrir la falta de resolución después de medir. Con σ = 0,5 el barrido
+> recorre de **0,8 % en `m = 1` a 67,9 % en `m = 12`** y vuelve a bajar a
+> 5,1 % en `m = n`: **ningún punto en 0 % ni en 100 %**, así que C7 no se
+> dispara y σ = 0,5 queda como condición principal.
+>
+> Se probó también σ = 0,15 en el mismo piloto: todo el barrido colapsa
+> entre 0,5 % y 1,8 %, con escaneo y umbral indistinguibles en todo el
+> rango. Es la condición de piso que C7 existe para evitar. Queda
+> registrado como descartado **por falta de resolución medida**, no por su
+> resultado.
+
+### C11 — El falso positivo se verifica, no se supone
+*Agregado el 2026-08-09, antes de correr.*
+
+Cada celda registra el **FPR empírico sobre señal limpia**, además de la tasa
+de detección. Motivo: el piloto dio 5,1 % de detección en `m = n`, donde C8
+predice 1 % por álgebra. La sospecha es la calibración —con 600 muestras el
+cuantil del 1 % se estima con 6 muestras de cola y el umbral queda sesgado
+bajo—, pero **es una sospecha y hay que medirla**.
+
+La corrida principal mantiene `calibration_samples = 600`, que es lo que usó
+`detector-deslizante` y lo que C2 pide para que el ancla sea comparable. En
+paralelo se mide una celda de control con calibración alta. Si el FPR
+empírico se aparta del 1 % objetivo, **el desvío se reporta como propiedad
+del aparato** y las tasas absolutas se leen con esa corrección al lado; no se
+ajusta la calibración a posteriori para que C8 cierre.
 
 ### C8 — El extremo
 En `m = n` se espera detección igual al falso positivo objetivo, **1 %**, con
@@ -146,21 +195,60 @@ zona entera. **Si esta cifra no da 1 %, hay un error en el aparato**, no un
 hallazgo.
 
 ### C9 — Ensayos
-**300 por `(zona, m)`**, igual que `detector-colectivo`. Semilla derivada de
-`20260808`.
+**2000 por `(zona, m, forma)`.** Semilla derivada de `20260808`.
 
-Si la corrida completa no cierra en tiempo razonable se baja a 200 y **se
-declara acá antes de correr**, no después.
+> **Enmienda del 2026-08-09, antes de correr.** Declarado originalmente en
+> 300, como `detector-colectivo`. Cronometrada una celda con la máquina
+> ociosa (`load average` 0,29 sobre 16 núcleos): calibración 0,09 s,
+> detección de 300 ensayos 0,04 s, celda completa 0,2 s, barrido entero
+> ~0,3 min. El costo es despreciable y el intervalo de confianza es la
+> restricción que ata a C6 y C10: con 300 ensayos la diferencia de dos
+> proporciones cerca del 50 % tiene medio ancho de ±8,0 puntos, y con 2000
+> baja a ±3,1. Eso es lo que vuelve significativa la comparación
+> **cuantitativa** de C10 contra el −15 % predicho, y no sólo el signo.
+>
+> Subir el número de ensayos no puede favorecer a ninguna de las dos
+> hipótesis: las dos se miden sobre los mismos ensayos.
 
 ### C10 — Contraste de forma
 A igual `m`, compacto contra extendido, en **`m ∈ {5, 6, 8}`**.
 
-**Predicción:**
+**Predicción — corregida el 2026-08-09, antes de correr.**
 
-* **Bajo A las dos curvas se superponen**, porque el predictor
-  `√(m(n−m)/n)` sólo depende de `m` y las dos formas comparten `m`.
-* **Bajo B se separan, y la extendida detecta mejor**, por tener más
-  perímetro al mismo tamaño.
+La versión original decía que bajo A las dos curvas se superponen. **Era A en
+su forma idealizada**, con el candidato igual al grupo. El detector real
+escanea bolas de radio 1 y 2, y una bola cubre peor a un grupo alargado que a
+uno compacto del mismo tamaño, así que A con candidatos reales **sí** predice
+separación, y en el sentido contrario a B.
+
+Medido antes de correr: contraste que el mejor candidato puede extraer,
+promediado sobre las seis zonas y todas las semillas.
+
+| `m` | forma | corte/nodo | contraste alcanzable |
+|---|---|---|---|
+| 5 | compacto | 2,091 | **1,842** |
+| 5 | extendido | 2,407 | **1,567** |
+| 6 | compacto | 1,813 | **1,968** |
+| 6 | extendido | 2,178 | **1,677** |
+| 8 | compacto | 1,522 | **2,006** |
+| 8 | extendido | 1,869 | **1,787** |
+
+* **Bajo A la extendida detecta PEOR**, −11 a −15 % de contraste alcanzable.
+  En el punto de operación eso son ~0,58 de `z` en `m = 6`, o sea del orden
+  de 18 a 23 puntos de detección.
+* **Bajo B la extendida detecta MEJOR**, por +15 a +23 % de perímetro.
+
+**Los signos son opuestos, así que el signo solo discrimina** y no hace falta
+resolver una magnitud. Ésa es la razón por la que este contraste tiene poder
+aunque las dos predicciones sean cercanas en otras partes del barrido.
+
+**Riesgo declarado: cancelación parcial.** Si los dos mecanismos operan a la
+vez se restan, y un "sin separación" se leería como A cuando en realidad hay
+componente de perímetro compensando. Por eso el contraste alcanzable se
+registra por evento y la diferencia observada se compara **contra el −15 %
+predicho**, no sólo por su signo. Si la separación medida es negativa pero
+claramente menor que la predicha, hay componente de perímetro y así se
+reporta.
 
 Es la única manipulación que desacopla tamaño de perímetro. Sin ella
 cualquier conclusión del barrido admite la objeción de que las dos variables
