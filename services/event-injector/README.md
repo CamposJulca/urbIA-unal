@@ -148,8 +148,7 @@ exigía ya está en su lugar:
 | Dipolo / antifase | desviación con signo por nodo | `delta` es una matriz, no un escalar |
 | Deriva gradual | perfil temporal separable | `TemporalProfile` |
 | Intermitente | ventana, no instante | `start` + `duration` |
-| Individual | — | es `depth=0` |
-| Modo común | casos negativos en la verdad | `expected_detectable` |
+| Individual | — | es `depth=0`, o `size_target=1` |
 | Desconexión | máscara de nodos ausentes | **falta** |
 | Grupo a caballo de zonas | operar sobre `AmiGraph` | **falta** |
 
@@ -157,6 +156,13 @@ Las dos últimas sí requieren tocar la interfaz. La de desconexión cambia el
 Laplaciano, no la señal; la de frontera zonal es la que mediría
 empíricamente la limitación de las 34 aristas suprimidas que documenta el
 ADR-003 §3.2.
+
+**El modo común no está en esta tabla y no es una familia.** Es el régimen
+de grupo grande de la desviación colectiva: el caso `size_target = n`, donde
+el grupo abarca la zona entera, no deja complemento y el contraste de dos
+muestras se vuelve exactamente invariante. Entre un medidor y la zona entera
+hay un continuo, y tratarlo como familia aparte fue lo que ocultó durante un
+tiempo que de ese continuo no se había medido ningún punto intermedio.
 
 ## Instalación
 

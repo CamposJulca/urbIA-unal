@@ -35,7 +35,15 @@ from .families import (
     step_profile,
 )
 from .injector import EventInjector
-from .neighborhood import k_hop, neighborhood_sizes
+from .neighborhood import (
+    SHAPES,
+    Shape,
+    boundary_edges,
+    connected_subgraph,
+    is_connected,
+    k_hop,
+    neighborhood_sizes,
+)
 from .profile import SignalProfile, load_profile
 from .types import (
     DEVICE_TYPES,
@@ -59,6 +67,7 @@ __all__ = [
     "DEVICE_TYPES",
     "FAMILY_COLLECTIVE",
     "MAGNITUDES",
+    "SHAPES",
     "BoundsViolationError",
     "CollectiveDeviationSpec",
     "DeviceType",
@@ -70,12 +79,16 @@ __all__ = [
     "InvalidSpecError",
     "Magnitude",
     "MagnitudeProfile",
+    "Shape",
     "SignalBounds",
     "SignalProfile",
     "TemporalProfile",
     "UnknownDeviceError",
     "apply_collective_deviation",
+    "boundary_edges",
+    "connected_subgraph",
     "device_type_of",
+    "is_connected",
     "k_hop",
     "load_bounds",
     "load_profile",

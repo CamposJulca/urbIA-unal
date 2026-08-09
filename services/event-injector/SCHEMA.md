@@ -59,7 +59,14 @@ dos realizaciones distintas.
 | `node_indices` | int[] | Posiciones de esos nodos en el orden canónico |
 | `start` | int | Primer instante afectado |
 | `duration` | int | Instantes consecutivos afectados |
-| `depth` | int | Profundidad del vecindario en saltos |
+| `depth` | int\|null | Profundidad del vecindario en saltos, si el eje fue `depth` |
+| `size_target` | int\|null | Tamaño pedido, si el eje fue `size_target` |
+| `shape` | string\|null | `compacto` o `extendido`, si el eje fue `size_target` |
+| `n_nodes` | int | Nodos afectados. Es el `m` del barrido de tamaño |
+| `boundary_edges` | int | Aristas con un solo extremo dentro del grupo: su perímetro |
+| `zone_size` | int | Nodos de la zona, el `n` contra el que se compara `m` |
+| `coverage` | float | `n_nodes / zone_size` |
+| `boundary_per_node` | float | `boundary_edges / n_nodes` |
 | `sigma_multiple` | float\|null | Magnitud **efectiva** en múltiplos de σ espacial |
 | `fraction` | float\|null | Magnitud **efectiva** como fracción del valor |
 | `delta` | float[][] | Desviación aplicada, `(duration, len(device_ids))` |
@@ -83,6 +90,30 @@ dos realizaciones distintas.
 5. **Los eventos se acumulan.** Si dos afectan al mismo nodo en el mismo
    instante, la señal lleva la suma y cada evento queda registrado por
    separado con su propio `delta`.
+6. **`depth` y `size_target` son mutuamente excluyentes**: uno de los dos es
+   `null`, nunca los dos ni ninguno. `shape` acompaña a `size_target` y es
+   `null` cuando el eje fue `depth`.
+7. **`n_nodes` es siempre el tamaño real del grupo**, se haya declarado por
+   el eje que se haya declarado. Es el campo que un barrido debe usar, no
+   `size_target`.
+
+### Los dos ejes de grupo
+
+| Eje | Qué controla | Para qué |
+|---|---|---|
+| `depth` | Vecindad a `k` saltos | La familia ya medida. El tamaño **depende de la topología local**: el mismo `depth=2` da 11 nodos en una zona y 18 en otra |
+| `size_target` | Cantidad exacta de nodos | Barrer tamaño como variable independiente, con eje comparable entre zonas |
+
+`shape` es la segunda perilla, y existe porque a tamaño fijo el perímetro
+todavía es libre. Medido sobre los 150 con `m = 6`: un grupo compacto deja
+10,88 aristas de corte y uno extendido 13,07. Sin esa perilla, tamaño y
+perímetro quedan confundidos por construcción y ningún barrido puede
+separarlos.
+
+Las dos formas garantizan **conexidad**: el compacto consume capas enteras
+de anchura y sólo trunca dentro de la última, y el extendido es un camino
+aleatorio donde cada nodo nuevo es vecino de uno ya visitado. Un grupo con
+dos componentes sería otra condición experimental, no un grupo extendido.
 
 ### `expected_detectable`
 
@@ -92,9 +123,19 @@ detector de grafo que lo marque está produciendo un falso positivo. Esos
 casos entran a la verdad con `expected_detectable: false` y cuentan al
 revés al puntuar.
 
-Hoy la única familia implementada lo trae siempre en `true`; el campo está
-en el contrato desde el principio para que agregar la familia de control no
-rompa los archivos ya generados.
+**Se deriva, no se declara.** Con la especificación en `null` —lo normal— el
+inyector lo calcula como `n_nodes < zone_size`: hay algo que detectar si y
+sólo si el grupo deja complemento, porque el contraste de dos muestras es
+exactamente invariante a sumarle una constante a toda la zona.
+
+Derivarlo importa por una razón metodológica. El modo común no es una
+familia aparte sino el **régimen de grupo grande** de la desviación
+colectiva, y entre un medidor y la zona entera hay un continuo. El caso
+ambiguo —un grupo grande pero no total— es justo el que uno estaría tentado
+de etiquetar según el resultado que espera medir. Sacándolo del álgebra, la
+etiqueta no depende de nadie.
+
+Se admite fijarlo a mano como escape; los experimentos lo dejan en `null`.
 
 ---
 

@@ -32,7 +32,7 @@ import numpy as np
 import numpy.typing as npt
 from urbia_monitor_gsp.graph import ZoneGraph
 
-from .neighborhood import k_hop
+from .neighborhood import boundary_edges, connected_subgraph, k_hop
 from .profile import SignalProfile
 from .types import (
     BoundsViolationError,
@@ -94,6 +94,31 @@ def _resolve_seed(
             f"'{spec.seed_device_id}' no pertenece a la zona '{zone.zona}', que tiene "
             f"{zone.n_meters} medidores"
         ) from None
+
+
+def _grupo(
+    zone: ZoneGraph,
+    semilla: int,
+    spec: CollectiveDeviationSpec,
+    rng: np.random.Generator,
+) -> tuple[int, ...]:
+    """Nodos afectados, por el eje que declare la especificación.
+
+    Args:
+        zone: Subgrafo zonal.
+        semilla: Posición del nodo semilla.
+        spec: Especificación del evento.
+        rng: Generador ya sembrado.
+
+    Returns:
+        Posiciones del grupo, en orden creciente.
+    """
+    if spec.size_target is not None:
+        return connected_subgraph(
+            zone.adjacency, semilla, spec.size_target, shape=spec.shape, rng=rng
+        )
+    assert spec.depth is not None  # __post_init__ garantiza uno de los dos ejes
+    return k_hop(zone.adjacency, semilla, spec.depth)
 
 
 def _base_delta(
@@ -213,7 +238,7 @@ def apply_collective_deviation(
         )
 
     semilla = _resolve_seed(zone, spec, rng)
-    nodos = k_hop(zone.adjacency, semilla, spec.depth)
+    nodos = _grupo(zone, semilla, spec, rng)
     columnas = list(nodos)
     valores = working[spec.start : fin][:, columnas]
 
@@ -246,9 +271,18 @@ def apply_collective_deviation(
         start=spec.start,
         duration=spec.duration,
         depth=spec.depth,
+        size_target=spec.size_target,
+        shape=(None if spec.size_target is None else spec.shape),
+        n_nodes=len(nodos),
+        boundary_edges=boundary_edges(zone.adjacency, nodos),
+        zone_size=zone.n_meters,
         sigma_multiple=(None if spec.sigma_multiple is None else spec.sigma_multiple * escala),
         fraction=(None if spec.fraction is None else spec.fraction * escala),
         delta=tuple(tuple(float(v) for v in fila) for fila in delta),
         scaled=escalado,
-        expected_detectable=spec.expected_detectable,
+        expected_detectable=(
+            len(nodos) < zone.n_meters
+            if spec.expected_detectable is None
+            else spec.expected_detectable
+        ),
     )

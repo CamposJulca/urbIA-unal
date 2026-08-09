@@ -17,6 +17,8 @@ from typing import Any, Final, Literal
 import numpy as np
 import numpy.typing as npt
 
+from .neighborhood import SHAPES, Shape
+
 Magnitude = Literal["voltaje_v", "corriente_a", "potencia_kw"]
 DeviceType = Literal["mono", "trifasico"]
 Direction = Literal["up", "down"]
@@ -223,10 +225,29 @@ class CollectiveDeviationSpec:
     útil en esta topología es `{0, 1, 2}`; `depth=0` afecta sólo a la
     semilla y sirve como caso de control individual.
 
+    **Cómo se elige el grupo.** Hay dos ejes excluyentes, y hay que declarar
+    exactamente uno:
+
+    * `depth`: vecindad a `k` saltos de la semilla. Es el eje de todas las
+      mediciones anteriores. El tamaño que produce **depende de la topología
+      local** —el mismo `depth=2` da 11 nodos en una zona y 18 en otra—, así
+      que no sirve para barrer tamaño ni para comparar entre zonas.
+    * `size_target`: cantidad exacta de nodos, creciendo conexo desde la
+      semilla. El eje queda limpio, que es lo que un barrido necesita.
+
     Attributes:
         magnitude: Magnitud a desviar.
-        depth: Profundidad del vecindario en saltos del grafo.
-        sigma_multiple: Magnitud en múltiplos de la dispersión espacial.
+        depth: Profundidad del vecindario en saltos del grafo. Excluyente
+            con `size_target`.
+        size_target: Cantidad exacta de nodos del grupo. Excluyente con
+            `depth`.
+        shape: Forma de crecimiento cuando se usa `size_target`. A tamaño
+            fijo, `"extendido"` deja más perímetro que `"compacto"`; es la
+            única manipulación que desacopla tamaño de perímetro.
+        sigma_multiple: Magnitud en múltiplos de la dispersión espacial de
+            la **zona**, tomada del perfil congelado. No se define sobre el
+            grupo: la unidad cambiaría con el tamaño y un barrido de tamaño
+            mediría dos variables mezcladas.
         fraction: Magnitud como fracción del valor de cada nodo.
         direction: Sentido de la desviación.
         seed_device_id: Nodo semilla. Si es `None` se sortea con la semilla
@@ -234,29 +255,35 @@ class CollectiveDeviationSpec:
             acomodar el resultado.
         start: Primer instante afectado.
         duration: Cantidad de instantes consecutivos afectados.
-        expected_detectable: Si el evento *debe* ser detectado. Está acá
-            para las familias de control —un corrimiento de zona completa
-            es un modo común y el detector no debería dispararse— que
-            necesitan entrar a la verdad de referencia como casos
-            negativos.
+        expected_detectable: Si el evento *debe* ser detectado. En `None`
+            —lo normal— se **deriva**: es detectable si el grupo deja
+            complemento (`m < n`), y no lo es si abarca la zona entera,
+            porque ahí el contraste de dos muestras es exactamente
+            invariante y no hay nada que ver. Derivarlo importa: el caso
+            ambiguo es justo el que uno estaría tentado de etiquetar según
+            lo que espera medir. Se admite fijarlo a mano sólo como escape;
+            los experimentos lo dejan en `None`.
     """
 
     magnitude: Magnitude
-    depth: int
+    depth: int | None = None
+    size_target: int | None = None
+    shape: Shape = "compacto"
     sigma_multiple: float | None = None
     fraction: float | None = None
     direction: Direction = "up"
     seed_device_id: str | None = None
     start: int = 0
     duration: int = 1
-    expected_detectable: bool = True
+    expected_detectable: bool | None = None
 
     def __post_init__(self) -> None:
         """Valida la coherencia interna de la especificación.
 
         Raises:
             InvalidSpecError: Si falta la magnitud, si se declaran las dos
-                formas a la vez, o si algún parámetro es negativo.
+                formas a la vez, si no se declara exactamente un eje de
+                grupo, o si algún parámetro es negativo.
         """
         declaradas = [v for v in (self.sigma_multiple, self.fraction) if v is not None]
         if len(declaradas) != 1:
@@ -271,8 +298,22 @@ class CollectiveDeviationSpec:
                 f"la magnitud de la desviación debe ser > 0, recibida {declaradas[0]}: "
                 f"el sentido se declara en `direction`, no con el signo"
             )
-        if self.depth < 0:
+        ejes = [v for v in (self.depth, self.size_target) if v is not None]
+        if len(ejes) != 1:
+            raise InvalidSpecError(
+                "hay que declarar exactamente uno de depth o size_target: el tamaño "
+                "que produce depth depende de la topología local, así que declarar "
+                "los dos dejaría sin definir cuál manda"
+            )
+        if self.shape not in SHAPES:
+            raise InvalidSpecError(f"shape debe ser uno de {SHAPES}, recibido '{self.shape}'")
+        if self.depth is not None and self.depth < 0:
             raise InvalidSpecError(f"depth debe ser >= 0, recibido {self.depth}")
+        if self.size_target is not None and self.size_target < 1:
+            raise InvalidSpecError(
+                f"size_target debe ser >= 1, recibido {self.size_target}: la semilla "
+                f"siempre entra al grupo"
+            )
         if self.start < 0:
             raise InvalidSpecError(f"start debe ser >= 0, recibido {self.start}")
         if self.duration < 1:
@@ -303,7 +344,15 @@ class InjectedEvent:
         node_indices: Posiciones de esos nodos en el grafo.
         start: Primer instante afectado.
         duration: Instantes afectados.
-        depth: Profundidad del vecindario usada.
+        depth: Profundidad del vecindario usada, si el eje fue `depth`.
+        size_target: Tamaño pedido, si el eje fue `size_target`.
+        shape: Forma de crecimiento usada, si el eje fue `size_target`.
+        n_nodes: Nodos efectivamente afectados. Es el `m` del barrido.
+        boundary_edges: Aristas con un solo extremo dentro del grupo, o sea
+            su perímetro. Se registra porque la hipótesis en discusión es si
+            la detección lo sigue a él o al tamaño, y sin el dato la
+            pregunta no se puede responder después.
+        zone_size: Nodos de la zona, el `n` contra el que `m` se compara.
         sigma_multiple: Magnitud efectiva en múltiplos de σ, si aplica.
         fraction: Magnitud efectiva como fracción, si aplica.
         delta: Desviación aplicada, forma `(duration, len(device_ids))`.
@@ -320,12 +369,32 @@ class InjectedEvent:
     node_indices: tuple[int, ...]
     start: int
     duration: int
-    depth: int
+    depth: int | None
+    size_target: int | None
+    shape: Shape | None
+    n_nodes: int
+    boundary_edges: int
+    zone_size: int
     sigma_multiple: float | None
     fraction: float | None
     delta: tuple[tuple[float, ...], ...]
     scaled: bool
     expected_detectable: bool
+
+    @property
+    def coverage(self) -> float:
+        """Fracción de la zona que abarca el grupo, `m/n`."""
+        return self.n_nodes / self.zone_size
+
+    @property
+    def boundary_per_node(self) -> float:
+        """Aristas de corte por nodo del grupo.
+
+        Es el predictor de la hipótesis del perímetro: sobre 600 eventos
+        correlaciona `r = 0,9534` con el cociente de Rayleigh
+        (`experiments/firma-espectral/RESULTADOS.md` §2).
+        """
+        return self.boundary_edges / self.n_nodes
 
     @property
     def instants(self) -> range:
@@ -354,6 +423,13 @@ class InjectedEvent:
             "start": self.start,
             "duration": self.duration,
             "depth": self.depth,
+            "size_target": self.size_target,
+            "shape": self.shape,
+            "n_nodes": self.n_nodes,
+            "boundary_edges": self.boundary_edges,
+            "zone_size": self.zone_size,
+            "coverage": self.coverage,
+            "boundary_per_node": self.boundary_per_node,
             "sigma_multiple": self.sigma_multiple,
             "fraction": self.fraction,
             "delta": [list(fila) for fila in self.delta],

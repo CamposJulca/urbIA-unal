@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from urbia_monitor_gsp.graph import ZoneGraph
+from urbia_monitor_gsp.graph import AmiGraph, ZoneGraph
 
 from conftest import SEMILLA, senal_normal
 from urbia_events import (
@@ -375,3 +375,177 @@ class TestValidacion:
         spec = CollectiveDeviationSpec(magnitude="voltaje_v", depth=1, sigma_multiple=1.0)
         with pytest.raises(InvalidSpecError, match="límites"):
             vacio.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+
+
+class TestEjeDeTamano:
+    """`size_target`: el eje limpio que el barrido necesita.
+
+    Con `depth` el tamaño queda atado a la topología local —el mismo
+    `depth=2` da 11 nodos en una zona y 18 en otra—, así que un barrido
+    indexado por `depth` no sería comparable entre zonas.
+    """
+
+    @pytest.mark.parametrize("m", [1, 3, 7, 12, 25])
+    def test_el_grupo_tiene_el_tamano_pedido(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile, m: int
+    ) -> None:
+        spec = CollectiveDeviationSpec(magnitude="voltaje_v", size_target=m, sigma_multiple=0.5)
+        _, verdad = inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+        evento = verdad.events[0]
+        assert evento.n_nodes == m
+        assert len(evento.device_ids) == m
+
+    def test_el_mismo_tamano_en_todas_las_zonas(
+        self, inyector: EventInjector, grafo: AmiGraph, perfil: SignalProfile
+    ) -> None:
+        """Lo que `depth` no puede dar, y es la razón del eje nuevo."""
+        tamanos = set()
+        for nombre in grafo.zone_order:
+            zona = grafo.zones[nombre]
+            spec = CollectiveDeviationSpec(magnitude="voltaje_v", size_target=8, sigma_multiple=0.5)
+            _, verdad = inyector.inject(zona, senal_normal(zona, perfil), [spec])
+            tamanos.add(verdad.events[0].n_nodes)
+        assert tamanos == {8}
+
+    def test_registra_perimetro_cobertura_y_tamano_de_zona(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile
+    ) -> None:
+        """Sin el perímetro no se puede contrastar la hipótesis del perímetro."""
+        spec = CollectiveDeviationSpec(magnitude="voltaje_v", size_target=6, sigma_multiple=0.5)
+        _, verdad = inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+        evento = verdad.events[0]
+        assert evento.zone_size == zona_mono.n_meters
+        assert evento.boundary_edges > 0
+        assert evento.coverage == 6 / zona_mono.n_meters
+        assert evento.boundary_per_node == evento.boundary_edges / 6
+
+    def test_el_grupo_completo_no_tiene_perimetro(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile
+    ) -> None:
+        """El caso límite: sin frontera no hay nada que un detector de grafo vea."""
+        spec = CollectiveDeviationSpec(
+            magnitude="voltaje_v", size_target=zona_mono.n_meters, sigma_multiple=0.5
+        )
+        _, verdad = inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+        evento = verdad.events[0]
+        assert evento.boundary_edges == 0
+        assert evento.coverage == 1.0
+
+    def test_la_forma_queda_registrada(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile
+    ) -> None:
+        spec = CollectiveDeviationSpec(
+            magnitude="voltaje_v", size_target=6, shape="extendido", sigma_multiple=0.5
+        )
+        _, verdad = inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+        evento = verdad.events[0]
+        assert evento.shape == "extendido"
+        assert evento.size_target == 6
+        assert evento.depth is None
+
+    def test_por_depth_no_se_registra_forma(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile
+    ) -> None:
+        """La familia ya medida no cambia de significado."""
+        spec = CollectiveDeviationSpec(magnitude="voltaje_v", depth=1, sigma_multiple=0.5)
+        _, verdad = inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+        evento = verdad.events[0]
+        assert evento.shape is None
+        assert evento.size_target is None
+        assert evento.depth == 1
+
+    def test_delta_reconstruye_el_original_tambien_por_tamano(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile
+    ) -> None:
+        """El invariante que hace verificable a la verdad, en el eje nuevo."""
+        base = senal_normal(zona_mono, perfil, n_instantes=6)
+        spec = CollectiveDeviationSpec(
+            magnitude="voltaje_v", size_target=9, sigma_multiple=0.5, start=1, duration=3
+        )
+        senal, verdad = inyector.inject(zona_mono, base, [spec])
+        evento = verdad.events[0]
+        reconstruida = senal.copy()
+        reconstruida[1:4][:, list(evento.node_indices)] -= np.asarray(evento.delta)
+        assert np.allclose(reconstruida, base)
+
+
+class TestExpectedDetectableDerivado:
+    """La etiqueta sale del álgebra, no de lo que uno espera medir.
+
+    El caso ambiguo —un grupo grande pero no total— es justo el que uno
+    estaría tentado de etiquetar según el resultado deseado. Derivarlo de
+    `m < n` lo saca de la discusión.
+    """
+
+    @pytest.mark.parametrize("m", [1, 6, 12, 24])
+    def test_un_grupo_con_complemento_es_detectable(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile, m: int
+    ) -> None:
+        spec = CollectiveDeviationSpec(magnitude="voltaje_v", size_target=m, sigma_multiple=0.5)
+        _, verdad = inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+        assert verdad.events[0].expected_detectable
+
+    def test_la_zona_entera_no_es_detectable(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile
+    ) -> None:
+        """El modo común: no hay discordancia con la vecindad."""
+        spec = CollectiveDeviationSpec(
+            magnitude="voltaje_v", size_target=zona_mono.n_meters, sigma_multiple=0.5
+        )
+        _, verdad = inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+        assert not verdad.events[0].expected_detectable
+
+    def test_depth_que_cubre_la_zona_entera_tampoco(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile
+    ) -> None:
+        """La derivación es del grupo resultante, no del eje que se declaró."""
+        spec = CollectiveDeviationSpec(magnitude="voltaje_v", depth=99, sigma_multiple=0.5)
+        _, verdad = inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+        assert not verdad.events[0].expected_detectable
+
+    def test_se_puede_fijar_a_mano_como_escape(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile
+    ) -> None:
+        spec = CollectiveDeviationSpec(
+            magnitude="voltaje_v",
+            size_target=zona_mono.n_meters,
+            sigma_multiple=0.5,
+            expected_detectable=True,
+        )
+        _, verdad = inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
+        assert verdad.events[0].expected_detectable
+
+
+class TestValidacionDeEjes:
+    def test_declarar_los_dos_ejes_es_error(self) -> None:
+        with pytest.raises(InvalidSpecError, match="exactamente uno de depth o size_target"):
+            CollectiveDeviationSpec(
+                magnitude="voltaje_v", depth=1, size_target=6, sigma_multiple=0.5
+            )
+
+    def test_no_declarar_ninguno_es_error(self) -> None:
+        with pytest.raises(InvalidSpecError, match="exactamente uno de depth o size_target"):
+            CollectiveDeviationSpec(magnitude="voltaje_v", sigma_multiple=0.5)
+
+    def test_tamano_cero_es_error(self) -> None:
+        with pytest.raises(InvalidSpecError, match="size_target debe ser >= 1"):
+            CollectiveDeviationSpec(magnitude="voltaje_v", size_target=0, sigma_multiple=0.5)
+
+    def test_forma_desconocida_es_error(self) -> None:
+        with pytest.raises(InvalidSpecError, match="shape debe ser"):
+            CollectiveDeviationSpec(
+                magnitude="voltaje_v",
+                size_target=6,
+                shape="raro",  # type: ignore[arg-type]
+                sigma_multiple=0.5,
+            )
+
+    def test_tamano_mayor_que_la_zona_es_error(
+        self, inyector: EventInjector, zona_mono: ZoneGraph, perfil: SignalProfile
+    ) -> None:
+        """La spec no conoce la zona; el error aparece al aplicar."""
+        spec = CollectiveDeviationSpec(
+            magnitude="voltaje_v", size_target=zona_mono.n_meters + 1, sigma_multiple=0.5
+        )
+        with pytest.raises(ValueError, match="size_target debe estar"):
+            inyector.inject(zona_mono, senal_normal(zona_mono, perfil), [spec])
