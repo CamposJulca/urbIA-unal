@@ -1,6 +1,6 @@
 # ESTADO — Punto de partida para retomar
 
-Estado descrito: árbol en **`b3ed026`**, verificado el **2026-08-09**.
+Estado descrito: árbol en **`0c5481b`**, verificado el **2026-08-10**.
 
 La referencia es al árbol sobre el que se tomaron las mediciones de acá, no
 al commit que edita este archivo: un archivo no puede citar su propio hash,
@@ -16,7 +16,7 @@ contradice al código, gana el código y hay que actualizar esto.
 
 | Paquete | Qué es | Tests |
 |---|---|---|
-| `services/monitor-gsp` | Grafo AMI, aparato espectral, Difuminador y **detector** | 295, cobertura 98,3 % |
+| `services/monitor-gsp` | Grafo AMI, aparato espectral, Difuminador, **detector** y **el servicio** | 534, cobertura 97,0 % |
 | `services/event-injector` | Inyector de eventos correlacionados con verdad de referencia | 77 + 13 de integración |
 
 Los dos con `ruff` y `mypy --strict` limpios. La dependencia va en un solo
@@ -65,7 +65,36 @@ positivos**. Commits `ed2986f`, `49a62f3`, `10f23b1`.
 ### `services/event-injector` — los eventos
 
 Familia implementada: desviación colectiva sutil. Magnitud en **múltiplos
-de σ espacial**, no en porcentaje. Commit `c1ffdab`.
+de σ espacial**, no en porcentaje. Commit `c1ffdab`. El eje de tamaño de
+grupo se agregó después en `b6d8f2b`.
+
+### `stream/` y `service/` — el monitor como proceso (ADR-005)
+
+Deja de ser una biblioteca que sólo usan los experimentos. Ingiere del
+broker, mantiene ventana temporal por zona, escanea y publica.
+
+```bash
+docker compose up -d monitor-gsp          # o
+python -m urbia_monitor_gsp.service
+```
+
+Cuatro decisiones, cada una con su negativa de arranque, y **las cuatro con
+la misma forma**: la alternativa hacía que el servicio siguiera produciendo
+números indistinguibles de los buenos.
+
+| | |
+|---|---|
+| Ventana | **Temporal**, no por conteo. Por conteo, un medidor caído deja la ventana llena de instantes viejos y el contraste espacial mide tiempo |
+| Zona sin dato | **No produce resultado** y publica el motivo. Imputar inventa el dato a contrastar; excluir cambia el grafo |
+| Ranking | **Completo**, no sólo la ganadora. `top_k` existe para recortar si crece la topología |
+| Topología | **Bloqueante**. No arranca, y se cae en la reverificación. Base inalcanzable ≠ topología cambiada |
+
+Commits `996cdaf` (servicio) y `0c5481b` (imagen, compose, job de
+Prometheus).
+
+**El intervalo de 3 s no está elegido a ojo**: sale de la regla C6 de
+`experiments/ciclo-deteccion/` sobre el p99 medido de 1,39 ms. En la RPi5
+de H1 hay que rehacer esa medición antes de reusar el valor.
 
 ---
 
@@ -105,6 +134,7 @@ Sus mediciones **espectrales** no caducan.
 |---|---|
 | **ADR-003** | Construcción del grafo: vecindad geográfica declarada, seis subgrafos, k-NN k=4 por unión, proyección elipsoidal, corrección de signo del Difuminador |
 | **ADR-004** | Detector por escaneo local; paso-alto de E6 descartado como núcleo; punto de operación; sin preprocesado espectral; **H3 reformulada** |
+| **ADR-005** | El monitor como servicio: ventana temporal, no imputar, ranking completo, topología bloqueante; el intervalo derivado del costo medido |
 
 `ADR-001` y `ADR-002` siguen vacíos (0 bytes, del 1 de mayo). Hay
 `TEMPLATE.md` si se los quiere escribir.
@@ -209,8 +239,9 @@ un documento anterior, sin volver a la medición que la produjo.
 una cifra viaja de un documento a otro hay que preguntar de qué corrida
 salió y con qué parámetros, no si el número está bien copiado. Los
 `RESULTADOS.md` llevan encabezado de configuración por esto, y los
-`results/medicion.json` están versionados para poder volver a verificar sin
-rehacer la medición.
+`results/medicion.json` guardan los datos crudos para poder volver a
+verificar sin rehacer la medición — **pero hoy sólo desde neusi-stage**:
+están gitignorados y no viajan con el repo. Ver §6.5.
 
 ### 5.4 Sobre la disciplina de medición
 
@@ -229,7 +260,17 @@ Dos prácticas que se adoptaron sobre la marcha y conviene mantener:
 
 ## 6. Qué está pendiente, por prioridad
 
-### 6.1 La curva de degradación por tamaño de grupo — **lo más urgente**
+### 6.1 La curva de degradación por tamaño de grupo — **medida y sin redactar**
+
+> **Estado al 2026-08-10.** El barrido **ya se corrió** (`ff9df50`, con sus
+> criterios commiteados antes en `4cc080b` y `5b15705`) y
+> `experiments/tamano-grupo/results/medicion.json` existe en disco, 62 kB.
+> Lo que falta es el `RESULTADOS.md`: **la medición está tomada y no está
+> interpretada**, así que ninguna de las conclusiones de abajo se puede dar
+> todavía por respondida. Ojo con `.gitignore:77` — los `results/` no se
+> versionan (ver §6.5), así que ese archivo vive sólo en neusi-stage.
+
+El planteo, que sigue valiendo:
 
 Durante un tiempo esto se anotó como "falta la familia de modo común en el
 inyector". Está mal planteado, y el planteo equivocado escondía el problema
@@ -281,11 +322,18 @@ recompensa por ese lado. Tres lecturas posibles, ninguna medida:
   estimable en línea, tiene recompensa clara.
 * El filtro entra en otro lugar del ciclo.
 
-### 6.3 Costo computacional
+### 6.3 Costo computacional — medido en x86, **no en el borde**
 
-49 ventanas × 41 bolas por señal y por zona es lo que un nodo de borde
-tendría que sostener. **Sin medir.** Importa para la primera línea de
-contribución —bajar el monitor al borde— y hoy no hay ninguna cifra.
+Ya no está en blanco. `experiments/ciclo-deteccion/` midió el ciclo completo
+sobre las seis zonas: **p99 de 1,39 ms** en neusi-stage, contra un límite de
+viabilidad de 600 ms — 430× de margen. De ahí sale el intervalo de 3 s.
+El desglose dice que `detect` es el 46,6 % y que **serializar el ranking
+cuesta casi tanto como escanear**.
+
+Lo que sigue faltando es la mitad que importa para H1: **la misma medición
+en ARM**. Hasta que exista, la comparación borde contra datacenter no tiene
+los dos lados. El servicio ya publica `urbia_monitor_ciclo_segundos`, así
+que la corrida en la RPi5 es cuestión de desplegar y raspar.
 
 ### 6.4 Ampliar la evaluación
 
@@ -305,6 +353,19 @@ contribución —bajar el monitor al borde— y hoy no hay ninguna cifra.
   `additionalProperties: false` y no lo incluye, pero el backend lo lista
   como campo de entrada. A revisar cuando se toque `urbia-platform`.
 * `ADR-001` y `ADR-002` vacíos.
+* **Los `results/medicion.json` NO están versionados**, al contrario de lo
+  que este archivo afirmaba en §5.3. `.gitignore:77` excluye
+  `experiments/*/results/` y `git ls-files` no encuentra ninguno: viven sólo
+  en el disco de neusi-stage. O se versionan —son chicos, el más grande son
+  62 kB— o se deja de decir que se puede volver a verificar sin rehacer la
+  medición. Hoy no se puede desde otra máquina.
+* **El consumidor de anomalías del backend no existe.** El monitor publica
+  en `urbia/manizales/monitor/#` y nadie lee. Queda decidido que se agrega
+  sin tocar el consumidor de telemetría, porque ese backend sostiene el
+  sitio público, y que el panel Edge deja de ser maqueta cuando exista.
+* **Prometheus en neusi-obs no tiene el job cargado todavía.** El job
+  `monitor-gsp` está descomentado en el repo (`0c5481b`); falta desplegar el
+  archivo y recargar, que es una operación en otra máquina.
 
 ---
 
@@ -323,3 +384,25 @@ POSTGRES_PASSWORD=$(docker inspect urbia-postgres \
 
 Los experimentos se rehacen con `run.py` de cada directorio y no necesitan
 cluster salvo `perfil-senal`.
+
+### Que el servicio sigue en pie
+
+```bash
+POSTGRES_HOST=127.0.0.1 \
+POSTGRES_PASSWORD=$(docker inspect urbia-postgres \
+  --format '{{range .Config.Env}}{{println .}}{{end}}' \
+  | sed -n 's/^POSTGRES_PASSWORD=//p') \
+  services/monitor-gsp/.venv/bin/python -m urbia_monitor_gsp.service
+
+# en otra terminal, tras los 96 s de calentamiento
+curl -s http://127.0.0.1:9101/metrics | grep '^urbia_monitor_'
+mosquitto_sub -h 192.168.40.12 -t 'urbia/manizales/monitor/#' -v
+```
+
+Verificado el 2026-08-10 sobre los 150 medidores reales, 171 ciclos y 416
+ventanas: las seis zonas producen una ventana cada 6 s, **cero detecciones
+bajo tráfico normal**, cero bins saltados, cero publicaciones fallidas, y la
+reverificación de topología contra la base viva pasó. El ciclo dio 0,833 ms
+de media con el 98,2 % por debajo de 2 ms, consistente con el p99 de 1,39 ms
+que midió `experiments/ciclo-deteccion/`. El payload son 5 517 B con ranking
+completo de 39 candidatas.

@@ -11,8 +11,8 @@ reales de `ami_meters`.
 
 ## Estado
 
-En construcción, paso 6 de 10. El ciclo dato → grafo → señal filtrada ya
-está cerrado:
+El ciclo entero está cerrado: **el monitor corre como servicio**, ingiere
+del broker y publica lo que detecta.
 
 | Módulo | Qué hace | Depende de |
 |---|---|---|
@@ -21,11 +21,17 @@ está cerrado:
 | `graph/spectral` | `A → L → L_norm → eigh → GFT`, sobre matrices | numpy |
 | `graph/builder` | De medidores a subgrafos zonales con espectro | numpy |
 | `graph/filter` | Difuminador: filtro paso-bajo `exp(−λ/(τ·λmax))` y métricas | numpy |
+| `detector/` | Escaneo local sobre ventana, con umbral congelado y ranking | numpy |
+| `stream/window` | Ventana temporal densa desde llegadas asíncronas | numpy |
+| `service/` | El proceso: ingesta, ciclo, publicación y métricas | extra `[service]` |
 | `db/` | Lectura de `ami_meters` | extra `[db]` |
 
-La dependencia va en un solo sentido: `db` importa de `graph` y nunca al
-revés. Por eso el núcleo depende sólo de numpy y puede correr en un nodo
-de borde sin driver de base de datos.
+Las dependencias van en un solo sentido y eso **no es estético**: `db`
+importa de `graph` y nunca al revés, y dentro de `service` el ciclo
+(`runtime`) y la forma del payload (`publisher`) no importan paho ni
+prometheus. Por eso el núcleo depende sólo de numpy, el ciclo se prueba sin
+broker, y lo que se mude al nodo de borde para medir H1 es el detector y no
+el andamiaje que lo rodea.
 
 ```python
 # desde la base
@@ -339,13 +345,105 @@ midió. La comparación entra a un ADR en el paso 7.
 El puente inter-zona existe como opción configurable, apagada por defecto,
 para poder comparar ambas construcciones.
 
+## El monitor como servicio
+
+Decisiones en **ADR-005**. Lo que hay que saber para operarlo:
+
+```bash
+docker compose up -d monitor-gsp          # en el stack
+python -m urbia_monitor_gsp.service       # o suelto, con el venv
+```
+
+### Se niega a arrancar de cuatro formas, y las cuatro a propósito
+
+Ninguna de las cuatro se puede notar mirando la salida una vez que el
+proceso anda: en las cuatro el monitor seguiría produciendo números con la
+misma pinta de siempre. Por eso son todas de arranque y todas ruidosas.
+
+| No arranca si… | Porque… |
+|---|---|
+| No hay calibración congelada | Calibrar en caliente haría que una anomalía persistente se volviera parte de la hipótesis nula: cuanto peor, más normal parecería |
+| El grafo vivo no es el calibrado | Un umbral de otra topología produce detecciones que no corresponden al sistema real |
+| La ventana no es la que el umbral supone | El corte se calibró sobre 16 bins; con otro ancho deja de corresponder a la distribución del máximo |
+| El intervalo no cabe en el bin | El servicio perdería bins de forma **acumulativa**, y no se recupera solo |
+
+La verificación de topología **no termina al arrancar**: se rehace cada
+`TOPOLOGY_CHECK_SECONDS` y, si el padrón cambió, el proceso sale con código
+2. Una base **inalcanzable** es otra cosa y no tumba nada — se reintenta al
+turno siguiente—, porque confundirlas haría que un corte de red apagara el
+monitor.
+
+### Qué publica
+
+| Topic | Cuándo |
+|---|---|
+| `<prefijo>/ventana/<zona>` | cada ventana analizada, haya o no detección |
+| `<prefijo>/deteccion/<zona>` | sólo si superó el corte, con el mismo cuerpo |
+| `<prefijo>/sin-ventana/<zona>` | cada zona que no produjo resultado, con el motivo |
+
+Cada mensaje lleva la **procedencia del umbral** y la **huella del grafo**.
+Un corte sin procedencia no se puede auditar después, que es exactamente la
+trampa de `ESTADO.md` §5.3.
+
+Una zona a la que le falta dato **no produce detección**: no se imputa ni se
+excluye a nadie, y el motivo distingue `calentamiento` —los primeros 96 s,
+se resuelve solo— de `bins_incompletos` —alguien dejó de publicar—.
+
+### Configuración
+
+Además de las variables de la base:
+
+| Variable | Por defecto | Qué es |
+|---|---|---|
+| `MQTT_HOST` | `192.168.40.12` | Broker, **compartido con proyectos cliente** |
+| `MQTT_TOPIC_TELEMETRY` | `urbia/manizales/#` | Se enruta por `device_id`, no por el topic |
+| `MQTT_TOPIC_PREFIX` | `urbia/manizales/monitor` | Raíz de lo que publica |
+| `MQTT_CLIENT_ID` | `urbia-monitor-gsp` | Distinto del backend, o el broker desconecta a uno |
+| `CALIBRATION_PATH` | `data/calibrations/manizales_scan_v1.json` | Relativo a la raíz del repo; en el contenedor va absoluto |
+| `CYCLE_SECONDS` | `3.0` | **Medido**, ver abajo |
+| `TOPOLOGY_CHECK_SECONDS` | `300.0` | Elección declarada, no medición |
+| `MAGNITUDE` | `voltaje_v` | La única magnitud con el detector evaluado |
+| `TOP_K` | *(vacío)* | Ranking completo. Recorta sólo si la topología crece |
+| `METRICS_PORT` | `9101` | Lo raspa el job `monitor-gsp` de Prometheus |
+| `ZONAS` | *(vacío)* | Todas. Acotar es lo que permite al borde correr sólo la suya |
+
+**El intervalo no está elegido a ojo.** Sale de la regla C6 de
+`experiments/ciclo-deteccion/` aplicada al costo medido del ciclo sobre las
+seis zonas: p99 de 1,39 ms en neusi-stage, contra un límite de viabilidad de
+600 ms. Manda `t ≤ b/2` y da 3 s.
+
+> La cifra vale **para neusi-stage y esta topología**. En la RPi5 ARM de H1
+> hay que rehacer la medición antes de reusar el valor; leerla allá sería el
+> error de `ESTADO.md` §5.3. El servicio publica la duración del ciclo como
+> métrica justamente para saber cuándo dejó de valer.
+
+### Las dos series a vigilar
+
+* `urbia_monitor_bins_saltados` distinto de cero significa que el ciclo
+  tarda más que el bin y el atraso **se acumula**. No se recupera solo.
+* `urbia_monitor_sin_ventana` cuenta las zonas sin resultado por falta de
+  datos. No es un error: es la consecuencia declarada de no imputar. Pero si
+  crece, ese panel está en blanco y hay que saberlo sin abrir los logs.
+
+### Limitación conocida, medible y no medida
+
+El umbral está congelado contra un nulo **sintético**, con la σ del perfil
+versionado. Eso **supone** que la dispersión espacial de la telemetría real
+se parece a la que declara el perfil. Si la real fuera mayor, la tasa de
+falsos positivos en operación superaría el 1 % declarado; si fuera menor, el
+detector sería más conservador de lo que dice.
+
+Se mide contrastando la distribución del estadístico en operación contra la
+nula simulada. El servicio ya publica el estadístico de cada ventana, así
+que los datos se están acumulando; la comparación no está hecha.
+
 ## Instalación
 
 ```bash
 # Entorno de desarrollo del servicio
 python3.12 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[db,dev]"
+pip install -e ".[service,dev]"
 ```
 
 El núcleo (`urbia_monitor_gsp.graph`) sólo depende de numpy y no importa
