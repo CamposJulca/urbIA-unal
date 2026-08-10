@@ -41,15 +41,18 @@ scrape_configs:
 
   # ─────────────────────────────────────────── monitor GSP
   #
-  # Preparado y apagado: el servicio del monitor todavía no existe. Cuando
-  # exista expone /metrics y esto se descomenta. Va como job aparte y no
-  # dentro de `node` porque su cardinalidad la manda el grafo —zonas y
-  # medidores—, no la máquina, y conviene poder acotarla por separado.
+  # Va como job aparte y no dentro de `node` porque su cardinalidad la
+  # manda el grafo —zonas—, no la máquina, y conviene poder acotarla por
+  # separado.
   #
-  # - job_name: monitor-gsp
-  #   static_configs:
-  #     - targets: ["192.168.40.11:9101"]
-  #       labels: {nodo: neusi-stage, componente: monitor-gsp}
-  #   relabel_configs:
-  #     - source_labels: [nodo]
-  #       target_label: instance
+  # `instance` se reescribe al nombre del nodo, igual que en `node`: el
+  # monitor se va a mudar a neusi-edge-x86 para medir H1, y comparar las
+  # dos corridas exige que el cambio de máquina se vea en una etiqueta y
+  # no parta la serie en dos.
+  - job_name: monitor-gsp
+    static_configs:
+      - targets: ["192.168.40.11:9101"]
+        labels: {nodo: neusi-stage, componente: monitor-gsp}
+    relabel_configs:
+      - source_labels: [nodo]
+        target_label: instance

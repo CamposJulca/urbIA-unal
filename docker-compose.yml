@@ -203,6 +203,65 @@ services:
       retries: 3
       start_period: 10s
 
+  # Monitor GSP: el nucleo doctoral corriendo como servicio.
+  #
+  # Consume telemetria del broker, mantiene ventana deslizante por zona y
+  # publica lo que detecta bajo urbia/manizales/monitor/. De PostgreSQL
+  # lee SOLO el padron de medidores (ami_meters) y nunca escribe: los
+  # resultados salen por MQTT.
+  #
+  # El contexto de build es la raiz del repo porque la imagen incluye
+  # data/calibrations y data/topologies. Ver el encabezado del Dockerfile.
+  monitor-gsp:
+    build:
+      context: .
+      dockerfile: services/monitor-gsp/Dockerfile
+    image: urbia/monitor-gsp:0.1.0
+    container_name: urbia-monitor-gsp
+    restart: unless-stopped
+    environment:
+      # Padron de medidores. Dentro del bridge se resuelve por nombre de
+      # servicio, igual que en el backend.
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # Broker MQTT externo en 192.168.40.12 (modo anonimo, ver .env.example).
+      MQTT_HOST: ${MQTT_HOST}
+      MQTT_PORT: ${MQTT_PORT}
+      MQTT_USERNAME: ${MQTT_USERNAME}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+      MQTT_TOPIC_TELEMETRY: ${MQTT_TOPIC_TELEMETRY}
+      MQTT_TOPIC_PREFIX: "urbia/manizales/monitor"
+      # client_id propio: si lo compartiera con el backend, el broker
+      # desconectaria a uno de los dos.
+      MQTT_CLIENT_ID: "urbia-monitor-gsp"
+      # Punto de operacion. El intervalo sale de la regla C6 de
+      # experiments/ciclo-deteccion/ (p99 del ciclo 1,39 ms sobre
+      # neusi-stage), NO esta elegido a ojo. Al mudarlo a neusi-edge-x86
+      # hay que rehacer esa medicion antes de reusar el valor.
+      CYCLE_SECONDS: "3.0"
+      TOPOLOGY_CHECK_SECONDS: "300.0"
+      # voltaje_v es la unica magnitud con el detector evaluado.
+      MAGNITUDE: "voltaje_v"
+      METRICS_HOST: "0.0.0.0"
+      METRICS_PORT: "9101"
+      LOG_LEVEL: "INFO"
+    ports:
+      # Lo raspa Prometheus desde neusi-obs.
+      - "9101:9101"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - urbia
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   urbia:
     name: urbia-network
