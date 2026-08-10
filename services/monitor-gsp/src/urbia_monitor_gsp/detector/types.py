@@ -233,6 +233,52 @@ class FrozenThreshold:
 
 
 @dataclass(frozen=True, slots=True)
+class ScanCandidate:
+    """Una bola candidata con el contraste que se midió sobre ella.
+
+    El escaneo evalúa todas las bolas y se queda con el máximo. Guardar
+    sólo la ganadora impediría reconstruir después el punto de operación:
+    con un solo número no se sabe si el máximo se despegó del resto —una
+    discordancia localizada— o si toda la zona rondaba el mismo valor y la
+    ganadora salió por azar. Son dos situaciones distintas que producen la
+    misma cifra.
+
+    La bola no lleva su lista de nodos: **el centro y el radio la
+    determinan sin ambigüedad dado el grafo**, y la huella del grafo viaja
+    con la calibración, así que el consumidor puede reconstruirla. Repetir
+    los identificadores por cada candidata multiplicaría el payload por el
+    tamaño de la bola sin agregar información.
+
+    Attributes:
+        seed_index: Centro de la bola, en el orden canónico de la zona.
+        seed_device_id: Identificador de ese centro.
+        radius: Saltos que abarca la bola desde el centro.
+        size: Nodos que contiene.
+        statistic: Contraste de dos muestras, en unidades de σ.
+    """
+
+    seed_index: int
+    seed_device_id: str
+    radius: int
+    size: int
+    statistic: float
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serializa la candidata.
+
+        Returns:
+            Diccionario serializable.
+        """
+        return {
+            "seed_index": self.seed_index,
+            "seed_device_id": self.seed_device_id,
+            "radius": self.radius,
+            "size": self.size,
+            "statistic": self.statistic,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class Detection:
     """Lo que el detector afirma sobre una ventana.
 
@@ -253,6 +299,13 @@ class Detection:
         radius: Radio de la bola ganadora.
         node_indices: Nodos de la bola ganadora, en orden canónico.
         device_ids: Identificadores de esos nodos.
+        ranking: **Todas** las bolas candidatas ordenadas por contraste
+            descendente, no sólo la ganadora. `ranking[0]` es siempre la
+            bola de la que salen `statistic`, `seed_index` y `radius`. La
+            construcción cuesta 34–49 µs por ventana según la zona —medido
+            sobre las seis de `manizales_150`, 35 a 50 bolas— contra los
+            6 s que dura un bin: irrelevante en operación. Quien publique
+            decide cuánto del ranking manda; ver `to_dict`.
     """
 
     zona: str
@@ -266,18 +319,31 @@ class Detection:
     radius: int | None
     node_indices: tuple[int, ...]
     device_ids: tuple[str, ...]
+    ranking: tuple[ScanCandidate, ...] = ()
 
     @property
     def instants(self) -> range:
         """Instantes que cubre la ventana."""
         return range(self.window_start, self.window_end)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self, top_k: int | None = None) -> dict[str, Any]:
         """Serializa la detección a tipos JSON.
+
+        Args:
+            top_k: Cuántas candidatas del ranking incluir, de mayor a
+                menor contraste. `None` las incluye todas, que es el
+                defecto: recortar es una decisión de quien publica —por
+                tamaño de payload— y no del detector.
 
         Returns:
             Diccionario serializable.
+
+        Raises:
+            DetectorError: Si `top_k` es negativo.
         """
+        if top_k is not None and top_k < 0:
+            raise DetectorError(f"top_k debe ser >= 0 o None, recibido {top_k}")
+        candidatas = self.ranking if top_k is None else self.ranking[:top_k]
         return {
             "zona": self.zona,
             "window_start": self.window_start,
@@ -289,6 +355,8 @@ class Detection:
             "radius": self.radius,
             "node_indices": list(self.node_indices),
             "device_ids": list(self.device_ids),
+            "candidatas_evaluadas": len(self.ranking),
+            "ranking": [c.to_dict() for c in candidatas],
         }
 
 

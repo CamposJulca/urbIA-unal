@@ -34,6 +34,7 @@ from .types import (
     DetectorConfig,
     DetectorError,
     FrozenThreshold,
+    ScanCandidate,
     confusion_matrix,
 )
 
@@ -45,6 +46,7 @@ __all__ = [
     "DetectorConfig",
     "DetectorError",
     "FrozenThreshold",
+    "ScanCandidate",
     "candidate_balls",
     "confusion_matrix",
     "contrasts",

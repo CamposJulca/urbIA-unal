@@ -58,7 +58,7 @@ import numpy.typing as npt
 from ..graph.filter import diffuse
 from ..graph.types import ZoneGraph
 from .scan import candidate_balls, contrasts
-from .types import Detection, DetectorConfig, DetectorError, FrozenThreshold
+from .types import Detection, DetectorConfig, DetectorError, FrozenThreshold, ScanCandidate
 
 
 class CollectiveScanDetector:
@@ -93,6 +93,9 @@ class CollectiveScanDetector:
         self._sigma = float(sigma_spatial)
         self._config = config if config is not None else DetectorConfig()
         self._masks, self._meta = candidate_balls(zone, self._config.scan_radii)
+        self._ball_sizes: tuple[int, ...] = tuple(
+            int(t) for t in self._masks.sum(axis=1).astype(np.int64).tolist()
+        )
         self._threshold: float | None = None
         self._provenance: str | None = None
 
@@ -329,7 +332,24 @@ class CollectiveScanDetector:
             La detección de esa ventana.
         """
         valores = contrasts(self._prepare(signal[inicio:fin]), self._masks, self._sigma_eff)[0]
-        mejor = int(valores.argmax())
+
+        # `kind="stable"` para que un empate se resuelva por orden de bola
+        # y no por el capricho del algoritmo: con `argmax` el empate se lo
+        # lleva la primera, y el ranking tiene que decir lo mismo que los
+        # campos de la ganadora.
+        orden = np.argsort(-valores, kind="stable").tolist()
+        ranking = tuple(
+            ScanCandidate(
+                seed_index=self._meta[i][0],
+                seed_device_id=self._zone.device_ids[self._meta[i][0]],
+                radius=self._meta[i][1],
+                size=self._ball_sizes[i],
+                statistic=float(valores[i]),
+            )
+            for i in orden
+        )
+
+        mejor = orden[0]
         centro, radio = self._meta[mejor]
         nodos = tuple(int(i) for i in np.flatnonzero(self._masks[mejor] > 0.0))
         estadistico = float(valores[mejor])
@@ -347,6 +367,7 @@ class CollectiveScanDetector:
             radius=radio if detectado else None,
             node_indices=nodos if detectado else (),
             device_ids=(tuple(self._zone.device_ids[i] for i in nodos) if detectado else ()),
+            ranking=ranking,
         )
 
     def detect(self, signal: npt.ArrayLike) -> tuple[Detection, ...]:
