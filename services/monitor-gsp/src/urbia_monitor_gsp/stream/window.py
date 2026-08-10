@@ -343,6 +343,14 @@ class ZoneWindow:
         return self._config
 
     @property
+    def device_ids(self) -> tuple[str, ...]:
+        """Medidores de la zona, en el orden canónico del grafo.
+
+        Es el orden que indexa las columnas de la matriz emitida.
+        """
+        return self._device_ids
+
+    @property
     def n_meters(self) -> int:
         """Medidores que exige un bin completo."""
         return len(self._device_ids)

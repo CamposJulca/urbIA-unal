@@ -30,16 +30,32 @@ db = [
     "psycopg[binary]>=3.2,<4",
     "pydantic-settings>=2.4,<3",
 ]
-dev = [
-    # Autorreferencia al extra `db`: la suite de tests incluye
-    # tests/test_db.py, que importa psycopg en el nivel de módulo. Sin
-    # esto, instalar sólo [dev] rompe la recolección de pytest entera.
+# El monitor como proceso: broker y exportador de métricas. Vive fuera del
+# núcleo por la misma razón que `db`: `runtime` y `publisher` no importan
+# paho ni prometheus, así que el ciclo entero se prueba sin ninguno de los
+# dos, y el núcleo sigue corriendo en un notebook con sólo numpy.
+service = [
     "urbia-monitor-gsp[db]",
+    "paho-mqtt>=2.1,<3",
+    "prometheus-client>=0.20,<1",
+]
+dev = [
+    # Autorreferencia a los extras: la suite incluye tests/test_db.py, que
+    # importa psycopg en el nivel de módulo, y los tests del servicio, que
+    # importan paho y prometheus. Sin esto, instalar sólo [dev] rompe la
+    # recolección de pytest entera.
+    "urbia-monitor-gsp[service]",
     "pytest>=8.3,<9",
     "pytest-cov>=5.0,<6",
     "ruff>=0.6,<0.13",
     "mypy>=1.11,<2",
 ]
+
+[project.scripts]
+# El monitor como proceso. Requiere el extra `[service]`; sin él, el
+# comando existe pero falla al importar paho con un ImportError que dice
+# qué falta.
+urbia-monitor-gsp = "urbia_monitor_gsp.service.app:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/urbia_monitor_gsp"]
@@ -107,7 +123,10 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 # Los tests no necesitan docstring por función; el nombre del test
 # (test_<funcion>_<escenario>_<resultado>) ya documenta el caso.
-"tests/**" = ["D100", "D101", "D102", "D103", "ANN201"]
+# D107 se suma por los dobles —`ClienteFalso`, `PublicadorRoto`,
+# `BaseFalsa`—: su `__init__` sólo guarda contadores, y documentarlo
+# alargaría el archivo sin decir nada que la clase no diga ya.
+"tests/**" = ["D100", "D101", "D102", "D103", "D107", "ANN201"]
 
 [tool.ruff.lint.pep8-naming]
 # Nomenclatura matemática: A (adyacencia), D (grados), L (Laplaciano),
