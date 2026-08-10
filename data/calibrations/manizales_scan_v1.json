@@ -1,0 +1,204 @@
+{
+  "format": "urbia-calibration-v1",
+  "magnitude": "voltaje_v",
+  "notes": "Nulo sintético gaussiano con la σ espacial del perfil versionado. Objetivo por señal de 64 bins de 6 s. Supone que la dispersión espacial de la telemetría real se parece a la del perfil; es un supuesto medible y no medido, declarado en el README del servicio.",
+  "profile": "manizales-signal-v1",
+  "topology": "manizales-v1",
+  "validation": {
+    "centro": {
+      "episodios_max_por_hora": 2.0,
+      "episodios_media_por_hora": 0.16,
+      "episodios_p95_por_hora": 1.0,
+      "fraccion_ventanas": 0.0006153846153846154,
+      "horas_simuladas": 100.0,
+      "ventanas_max_por_hora": 6.0,
+      "ventanas_media_por_hora": 0.36,
+      "ventanas_p95_por_hora": 3.0
+    },
+    "chipre": {
+      "episodios_max_por_hora": 2.0,
+      "episodios_media_por_hora": 0.05,
+      "episodios_p95_por_hora": 0.0,
+      "fraccion_ventanas": 0.00017094017094017094,
+      "horas_simuladas": 100.0,
+      "ventanas_max_por_hora": 7.0,
+      "ventanas_media_por_hora": 0.1,
+      "ventanas_p95_por_hora": 0.0
+    },
+    "la_enea": {
+      "episodios_max_por_hora": 2.0,
+      "episodios_media_por_hora": 0.08,
+      "episodios_p95_por_hora": 1.0,
+      "fraccion_ventanas": 0.00023931623931623932,
+      "horas_simuladas": 100.0,
+      "ventanas_max_por_hora": 7.0,
+      "ventanas_media_por_hora": 0.14,
+      "ventanas_p95_por_hora": 1.0
+    },
+    "palermo": {
+      "episodios_max_por_hora": 2.0,
+      "episodios_media_por_hora": 0.13,
+      "episodios_p95_por_hora": 1.0,
+      "fraccion_ventanas": 0.00044444444444444447,
+      "horas_simuladas": 100.0,
+      "ventanas_max_por_hora": 5.0,
+      "ventanas_media_por_hora": 0.26,
+      "ventanas_p95_por_hora": 2.0
+    },
+    "palogrande": {
+      "episodios_max_por_hora": 2.0,
+      "episodios_media_por_hora": 0.18,
+      "episodios_p95_por_hora": 1.0,
+      "fraccion_ventanas": 0.00044444444444444447,
+      "horas_simuladas": 100.0,
+      "ventanas_max_por_hora": 5.0,
+      "ventanas_media_por_hora": 0.26,
+      "ventanas_p95_por_hora": 2.0
+    },
+    "universitario": {
+      "episodios_max_por_hora": 2.0,
+      "episodios_media_por_hora": 0.14,
+      "episodios_p95_por_hora": 1.0,
+      "fraccion_ventanas": 0.0005128205128205128,
+      "horas_simuladas": 100.0,
+      "ventanas_max_por_hora": 7.0,
+      "ventanas_media_por_hora": 0.3,
+      "ventanas_p95_por_hora": 2.049999999999997
+    }
+  },
+  "version": "manizales-scan-v1",
+  "zones": {
+    "centro": {
+      "config": {
+        "calibration_samples": 2000,
+        "fpr_target": 0.01,
+        "prefilter_tau": null,
+        "project_out_kernel": false,
+        "scan_radii": [
+          1,
+          2
+        ],
+        "step": 1,
+        "window": 16
+      },
+      "fingerprint": "2a962c5f0eb6187cfd20e1fa45f11b7d",
+      "n_instants": 64,
+      "n_meters": 25,
+      "seed": 20260808,
+      "sigma_spatial": 4.401231,
+      "source": "data/calibrations/manizales_scan_v1.json (manizales-scan-v1)",
+      "threshold": 4.4091658498042445,
+      "zona": "centro"
+    },
+    "chipre": {
+      "config": {
+        "calibration_samples": 2000,
+        "fpr_target": 0.01,
+        "prefilter_tau": null,
+        "project_out_kernel": false,
+        "scan_radii": [
+          1,
+          2
+        ],
+        "step": 1,
+        "window": 16
+      },
+      "fingerprint": "eb5c6c72023248df06bc59623b00ec00",
+      "n_instants": 64,
+      "n_meters": 25,
+      "seed": 20260808,
+      "sigma_spatial": 4.401231,
+      "source": "data/calibrations/manizales_scan_v1.json (manizales-scan-v1)",
+      "threshold": 4.496959844264679,
+      "zona": "chipre"
+    },
+    "la_enea": {
+      "config": {
+        "calibration_samples": 2000,
+        "fpr_target": 0.01,
+        "prefilter_tau": null,
+        "project_out_kernel": false,
+        "scan_radii": [
+          1,
+          2
+        ],
+        "step": 1,
+        "window": 16
+      },
+      "fingerprint": "3d062526a1f5e6ede38b6b2581c36290",
+      "n_instants": 64,
+      "n_meters": 25,
+      "seed": 20260808,
+      "sigma_spatial": 4.397959,
+      "source": "data/calibrations/manizales_scan_v1.json (manizales-scan-v1)",
+      "threshold": 4.410180179774718,
+      "zona": "la_enea"
+    },
+    "palermo": {
+      "config": {
+        "calibration_samples": 2000,
+        "fpr_target": 0.01,
+        "prefilter_tau": null,
+        "project_out_kernel": false,
+        "scan_radii": [
+          1,
+          2
+        ],
+        "step": 1,
+        "window": 16
+      },
+      "fingerprint": "8500c95240602f88df85a15381a15a8c",
+      "n_instants": 64,
+      "n_meters": 25,
+      "seed": 20260808,
+      "sigma_spatial": 4.397959,
+      "source": "data/calibrations/manizales_scan_v1.json (manizales-scan-v1)",
+      "threshold": 4.356641093505147,
+      "zona": "palermo"
+    },
+    "palogrande": {
+      "config": {
+        "calibration_samples": 2000,
+        "fpr_target": 0.01,
+        "prefilter_tau": null,
+        "project_out_kernel": false,
+        "scan_radii": [
+          1,
+          2
+        ],
+        "step": 1,
+        "window": 16
+      },
+      "fingerprint": "2acc9cc2ee1bd7006e31e230b7157903",
+      "n_instants": 64,
+      "n_meters": 30,
+      "seed": 20260808,
+      "sigma_spatial": 4.401231,
+      "source": "data/calibrations/manizales_scan_v1.json (manizales-scan-v1)",
+      "threshold": 4.385120588775373,
+      "zona": "palogrande"
+    },
+    "universitario": {
+      "config": {
+        "calibration_samples": 2000,
+        "fpr_target": 0.01,
+        "prefilter_tau": null,
+        "project_out_kernel": false,
+        "scan_radii": [
+          1,
+          2
+        ],
+        "step": 1,
+        "window": 16
+      },
+      "fingerprint": "b65cc02c53e9860830d4003f8a6d27ba",
+      "n_instants": 64,
+      "n_meters": 20,
+      "seed": 20260808,
+      "sigma_spatial": 4.397959,
+      "source": "data/calibrations/manizales_scan_v1.json (manizales-scan-v1)",
+      "threshold": 4.35845518147237,
+      "zona": "universitario"
+    }
+  }
+}
